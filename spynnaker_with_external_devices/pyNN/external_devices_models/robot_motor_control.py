@@ -1,23 +1,27 @@
-import os
-
 from spinn_machine.processor import Processor
 from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
     AbstractPopulationVertex
-from spynnaker_with_external_devices.pyNN.external_devices_models.external_motor_device import \
-    ExternalMotorDevice
+from spynnaker_with_external_devices.pyNN.external_devices_models.\
+    external_motor_device import ExternalMotorDevice
 from spynnaker.pyNN.utilities import packet_conversions
 from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.utilities.conf import config
-from pacman.model.graph.edge import Edge
 from pacman.model.resources.cpu_cycles_per_tick_resource import \
     CPUCyclesPerTickResource
+
+from pacman.model.constraints.vertex_has_dependent_constraint import \
+    VertexHasDependentConstraint
 from pacman.model.resources.dtcm_resource import DTCMResource
 from pacman.model.resources.sdram_resource import SDRAMResource
 from pacman.model.constraints.partitioner_maximum_size_constraint \
     import PartitionerMaximumSizeConstraint
+
+
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 from data_specification.file_data_writer import FileDataWriter
+
+import os
 
 
 class RobotMotorControl(AbstractPopulationVertex):
@@ -44,6 +48,14 @@ class RobotMotorControl(AbstractPopulationVertex):
         max_constraint = \
             PartitionerMaximumSizeConstraint(RobotMotorControl._N_ATOMS)
         self.add_constraint(max_constraint)
+
+        dependant_vertex_constraint =\
+            VertexHasDependentConstraint(
+                ExternalMotorDevice(1, self.virtual_chip_coords,
+                                    self.connected_chip_coords,
+                                    self.connected_chip_edge))
+        self.add_constraint(dependant_vertex_constraint)
+
         self._binary = "robot_motor_control.aplx"
 
         self.virtual_chip_coords = virtual_chip_coords
@@ -57,18 +69,6 @@ class RobotMotorControl(AbstractPopulationVertex):
         self.delay_time = delay_time
         self.delta_threshold = delta_threshold
         self.continue_if_not_different = continue_if_not_different
-
-    def get_dependant_vertexes_edges(self):
-        virtual_vertexes = list()
-        virtual_edges = list()
-        virtual_vertexes.append(
-            ExternalMotorDevice(1, self.virtual_chip_coords,
-                                self.connected_chip_coords,
-                                self.connected_chip_edge))
-
-        self.out_going_edge = Edge(self, virtual_vertexes[0])
-        virtual_edges.append(self.out_going_edge)
-        return virtual_vertexes, virtual_edges
 
     def generate_data_spec(self, processor_chip_x, processor_chip_y,
                            processor_id, subvertex, subgraph,
