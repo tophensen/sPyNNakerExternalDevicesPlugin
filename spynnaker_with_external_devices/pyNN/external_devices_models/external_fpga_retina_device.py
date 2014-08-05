@@ -1,5 +1,7 @@
-from pacman.model.constraints.vertex_requires_multi_cast_source_constraint import \
-    VertexRequiresMultiCastSourceConstraint
+from pacman.model.constraints.key_allocator_routing_constraint import \
+    KeyAllocatorRoutingConstraint
+from pacman.model.constraints.vertex_requires_multi_cast_source_constraint \
+    import VertexRequiresMultiCastSourceConstraint
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
     abstract_external_retina_device import AbstractExternalRetinaDevice
 from spynnaker.pyNN.utilities import packet_conversions
@@ -54,6 +56,10 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice):
         command_constraint = \
             VertexRequiresMultiCastSourceConstraint(self.get_commands())
         self.add_constraint(command_constraint)
+        #add routing key constraint
+        routing_key_constraint = \
+            KeyAllocatorRoutingConstraint(self.generate_routing_info)
+        self.add_constraint(routing_key_constraint)
 
     def get_commands(self):
         """

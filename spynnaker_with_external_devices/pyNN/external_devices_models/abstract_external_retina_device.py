@@ -1,5 +1,5 @@
-from spynnaker_with_external_devices.pyNN.external_devices_models.abstract_external_device \
-    import ExternalDevice
+from spynnaker_with_external_devices.pyNN.external_devices_models.\
+    abstract_external_device import ExternalDevice
 from pacman.model.constraints.placer_chip_and_core_constraint \
     import PlacerChipAndCoreConstraint
 

@@ -1,8 +1,11 @@
-from pacman.model.constraints.vertex_requires_multi_cast_source_constraint import \
-    VertexRequiresMultiCastSourceConstraint
-from spynnaker_with_external_devices.pyNN.external_devices_models.abstract_external_retina_device import AbstractExternalRetinaDevice
+from pacman.model.constraints.vertex_requires_multi_cast_source_constraint \
+    import VertexRequiresMultiCastSourceConstraint
+from spynnaker_with_external_devices.pyNN.external_devices_models.\
+    abstract_external_retina_device import AbstractExternalRetinaDevice
 from pacman.model.constraints.placer_chip_and_core_constraint \
     import PlacerChipAndCoreConstraint
+from pacman.model.constraints.key_allocator_routing_constraint import \
+    KeyAllocatorRoutingConstraint
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import packet_conversions
 
@@ -42,9 +45,10 @@ class ExternalRetinaDevice(AbstractExternalRetinaDevice):
         command_constraint = \
             VertexRequiresMultiCastSourceConstraint(self.get_commands())
         self.add_constraint(command_constraint)
-
-
-
+        #add routing key constraint
+        routing_key_constraint = \
+            KeyAllocatorRoutingConstraint(self.generate_routing_info)
+        self.add_constraint(routing_key_constraint)
 
     def add_constraints_to_subverts(self, subverts):
         ordered_subverts = sorted(subverts, key=lambda x: x.lo_atom)
@@ -65,7 +69,6 @@ class ExternalRetinaDevice(AbstractExternalRetinaDevice):
                                             start_point)
             subvert.add_constraint(constraint)
             start_point += 1
-
 
     def get_commands(self):
         """
@@ -98,7 +101,7 @@ class ExternalRetinaDevice(AbstractExternalRetinaDevice):
         if self.position == self.RIGHT_RETINA:
             mgmt_key = (self._virtual_chip_coords['x'] << 24 |
                         self._virtual_chip_coords['y'] << 16 |
-                        self.MANAGEMENT_BIT | self.RIGHT_RETINA_ENABLE)  # enable
+                        self.MANAGEMENT_BIT | self.RIGHT_RETINA_ENABLE)  # enabl
         else:
             mgmt_key = (self._virtual_chip_coords['x'] << 24 |
                         self._virtual_chip_coords['y'] << 16 |
