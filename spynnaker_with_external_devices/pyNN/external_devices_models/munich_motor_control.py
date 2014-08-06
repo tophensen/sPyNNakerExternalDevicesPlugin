@@ -24,14 +24,14 @@ from data_specification.file_data_writer import FileDataWriter
 import os
 
 
-class RobotMotorControl(AbstractPopulationVertex):
+class MunichMotorControl(AbstractPopulationVertex):
 
     PARAMS = 2
     SYSTEM_SIZE = 16
     PARAMS_SIZE = 7 * 4
     _N_ATOMS = 6
 
-    CORE_APP_IDENTIFIER = constants.ROBOT_MOTER_CONTROL_CORE_APPLICATION_ID
+    CORE_APP_IDENTIFIER = constants.MUNICH_MOTOR_CONTROL_CORE_APPLICATION_ID
 
     def __init__(self, virtual_chip_coords, connected_chip_coords,
                  connected_chip_edge,
@@ -46,7 +46,7 @@ class RobotMotorControl(AbstractPopulationVertex):
             max_atoms_per_core=6, n_params=3)
 
         max_constraint = \
-            PartitionerMaximumSizeConstraint(RobotMotorControl._N_ATOMS)
+            PartitionerMaximumSizeConstraint(MunichMotorControl._N_ATOMS)
         self.add_constraint(max_constraint)
 
         dependant_vertex_constraint =\
@@ -84,7 +84,8 @@ class RobotMotorControl(AbstractPopulationVertex):
         data_writer = FileDataWriter(binary_file_name)
         spec = DataSpecificationGenerator(data_writer)
 
-        self._write_basic_setup_info(spec, RobotMotorControl.CORE_APP_IDENTIFER)
+        self._write_basic_setup_info(spec,
+                                     MunichMotorControl.CORE_APP_IDENTIFER)
 
         spec.comment("\n*** Spec for robot motor control ***\n\n")
 

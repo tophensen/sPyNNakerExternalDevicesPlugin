@@ -33,9 +33,9 @@ from spynnaker_with_external_devices.pyNN.external_devices_models.\
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
     external_motor_device import ExternalMotorDevice
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    robot_retina_device import AbstractExternalRetinaDevice
+    munich_retina_device import MunichRetinaDevice
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    robot_motor_control import RobotMotorControl
+    munich_motor_control import MunichMotorControl
 
 # neural models
 from spynnaker.pyNN.models.neural_models.if_cond_exp \

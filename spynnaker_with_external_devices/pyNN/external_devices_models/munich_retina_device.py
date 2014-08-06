@@ -10,7 +10,7 @@ from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import packet_conversions
 
 
-class ExternalRetinaDevice(AbstractExternalRetinaDevice):
+class MunichRetinaDevice(AbstractExternalRetinaDevice):
     #key codes for the robot retina
     MANAGEMENT_BIT = 0x400
     LEFT_RETINA_ENABLE = 0x45
@@ -27,7 +27,7 @@ class ExternalRetinaDevice(AbstractExternalRetinaDevice):
                  connected_chip_edge, position, label=None,
                  polarity=AbstractExternalRetinaDevice.MERGED_POLARITY):
 
-        if self.polarity == ExternalRetinaDevice.MERGED_POLARITY:
+        if self.polarity == MunichRetinaDevice.MERGED_POLARITY:
             n_atoms = 128 * 128 * 2
         else:
             n_atoms = 128 * 128
@@ -133,7 +133,7 @@ class ExternalRetinaDevice(AbstractExternalRetinaDevice):
         """
         processor_id = subedge.presubvertex.placement.processor.idx % 16
         if self.position == self.RIGHT_RETINA:
-            if self.polarity == ExternalRetinaDevice.UP_POLARITY:
+            if self.polarity == MunichRetinaDevice.UP_POLARITY:
                 part_1 = \
                     packet_conversions.get_key_from_coords(0, 6, processor_id)
                 key = part_1 | (1 << 14)
@@ -142,7 +142,7 @@ class ExternalRetinaDevice(AbstractExternalRetinaDevice):
                 key = packet_conversions.get_key_from_coords(0, 6, processor_id)
                 return key, 0xffff7800
         else:
-            if self.polarity == ExternalRetinaDevice.UP_POLARITY:
+            if self.polarity == MunichRetinaDevice.UP_POLARITY:
                 key = \
                     packet_conversions.get_key_from_coords(0, 7, processor_id) \
                     | (1 << 14)

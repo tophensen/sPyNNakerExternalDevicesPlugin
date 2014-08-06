@@ -85,6 +85,7 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice):
         commands.append(command)
         return commands
 
+    # noinspection PyUnusedLocal
     def generate_routing_info(self, subedge):
         """
         over writes component method, return the key and mask
