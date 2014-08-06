@@ -37,6 +37,9 @@ from spynnaker_with_external_devices.pyNN.external_devices_models.\
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
     munich_motor_control import MunichMotorControl
 
+from spynnaker.pyNN.models.neural_properties.synapse_dynamics.stdp_mechanism \
+    import STDPMechanism
+
 # neural models
 from spynnaker.pyNN.models.neural_models.if_cond_exp \
     import IFConductanceExponentialPopulation as IF_cond_exp
