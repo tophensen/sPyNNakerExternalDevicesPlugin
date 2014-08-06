@@ -152,7 +152,7 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     @property
     def model_name(self):
-        return "Robot Motor Control"
+        return "Munich Motor Control"
 
     def get_resources_used_by_atoms(self, lo_atom, hi_atom, vertex_in_edges):
         resources = list()
