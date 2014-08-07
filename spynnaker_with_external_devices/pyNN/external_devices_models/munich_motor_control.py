@@ -2,7 +2,7 @@ from spinn_machine.processor import Processor
 from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
     AbstractPopulationVertex
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    external_motor_device import ExternalMotorDevice
+    munich_motor_device import MunichMotorDevice
 from spynnaker.pyNN.utilities import packet_conversions
 from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.utilities.conf import config
@@ -51,7 +51,7 @@ class MunichMotorControl(AbstractPopulationVertex):
 
         dependant_vertex_constraint =\
             VertexHasDependentConstraint(
-                ExternalMotorDevice(1, self.virtual_chip_coords,
+                MunichMotorDevice(1, self.virtual_chip_coords,
                                     self.connected_chip_coords,
                                     self.connected_chip_edge))
         self.add_constraint(dependant_vertex_constraint)

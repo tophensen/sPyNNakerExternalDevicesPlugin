@@ -1,10 +1,10 @@
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    abstract_external_device import ExternalDevice
+    abstract_external_device import AbstractExternalDevice
 from pacman.model.constraints.placer_chip_and_core_constraint \
     import PlacerChipAndCoreConstraint
 
 
-class AbstractExternalRetinaDevice(ExternalDevice):
+class AbstractExternalRetinaDevice(AbstractExternalDevice):
 
     UP_POLARITY = "UP"
     DOWN_POLARITY = "DOWN"
@@ -13,7 +13,7 @@ class AbstractExternalRetinaDevice(ExternalDevice):
     def __init__(self, n_neurons, virtual_chip_coords, connected_node_coords,
                  connected_node_edge, polarity, label=None):
 
-        ExternalDevice.__init__(
+        AbstractExternalDevice.__init__(
             self, n_neurons, virtual_chip_coords, connected_node_coords,
             connected_node_edge, label=label,
             max_atoms_per_core=self._get_max_atoms_per_core())

@@ -3,12 +3,14 @@ from pacman.model.constraints.key_allocator_routing_constraint import \
 from pacman.model.constraints.vertex_requires_multi_cast_source_constraint \
     import VertexRequiresMultiCastSourceConstraint
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
+    abstract_FPGA_device import AbstractFPGADevice
+from spynnaker_with_external_devices.pyNN.external_devices_models.\
     abstract_external_retina_device import AbstractExternalRetinaDevice
 from spynnaker.pyNN.utilities import packet_conversions
 from spynnaker.pyNN import exceptions
 
 
-class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice):
+class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice):
 
     MODE_128 = "128"
     MODE_64 = "64"
@@ -51,6 +53,12 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice):
             connected_node_coords=connected_chip_coords,
             connected_node_edge=connected_chip_edge, label=label,
             polarity=polarity)
+
+        AbstractFPGADevice.__init__(
+            self, n_neurons=n_neurons, virtual_chip_coords=virtual_chip_coords,
+            connected_node_coords=connected_chip_coords,
+            connected_node_edge=connected_chip_edge, label=label,
+            max_atoms_per_core=self._get_max_atoms_per_core())
 
         #add commands constraint
         command_constraint = \

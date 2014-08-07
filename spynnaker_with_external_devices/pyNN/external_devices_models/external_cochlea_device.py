@@ -1,9 +1,9 @@
 __author__ = 'stokesa6'
 from spynnaker_with_external_devices.pyNN.external_devices_models.abstract_external_device \
-    import ExternalDevice
+    import AbstractExternalDevice
 
 
-class ExternalCochleaDevice(ExternalDevice):
+class ExternalCochleaDevice(AbstractExternalDevice):
 
     def __init__(self, n_neurons, virtual_chip_coords,
                  connected_chip_coords, connected_chip_edge, max_atoms_per_core,

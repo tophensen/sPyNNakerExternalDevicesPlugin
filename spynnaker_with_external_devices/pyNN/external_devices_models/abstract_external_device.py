@@ -13,7 +13,7 @@ from six import add_metaclass
 
 
 @add_metaclass(ABCMeta)
-class ExternalDevice(AbstractVirtualVertex):
+class AbstractExternalDevice(AbstractVirtualVertex):
     def __init__(self, n_neurons, virtual_chip_coords, connected_node_coords,
                  connected_node_edge, label, max_atoms_per_core):
         AbstractVirtualVertex.__init__(

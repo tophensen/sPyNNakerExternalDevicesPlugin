@@ -8,9 +8,11 @@ from pacman.model.constraints.key_allocator_routing_constraint import \
     KeyAllocatorRoutingConstraint
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import packet_conversions
+from spynnaker_with_external_devices.pyNN.external_devices_models.\
+    abstract_munich_device import AbstractMunichDevice
 
 
-class MunichRetinaDevice(AbstractExternalRetinaDevice):
+class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
     #key codes for the robot retina
     MANAGEMENT_BIT = 0x400
     LEFT_RETINA_ENABLE = 0x45
@@ -34,6 +36,11 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice):
         AbstractExternalRetinaDevice.__init__(
             self, n_atoms, virtual_chip_coords, connected_chip_coords,
             connected_chip_edge, polarity, label=label)
+        AbstractMunichDevice.__init__(
+            self, n_neurons=n_atoms, virtual_chip_coords=virtual_chip_coords,
+            connected_node_coords=connected_chip_coords,
+            connected_node_edge=connected_chip_edge, label=label,
+            max_atoms_per_core=self._get_max_atoms_per_core())
         self.position = position
 
         if (self.position != self.RIGHT_RETINA and
