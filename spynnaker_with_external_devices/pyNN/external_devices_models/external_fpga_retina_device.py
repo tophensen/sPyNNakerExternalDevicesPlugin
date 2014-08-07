@@ -16,7 +16,7 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice)
     MODE_16 = "16"
 
     def __init__(self, mode, virtual_chip_coords, connected_chip_coords,
-                 connected_chip_edge, polarity, label=None):
+                 connected_chip_edge, polarity, label=None, n_neurons=None):
 
         if mode == ExternalFPGARetinaDevice.MODE_128:
             if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or

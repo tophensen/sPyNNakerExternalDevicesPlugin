@@ -15,9 +15,8 @@ class AbstractExternalRetinaDevice(AbstractExternalDevice):
         AbstractExternalDevice.__init__(
             self, n_neurons, virtual_chip_coords, connected_node_coords,
             connected_node_edge, label=label,
-            max_atoms_per_core=self._get_max_atoms_per_core())
+            max_atoms_per_core=self._get_max_atoms_per_core(n_neurons))
 
-        self._get_max_atoms_per_core()
         self.polarity = polarity
 
     @property
@@ -43,9 +42,10 @@ class AbstractExternalRetinaDevice(AbstractExternalDevice):
             subvert.add_constraint(constraint)
             start_point += 1
 
-    def _get_max_atoms_per_core(self):
-        if (self.n_atoms >> 11) <= 0:  # if the keys dont touce p,
+    @staticmethod
+    def _get_max_atoms_per_core(n_neurons):
+        if (n_neurons >> 11) <= 0:  # if the keys dont touce p,
                                      # then just 1 subvert is needed
             return 1
         else:
-            return self.n_atoms >> 11
+            return n_neurons >> 11
