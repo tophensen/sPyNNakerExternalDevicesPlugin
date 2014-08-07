@@ -1,15 +1,13 @@
 from pacman.model.constraints.vertex_requires_multi_cast_source_constraint \
     import VertexRequiresMultiCastSourceConstraint
-from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    abstract_external_retina_device import AbstractExternalRetinaDevice
+from spynnaker_with_external_devices.pyNN.abstract_models.abstract_external_retina_device import AbstractExternalRetinaDevice
 from pacman.model.constraints.placer_chip_and_core_constraint \
     import PlacerChipAndCoreConstraint
 from pacman.model.constraints.key_allocator_routing_constraint import \
     KeyAllocatorRoutingConstraint
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import packet_conversions
-from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    abstract_munich_device import AbstractMunichDevice
+from spynnaker_with_external_devices.pyNN.interfaces.abstract_munich_device import AbstractMunichDevice
 
 
 class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):

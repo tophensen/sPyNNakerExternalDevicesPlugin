@@ -2,10 +2,8 @@ from pacman.model.constraints.key_allocator_routing_constraint import \
     KeyAllocatorRoutingConstraint
 from pacman.model.constraints.vertex_requires_multi_cast_source_constraint \
     import VertexRequiresMultiCastSourceConstraint
-from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    abstract_FPGA_device import AbstractFPGADevice
-from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    abstract_external_retina_device import AbstractExternalRetinaDevice
+from spynnaker_with_external_devices.pyNN.interfaces.abstract_FPGA_device import AbstractFPGADevice
+from spynnaker_with_external_devices.pyNN.abstract_models.abstract_external_retina_device import AbstractExternalRetinaDevice
 from spynnaker.pyNN.utilities import packet_conversions
 from spynnaker.pyNN import exceptions
 

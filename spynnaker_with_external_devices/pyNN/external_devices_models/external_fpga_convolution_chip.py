@@ -1,4 +1,4 @@
-from spynnaker_with_external_devices.pyNN.external_devices_models.abstract_FPGA_device import \
+from spynnaker_with_external_devices.pyNN.interfaces.abstract_FPGA_device import \
     AbstractFPGADevice
 
 

@@ -1,21 +1,19 @@
-#spinnmachine imports
-
 #inhittance imports
 from abc import ABCMeta
+
 from six import add_metaclass
-from spynnaker_with_external_devices.pyNN.\
-    external_devices_models.abstract_external_device import \
-    AbstractExternalDevice
+
+from spynnaker_with_external_devices.pyNN.links.abstract_spinn_link_device import AbstractSpinnLinkDevice
 
 
 @add_metaclass(ABCMeta)
-class AbstractFPGADevice(AbstractExternalDevice):
+class AbstractMunichDevice(AbstractSpinnLinkDevice):
     def __init__(self, n_neurons, virtual_chip_coords, connected_node_coords,
                  connected_node_edge, label, max_atoms_per_core):
-        AbstractExternalDevice.__init__(
+        AbstractSpinnLinkDevice.__init__(
             self, n_neurons, virtual_chip_coords, connected_node_coords,
             connected_node_edge, label, max_atoms_per_core)
 
     @property
     def model_name(self):
-        return "ExternalDeviceWithFPGAInterface:{}".format(self.label)
+        return "ExternalDeviceWithMunichInterface:{}".format(self.label)

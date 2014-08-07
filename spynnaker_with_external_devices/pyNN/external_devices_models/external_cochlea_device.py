@@ -1,5 +1,5 @@
 __author__ = 'stokesa6'
-from spynnaker_with_external_devices.pyNN.external_devices_models.abstract_external_device \
+from spynnaker_with_external_devices.pyNN.abstract_models.abstract_external_device \
     import AbstractExternalDevice
 
 

@@ -14,16 +14,8 @@ from spynnaker_with_external_devices.pyNN.spinnaker_with_external_devices \
     import SpinnakerWithExternalDevices
 
 #utility functions
-from spynnaker.pyNN.utilities import conf
-from spynnaker.pyNN.utilities.timer import Timer
-from spynnaker.pyNN.utilities import utility_calls
-from spynnaker.pyNN.utilities.parameters_surrogate\
-    import PyNNParametersSurrogate
-from spynnaker.pyNN.utilities.constants import VISUALISER_MODES
 
 #pynn centric classes
-from spynnaker.pyNN.spinnaker import Spinnaker
-from spynnaker.pyNN import exceptions
 
 #external models
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
@@ -31,68 +23,18 @@ from spynnaker_with_external_devices.pyNN.external_devices_models.\
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
     external_fpga_retina_device import ExternalFPGARetinaDevice
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    external_motor_device import ExternalMotorDevice
+    munich_motor_device import MunichMotorDevice
 from spynnaker_with_external_devices.pyNN.external_devices_models.\
     munich_retina_device import MunichRetinaDevice
-from spynnaker_with_external_devices.pyNN.external_devices_models.\
-    munich_motor_control import MunichMotorControl
-
-from spynnaker.pyNN.models.neural_properties.synapse_dynamics.stdp_mechanism \
-    import STDPMechanism
+from spynnaker_with_external_devices.pyNN.control_models.munich_motor_control import MunichMotorControl
 
 # neural models
-from spynnaker.pyNN.models.neural_models.if_cond_exp \
-    import IFConductanceExponentialPopulation as IF_cond_exp
-from spynnaker.pyNN.models.neural_models.if_curr_dual_exp \
-    import IFCurrentDualExponentialPopulation as IF_curr_dual_exp
-from spynnaker.pyNN.models.neural_models.if_curr_exp \
-    import IFCurrentExponentialPopulation as IF_curr_exp
-from spynnaker.pyNN.models.neural_models.izk_curr_exp \
-    import IzhikevichCurrentExponentialPopulation as IZK_curr_exp
 
 #neural projections
-from spynnaker.pyNN.models.neural_projections.delay_afferent_edge \
-    import DelayAfferentEdge
-from spynnaker.pyNN.models.neural_projections.delay_extension_vertex\
-    import DelayExtensionVertex
-from spynnaker.pyNN.models.neural_projections.delay_projection_edge \
-    import DelayProjectionEdge
-from spynnaker.pyNN.models.neural_projections.delay_projection_subedge \
-    import DelayProjectionSubedge
-from spynnaker.pyNN.models.neural_projections.projection_edge \
-    import ProjectionEdge
-from spynnaker.pyNN.models.neural_projections.projection_subedge \
-    import ProjectionSubedge
 
 #spike sources
-from spynnaker.pyNN.models.spike_source.spike_source_array \
-    import SpikeSourceArray
-from spynnaker.pyNN.models.spike_source.spike_source_poisson\
-    import SpikeSourcePoisson
 
 #connections
-from spynnaker.pyNN.models.neural_projections.connectors.all_to_all\
-    import AllToAllConnector
-from spynnaker.pyNN.models.neural_projections.connectors.fixed_number_pre_connector \
-    import FixedNumberPreConnector
-from spynnaker.pyNN.models.neural_projections.connectors.fixed_probability \
-    import FixedProbabilityConnector
-from spynnaker.pyNN.models.neural_projections.connectors.from_list \
-    import FromListConnector
-from spynnaker.pyNN.models.neural_projections.connectors.from_file \
-    import FromFileConnector
-from spynnaker.pyNN.models.neural_projections.connectors.multapse \
-    import MultapseConnector
-from spynnaker.pyNN.models.neural_projections.connectors.one_to_one \
-    import OneToOneConnector
-from spynnaker.pyNN.models.neural_projections.connectors.\
-    distance_dependent_probability import DistanceDependentProbabilityConnector
-from spynnaker.pyNN.models.neural_projections.connectors.\
-    fixed_number_post_connector import FixedNumberPostConnector
-from spynnaker.pyNN.models.neural_projections.connectors.from_file \
-    import FromFileConnector
-from spynnaker.pyNN.models.neural_projections.connectors.small_world_connector \
-    import SmallWorldConnector
 
 
 #traditional logger
