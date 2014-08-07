@@ -1,4 +1,3 @@
-__author__ = 'stokesa6'
 """
 retina example that just feeds data from retina to vis
 """
@@ -36,17 +35,17 @@ projections = list()
 
 populations.append(p.Population(1, p.MunichRetinaDevice,
                    {'virtual_chip_coords': virtual_chip_coords,
-                    'connected_chip_coords':connected_chip_coords,
-                    'connected_chip_edge':link,
-                    'polarity':p.MunichRetinaDevice.DOWN_POLARITY,
+                    'connected_chip_coords': connected_chip_coords,
+                    'connected_chip_edge': link,
+                    'polarity': p.MunichRetinaDevice.DOWN_POLARITY,
                     'position': p.MunichRetinaDevice.RIGHT_RETINA},
                    label='External retina'))
 
 populations.append(p.Population(1, p.MunichRetinaDevice,
                    {'virtual_chip_coords': virtual_chip_coords,
-                    'connected_chip_coords':connected_chip_coords,
-                    'connected_chip_edge':link,
-                    'polarity':p.MunichRetinaDevice.UP_POLARITY,
+                    'connected_chip_coords': connected_chip_coords,
+                    'connected_chip_edge': link,
+                    'polarity': p.MunichRetinaDevice.UP_POLARITY,
                     'position': p.MunichRetinaDevice.RIGHT_RETINA},
                    label='External retina'))
 
