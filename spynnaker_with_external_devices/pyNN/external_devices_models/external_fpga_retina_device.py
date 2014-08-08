@@ -56,7 +56,7 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice)
             self, n_neurons=n_neurons, virtual_chip_coords=virtual_chip_coords,
             connected_node_coords=connected_chip_coords,
             connected_node_edge=connected_chip_edge, label=label,
-            max_atoms_per_core=self._get_max_atoms_per_core())
+            max_atoms_per_core=self._get_max_atoms_per_core(n_neurons))
 
         #add commands constraint
         command_constraint = \

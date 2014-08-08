@@ -1,13 +1,15 @@
 from pacman.model.constraints.vertex_requires_multi_cast_source_constraint \
     import VertexRequiresMultiCastSourceConstraint
-from spynnaker_with_external_devices.pyNN.abstract_models.abstract_external_retina_device import AbstractExternalRetinaDevice
+from spynnaker_with_external_devices.pyNN.abstract_models.\
+    abstract_external_retina_device import AbstractExternalRetinaDevice
 from pacman.model.constraints.placer_chip_and_core_constraint \
     import PlacerChipAndCoreConstraint
 from pacman.model.constraints.key_allocator_routing_constraint import \
     KeyAllocatorRoutingConstraint
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import packet_conversions
-from spynnaker_with_external_devices.pyNN.interfaces.abstract_munich_device import AbstractMunichDevice
+from spynnaker_with_external_devices.pyNN.interfaces.abstract_munich_device\
+    import AbstractMunichDevice
 
 
 class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
@@ -28,17 +30,17 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
                  polarity=AbstractExternalRetinaDevice.MERGED_POLARITY):
 
         if polarity == MunichRetinaDevice.MERGED_POLARITY:
-            n_atoms = 128 * 128 * 2
+            n_neurons = 128 * 128 * 2
         else:
-            n_atoms = 128 * 128
+            n_neurons = 128 * 128
         AbstractExternalRetinaDevice.__init__(
-            self, n_atoms, virtual_chip_coords, connected_chip_coords,
+            self, n_neurons, virtual_chip_coords, connected_chip_coords,
             connected_chip_edge, polarity, label=label)
         AbstractMunichDevice.__init__(
-            self, n_neurons=n_atoms, virtual_chip_coords=virtual_chip_coords,
+            self, n_neurons=n_neurons, virtual_chip_coords=virtual_chip_coords,
             connected_node_coords=connected_chip_coords,
             connected_node_edge=connected_chip_edge, label=label,
-            max_atoms_per_core=self._get_max_atoms_per_core(n_atoms))
+            max_atoms_per_core=self._get_max_atoms_per_core(n_neurons))
         self.position = position
 
         if (self.position != self.RIGHT_RETINA and
