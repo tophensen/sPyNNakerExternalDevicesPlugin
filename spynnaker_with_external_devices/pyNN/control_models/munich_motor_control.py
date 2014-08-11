@@ -78,7 +78,7 @@ class MunichMotorControl(AbstractPopulationVertex):
         single external retina device.
         """
         # Create new DataSpec for this processor:
-        binary_file_name = self.get_binary_file_name(
+        binary_file_name = self.get_data_spec_file_name(
             processor_chip_x, processor_chip_y, processor_id, hostname)
 
         data_writer = FileDataWriter(binary_file_name)
@@ -123,7 +123,7 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     #inhirrited from data specable vertex
     @staticmethod
-    def get_binary_name(self):
+    def get_binary_file_name(self):
         common_binary_path = os.path.join(config.get("SpecGeneration",
                                                      "common_binary_folder"))
 
