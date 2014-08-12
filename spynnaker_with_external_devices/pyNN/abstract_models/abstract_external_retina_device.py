@@ -10,11 +10,11 @@ class AbstractExternalRetinaDevice(AbstractExternalDevice):
     MERGED_POLARITY = "MERGED"
 
     def __init__(self, n_neurons, virtual_chip_coords, connected_node_coords,
-                 connected_node_edge, polarity, label=None):
+                 connected_node_edge, polarity, machine_time_step, label=None):
 
         AbstractExternalDevice.__init__(
             self, n_neurons, virtual_chip_coords, connected_node_coords,
-            connected_node_edge, label=label,
+            connected_node_edge, machine_time_step, label=label,
             max_atoms_per_core=self._get_max_atoms_per_core(n_neurons))
 
         self.polarity = polarity

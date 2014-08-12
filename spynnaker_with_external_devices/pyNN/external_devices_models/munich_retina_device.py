@@ -26,7 +26,8 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
     RIGHT_RETINA = "RIGHT"
 
     def __init__(self, virtual_chip_coords, connected_chip_coords,
-                 connected_chip_edge, position, label=None, n_neurons=None,
+                 connected_chip_edge, position, machine_time_step, label=None,
+                 n_neurons=None,
                  polarity=AbstractExternalRetinaDevice.MERGED_POLARITY):
 
         if polarity == MunichRetinaDevice.MERGED_POLARITY:
@@ -35,11 +36,13 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
             n_neurons = 128 * 128
         AbstractExternalRetinaDevice.__init__(
             self, n_neurons, virtual_chip_coords, connected_chip_coords,
-            connected_chip_edge, polarity, label=label)
+            connected_chip_edge, polarity, machine_time_step=machine_time_step,
+            label=label)
         AbstractMunichDevice.__init__(
             self, n_neurons=n_neurons, virtual_chip_coords=virtual_chip_coords,
             connected_node_coords=connected_chip_coords,
             connected_node_edge=connected_chip_edge, label=label,
+            machine_time_step=machine_time_step,
             max_atoms_per_core=self._get_max_atoms_per_core(n_neurons))
         self.position = position
 
