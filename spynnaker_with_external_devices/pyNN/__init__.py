@@ -48,7 +48,7 @@ import IzhikevichCurrentExponentialPopulation as IZK_curr_exp
 
 #neural projections
 from spynnaker.pyNN.models.neural_projections.delay_afferent_edge \
-import DelayAfferentEdge
+import DelayAfferentPartitionableEdge
 from spynnaker.pyNN.models.neural_projections.delay_extension_vertex\
 import DelayExtensionVertex
 from spynnaker.pyNN.models.neural_projections.delay_projection_edge \
@@ -56,7 +56,7 @@ import DelayProjectionEdge
 from spynnaker.pyNN.models.neural_projections.delay_projection_subedge \
 import DelayProjectionSubedge
 from spynnaker.pyNN.models.neural_projections.projection_edge \
-import ProjectionEdge
+import ProjectionPartitionableEdge
 from spynnaker.pyNN.models.neural_projections.projection_subedge \
 import ProjectionPartitionedEdge
 
