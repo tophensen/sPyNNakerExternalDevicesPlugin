@@ -71,7 +71,7 @@ class MunichMotorControl(AbstractPopulationVertex):
         self.continue_if_not_different = continue_if_not_different
 
     def generate_data_spec(self, processor_chip_x, processor_chip_y,
-                           processor_id, subvertex, subgraph,
+                           processor_id, subvertex, placement, subgraph, graph,
                            routing_info, hostname, graph_subgraph_mapper):
         """
         Model-specific construction of the data blocks necessary to build a
