@@ -33,8 +33,8 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     CORE_APP_IDENTIFIER = constants.MUNICH_MOTOR_CONTROL_CORE_APPLICATION_ID
 
-    def __init__(self, virtual_chip_coords, connected_chip_coords,
-                 connected_chip_edge,
+    def __init__(self, n_neurons, virtual_chip_coords, connected_chip_coords,
+                 connected_chip_edge, machine_time_step,
                  speed=30, sample_time=4096,
                  update_time=512, delay_time=5, delta_threshold=23,
                  continue_if_not_different=True, label="RobotMotorControl"):
@@ -43,7 +43,8 @@ class MunichMotorControl(AbstractPopulationVertex):
         """
         AbstractPopulationVertex.__init__(
             self, binary="robot_motor_control.aplx", label=label, n_neurons=6,
-            max_atoms_per_core=6, n_params=3)
+            max_atoms_per_core=6, n_params=3,
+            machine_time_step=machine_time_step)
 
         max_constraint = \
             PartitionerMaximumSizeConstraint(MunichMotorControl._N_ATOMS)
@@ -51,9 +52,9 @@ class MunichMotorControl(AbstractPopulationVertex):
 
         dependant_vertex_constraint =\
             VertexHasDependentConstraint(
-                MunichMotorDevice(1, self.virtual_chip_coords,
-                                    self.connected_chip_coords,
-                                    self.connected_chip_edge))
+                MunichMotorDevice(1, virtual_chip_coords,
+                                  connected_chip_coords,
+                                  connected_chip_edge, machine_time_step))
         self.add_constraint(dependant_vertex_constraint)
 
         self._binary = "robot_motor_control.aplx"
@@ -175,3 +176,9 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     def get_cpu_usage_for_atoms(self, lo_atom, hi_atom):
         return (hi_atom - lo_atom) * (Processor.CPU_AVAILABLE / self._n_atoms)
+
+    def get_n_synapse_type_bits(self):
+        return 1
+
+    def write_synapse_parameters(self, spec, subvertex):
+        pass
