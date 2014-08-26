@@ -33,6 +33,7 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     CORE_APP_IDENTIFIER = constants.MUNICH_MOTOR_CONTROL_CORE_APPLICATION_ID
 
+
     def __init__(self, n_neurons, virtual_chip_coords, connected_chip_coords,
                  connected_chip_edge, machine_time_step,
                  speed=30, sample_time=4096,
@@ -71,16 +72,16 @@ class MunichMotorControl(AbstractPopulationVertex):
         self.delta_threshold = delta_threshold
         self.continue_if_not_different = continue_if_not_different
 
-    def generate_data_spec(self, processor_chip_x, processor_chip_y,
-                           processor_id, subvertex, placement, subgraph, graph,
+    def generate_data_spec(self, subvertex, placement, subgraph, graph,
                            routing_info, hostname, graph_subgraph_mapper):
         """
         Model-specific construction of the data blocks necessary to build a
         single external retina device.
         """
         # Create new DataSpec for this processor:
-        binary_file_name = self.get_data_spec_file_name(
-            processor_chip_x, processor_chip_y, processor_id, hostname)
+        binary_file_name = \
+            self.get_data_spec_file_name(placement.x, placement.y, placement.p,
+                                         hostname)
 
         data_writer = FileDataWriter(binary_file_name)
         spec = DataSpecificationGenerator(data_writer)
