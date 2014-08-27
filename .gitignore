@@ -1,1 +1,10 @@
+/.project
+/.pydevproject
+/.idea
+/.settings
+/doc/build
 *.pyc
+/reports
+/application_generated_data_files
+/spynnaker/pyNN/model_binaries
+*build/
