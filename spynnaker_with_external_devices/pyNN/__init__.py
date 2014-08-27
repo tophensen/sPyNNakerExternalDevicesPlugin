@@ -9,7 +9,7 @@ import inspect
 
 #pynn centric import
 from spynnaker_with_external_devices.pyNN.spinnaker_with_external_devices \
-import SpinnakerWithExternalDevices
+    import SpinnakerWithExternalDevices
 #utility functions
 from spynnaker.pyNN.utilities import conf
 from spynnaker.pyNN.utilities.timer import Timer
@@ -49,7 +49,7 @@ import IzhikevichCurrentExponentialPopulation as IZK_curr_exp
 #neural projections
 from spynnaker.pyNN.models.neural_projections.delay_afferent_edge \
 import DelayAfferentPartitionableEdge
-from spynnaker.pyNN.models.neural_projections.delay_extension_vertex\
+from spynnaker.pyNN.models.utility_models.delay_extension_vertex\
 import DelayExtensionVertex
 from spynnaker.pyNN.models.neural_projections.delay_projection_edge \
 import DelayProjectionEdge
