@@ -155,7 +155,7 @@ class MunichMotorControl(AbstractPopulationVertex):
     def model_name(self):
         return "Munich Motor Control"
 
-    def get_resources_used_by_atoms(self, lo_atom, hi_atom, vertex_in_edges):
+    def get_resources_used_by_atoms(self, vertex_slice, vertex_in_edges):
         resources = list()
         # noinspection PyTypeChecker
         resources.append(CPUCyclesPerTickResource(0))
@@ -174,8 +174,9 @@ class MunichMotorControl(AbstractPopulationVertex):
     def get_parameters(self):
         raise NotImplementedError
 
-    def get_cpu_usage_for_atoms(self, lo_atom, hi_atom):
-        return (hi_atom - lo_atom) * (Processor.CPU_AVAILABLE / self._n_atoms)
+    def get_cpu_usage_for_atoms(self, vertex_slice):
+        return (vertex_slice.hi_atom - vertex_slice.lo_atom) * \
+               (Processor.CPU_AVAILABLE / self._n_atoms)
 
     def get_n_synapse_type_bits(self):
         return 1
