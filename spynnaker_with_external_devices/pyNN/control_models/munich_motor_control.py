@@ -19,20 +19,20 @@ from pacman.model.constraints.partitioner_maximum_size_constraint \
 
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
-from data_specification.file_data_writer import FileDataWriter
 
 import os
 
 
 class MunichMotorControl(AbstractPopulationVertex):
 
-    PARAMS = 2
+    SYSTEM_REGION = 0
+    PARAMS_REGION = 1
+
     SYSTEM_SIZE = 16
     PARAMS_SIZE = 7 * 4
     _N_ATOMS = 6
 
     CORE_APP_IDENTIFIER = constants.MUNICH_MOTOR_CONTROL_CORE_APPLICATION_ID
-
 
     def __init__(self, n_neurons, virtual_chip_coords, connected_chip_coords,
                  connected_chip_edge, machine_time_step,
@@ -106,7 +106,7 @@ class MunichMotorControl(AbstractPopulationVertex):
                 edge_key = subedge.key
 
         #write params to memory
-        spec.switch_write_focus(region=self.PARAMS)
+        spec.switch_write_focus(region=self.PARAMS_REGION)
         spec.write_value(data=edge_key)
         spec.write_value(data=self.speed)
         spec.write_value(data=self.sample_time)
@@ -147,7 +147,7 @@ class MunichMotorControl(AbstractPopulationVertex):
                               size=self.SYSTEM_SIZE,
                               label='setup')
         
-        spec.reserveMemRegion(region=self.PARAMS,
+        spec.reserveMemRegion(region=self.PARAMS_REGION,
                               size=self.PARAMS_SIZE,
                               label='params')
 
