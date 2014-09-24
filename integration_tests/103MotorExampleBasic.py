@@ -4,7 +4,7 @@ motor example that just feeds data to the motor pop which starts the motor going
 """
 
 #!/usr/bin/python
-import spynnaker_with_external_devices.pyNN as p
+import spynnaker_external_devices_plugin.pyNN as p
 import numpy, pylab
 
 #set up pacman103

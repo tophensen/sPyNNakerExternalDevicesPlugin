@@ -3,7 +3,7 @@ retina example that just feeds data from retina to vis
 """
 
 #!/usr/bin/python
-import spynnaker_with_external_devices.pyNN as p
+import spynnaker_external_devices_plugin.pyNN as p
 import visualiser.visualiser_constants as modes
 import numpy, pylab
 import retina_lib as retina_lib
