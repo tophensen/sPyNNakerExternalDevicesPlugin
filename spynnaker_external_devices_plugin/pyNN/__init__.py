@@ -13,5 +13,7 @@ from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_motor_device import MunichMotorDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_retina_device import MunichRetinaDevice
-from spynnaker_external_devices_plugin.pyNN.control_models.munich_motor_control \
-    import MunichMotorControl
+from spynnaker_external_devices_plugin.pyNN.control_models.\
+    munich_motor_control import MunichMotorControl
+from spynnaker_external_devices_plugin.pyNN.control_models.spike_injector \
+    import SpikeInjector
