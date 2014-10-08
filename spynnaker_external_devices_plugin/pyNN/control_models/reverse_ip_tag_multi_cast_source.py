@@ -18,8 +18,9 @@ import math
 from enum import Enum
 
 
-class SpikeInjector(AbstractPartitionableVertex, AbstractDataSpecableVertex,
-                    AbstractReverseIPTagableVertex):
+class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
+                                  AbstractDataSpecableVertex,
+                                  AbstractReverseIPTagableVertex):
 
     #internal params
     _SPIKE_INJECTOR_REGIONS = Enum(
@@ -101,7 +102,7 @@ class SpikeInjector(AbstractPartitionableVertex, AbstractDataSpecableVertex,
 
     @property
     def model_name(self):
-        return "SpikeInjector"
+        return "ReverseIpTagMultiCastSource"
 
     def is_reverse_ip_tagable_vertex(self):
         return True
@@ -115,7 +116,7 @@ class SpikeInjector(AbstractPartitionableVertex, AbstractDataSpecableVertex,
                                                      "common_binary_folder"))
 
         binary_name = os.path.join(common_binary_path,
-                                   'spike_injector.aplx')
+                                   'reverse_iptag_multicast_source.aplx')
         return binary_name
 
     def get_cpu_usage_for_atoms(self, vertex_slice, graph):
@@ -154,7 +155,7 @@ class SpikeInjector(AbstractPartitionableVertex, AbstractDataSpecableVertex,
             size=self._CONFIGURATION_REGION_SIZE, label='CONFIGURATION')
 
         #set up system region writes
-        self._write_basic_setup_info(spec, SpikeInjector.CORE_APP_IDENTIFIER)
+        self._write_basic_setup_info(spec, ReverseIpTagMultiCastSource.CORE_APP_IDENTIFIER)
 
         #set up configuration region writes
         spec.switch_write_focus(

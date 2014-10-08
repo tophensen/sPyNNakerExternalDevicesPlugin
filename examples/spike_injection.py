@@ -17,8 +17,8 @@ cell_params_lif = {'cm'        : 0.25, # nF
                    'v_thresh'  : -50.0
                   }
 
-cell_params_spike_injector = {'host_port_number' : 19876,
-                              'host_ip_address'  : 123,
+cell_params_spike_injector = {'host_port_number' : 12345,
+                              'host_ip_address'  : "localhost",
                               'virtual_key'      : 458752,
                               'prefix'           : None,
                               'prefix_type'      : None}
@@ -30,7 +30,7 @@ weight_to_spike = 2.0
 
 populations.append(p.Population(nNeurons, p.IF_curr_exp,
                                 cell_params_lif, label='pop_1'))
-populations.append(p.Population(nNeurons, q.SpikeInjector,
+populations.append(p.Population(nNeurons, q.ReverseIpTagMultiCastSource,
                                 cell_params_spike_injector,
                                 label='spike_injector_1'))
 
