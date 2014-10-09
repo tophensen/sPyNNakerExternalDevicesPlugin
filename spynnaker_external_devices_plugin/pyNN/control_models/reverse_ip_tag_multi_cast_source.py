@@ -13,7 +13,7 @@ from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
 from spynnaker.pyNN.utilities.conf import config
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
-from spinnman.messages.eidio.eidio_prefix_type import EIDIOPrefixType
+from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
 import os
 import math
 from enum import Enum
@@ -29,14 +29,14 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         names=[('SYSTEM', 0),
                ('CONFIGURATION', 1)])
 
-    _CONFIGURATION_REGION_SIZE = 24
+    _CONFIGURATION_REGION_SIZE = 28
 
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
     #constrcutor
     def __init__(self, n_neurons, host_port_number, host_ip_address,
                  virtual_key, label, machine_time_step, check_key=True,
-                 prefix=None, prefix_type=None, tag=None):
+                 prefix=None, prefix_type=None, tag=None, key_left_shift=0):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
         AbstractDataSpecableVertex.__init__(self, n_neurons, label,
@@ -50,6 +50,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         self._prefix = prefix
         self._check_key = check_key
         self._prefix_type = prefix_type
+        self._key_left_shift = key_left_shift
         #validate params
         if self._prefix is not None and self._prefix_type is None:
             raise exceptions.ConfigurationException(
@@ -60,9 +61,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
         #key =( key  ored prefix )and mask
         if self._prefix is not None:
-            if self._prefix_type == EIDIOPrefixType.LOWER_HALF_WORD:
+            if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
                 self._virtual_key |= self._prefix
-            if self._prefix_type == EIDIOPrefixType.UPPER_HALF_WORD:
+            if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
                 self._virtual_key |= (self._prefix << 16)
 
         #check that neuron mask does not interfere with key
@@ -80,6 +81,11 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 "The mask calculated from your number of neurons has the "
                 "protential to interfere with the key, please reduce the number "
                 "of neurons or reduce the virtual key")
+
+        if self._key_left_shift > 16 or self._key_left_shift < 0:
+            raise exceptions.ConfigurationException(
+                "the key left shift must be within a range of 0 and 16. Please"
+                "change this param and try again")
 
         #add routing constraint
         routing_key_constraint =\
@@ -170,7 +176,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         else:
             spec.write_value(data=1)
         #add type value
-        if self._prefix_type is EIDIOPrefixType.LOWER_HALF_WORD:
+        if self._prefix_type is EIEIOPrefixType.LOWER_HALF_WORD:
             spec.write_value(data=0)
         else:
             spec.write_value(data=1)
@@ -178,10 +184,13 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         if self._prefix is None:
             spec.write_value(data=0)
         else:
-            if self._prefix_type is EIDIOPrefixType.LOWER_HALF_WORD:
+            if self._prefix_type is EIEIOPrefixType.LOWER_HALF_WORD:
                 spec.write_value(data=self._prefix)
             else:
                 spec.write_value(data=self._prefix << 16)
+
+        #key left shift
+        spec.write_value(data=self._key_left_shift)
 
         #add key check
         if self._check_key:

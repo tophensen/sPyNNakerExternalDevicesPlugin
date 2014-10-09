@@ -1,7 +1,7 @@
 from spinnman.connections.udp_connection import UDPConnection
-from spinnman.messages.eidio.eidio_header import EIDIOHeader
-from spinnman.messages.eidio.eidio_message import EIDIOMessage
-from spinnman.messages.eidio.eidio_type_param import EIDIOTypeParam
+from spinnman.messages.eieio.eieio_header import EIEIOHeader
+from spinnman.messages.eieio.eieio_message import EIEIOMessage
+from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 
 number_of_packets = 5
 
@@ -12,8 +12,8 @@ for _ in range(number_of_packets):
     data = bytearray()
     data.append(0)
     data.append(7)
-    header = EIDIOHeader(type_param=EIDIOTypeParam.KEY_16_BIT, count_param=1)
-    message = EIDIOMessage(eidio_header=header, data=data)
+    header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_16_BIT, count_param=1)
+    message = EIEIOMessage(eieio_header=header, data=data)
     udp_connection.send_eidio_message(message)
 
 for _ in range(number_of_packets):
@@ -23,6 +23,7 @@ for _ in range(number_of_packets):
     data = bytearray()
     data.append(0)
     data.append(7)
-    header = EIDIOHeader(type_param=EIDIOTypeParam.KEY_PAYLOAD_16_BIT, count_param=2)
-    message = EIDIOMessage(eidio_header=header, data=data)
+    header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT,
+                         count_param=2)
+    message = EIEIOMessage(eieio_header=header, data=data)
     udp_connection.send_eidio_message(message)
