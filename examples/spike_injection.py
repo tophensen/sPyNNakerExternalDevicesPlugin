@@ -4,7 +4,7 @@ import spynnaker_external_devices_plugin.pyNN as q
 p.setup(timestep=1.0, min_delay=1.0, max_delay=144.0)
 
 nNeurons = 100
-run_time = 560
+run_time = 10000
 
 cell_params_lif = {'cm'        : 0.25, # nF
                    'i_offset'  : 0.0,

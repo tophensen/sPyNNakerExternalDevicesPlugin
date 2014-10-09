@@ -5,7 +5,7 @@ from spinnman.messages.eidio.eidio_type_param import EIDIOTypeParam
 
 number_of_packets = 5
 
-udp_connection = UDPConnection(remote_host="spinn-1.cs.man.ac.uk",
+udp_connection = UDPConnection(remote_host="spinn-9.cs.man.ac.uk",
                                remote_port=12345)
 
 for _ in range(number_of_packets):
