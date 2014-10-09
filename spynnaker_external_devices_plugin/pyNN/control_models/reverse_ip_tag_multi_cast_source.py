@@ -27,12 +27,14 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         value="SPIKE_INJECTOR_REGIONS",
         names=[('SYSTEM', 0),
                ('CONFIGURATION', 1)])
-    _CONFIGURATION_REGION_SIZE = 20
+
+    _CONFIGURATION_REGION_SIZE = 24
+
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
     #constrcutor
     def __init__(self, n_neurons, host_port_number, host_ip_address,
-                 virtual_key, label, machine_time_step,
+                 virtual_key, label, machine_time_step, check_key=True,
                  prefix=None, prefix_type=None, tag=None):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
@@ -45,6 +47,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         self._host_ip_address = host_ip_address
         self._virtual_key = virtual_key
         self._prefix = prefix
+        self._check_key = check_key
         self._prefix_type = prefix_type
         #validate params
         if self._prefix is not None and self._prefix_type is None:
@@ -174,7 +177,16 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         if self._prefix is None:
             spec.write_value(data=0)
         else:
-            spec.write_value(data=self._prefix)
+            if self._prefix_type is constants.PREFIX_TYPE.LOWER_HALF_WORD:
+                spec.write_value(data=self._prefix)
+            else:
+                spec.write_value(data=self._prefix << 16)
+
+        #add key check
+        if self._check_key:
+            spec.write_value(data=1)
+        else:
+            spec.write_value(data=0)
 
         #add key and mask
         spec.write_value(data=self._virtual_key)
