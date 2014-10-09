@@ -39,4 +39,4 @@ projections.append(p.Projection(populations[1], populations[0],
 
 
 p.run(run_time)
-p.end()
+#p.end()

@@ -13,6 +13,7 @@ from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
 from spynnaker.pyNN.utilities.conf import config
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
+from spinnman.messages.eidio.eidio_prefix_type import EIDIOPrefixType
 import os
 import math
 from enum import Enum
@@ -59,9 +60,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
         #key =( key  ored prefix )and mask
         if self._prefix is not None:
-            if self._prefix_type == constants.PREFIX_TYPE.LOWER_HALF_WORD:
+            if self._prefix_type == EIDIOPrefixType.LOWER_HALF_WORD:
                 self._virtual_key |= self._prefix
-            if self._prefix_type == constants.PREFIX_TYPE.UPPER_HALF_WORD:
+            if self._prefix_type == EIDIOPrefixType.UPPER_HALF_WORD:
                 self._virtual_key |= (self._prefix << 16)
 
         #check that neuron mask does not interfere with key
@@ -169,7 +170,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         else:
             spec.write_value(data=1)
         #add type value
-        if self._prefix_type is constants.PREFIX_TYPE.LOWER_HALF_WORD:
+        if self._prefix_type is EIDIOPrefixType.LOWER_HALF_WORD:
             spec.write_value(data=0)
         else:
             spec.write_value(data=1)
@@ -177,7 +178,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         if self._prefix is None:
             spec.write_value(data=0)
         else:
-            if self._prefix_type is constants.PREFIX_TYPE.LOWER_HALF_WORD:
+            if self._prefix_type is EIDIOPrefixType.LOWER_HALF_WORD:
                 spec.write_value(data=self._prefix)
             else:
                 spec.write_value(data=self._prefix << 16)
