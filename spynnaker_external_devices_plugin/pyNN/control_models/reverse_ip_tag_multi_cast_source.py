@@ -105,8 +105,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         return mask, active_mask_bit_range
 
     def get_sdram_usage_for_atoms(self, vertex_slice, graph):
-        return (constants.SETUP_SIZE + self._CONFIGURATION_REGION_SIZE
-                + (6 * 4))
+        return constants.SETUP_SIZE + self._CONFIGURATION_REGION_SIZE
         #3 words from the system region of the dsg/e,
         # 3 words for configuration and 6 *4 words for app pointer table
 
