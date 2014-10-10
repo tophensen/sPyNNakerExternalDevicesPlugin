@@ -14,7 +14,7 @@ for _ in range(number_of_packets):
     data.append(7)
     header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_16_BIT, count_param=1)
     message = EIEIOMessage(eieio_header=header, data=data)
-    udp_connection.send_eidio_message(message)
+    udp_connection.send_eieio_message(message)
 
 for _ in range(number_of_packets):
     data = bytearray()
@@ -26,4 +26,4 @@ for _ in range(number_of_packets):
     header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT,
                          count_param=2)
     message = EIEIOMessage(eieio_header=header, data=data)
-    udp_connection.send_eidio_message(message)
+    udp_connection.send_eieio_message(message)

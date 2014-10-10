@@ -175,11 +175,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             spec.write_value(data=0)
         else:
             spec.write_value(data=1)
-        #add type value
-        if self._prefix_type is EIEIOPrefixType.LOWER_HALF_WORD:
-            spec.write_value(data=0)
-        else:
-            spec.write_value(data=1)
+
         #add prefix
         if self._prefix is None:
             spec.write_value(data=0)
