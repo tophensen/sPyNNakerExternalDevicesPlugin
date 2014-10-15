@@ -26,8 +26,8 @@ cell_params_spike_injector = {'host_port_number' : 12345,
 cell_params_spike_injector_with_prefix = {'host_port_number' : 12345,
                                           'host_ip_address'  : "localhost",
                                           'virtual_key'      : 458752,
-                                          'prefix'           : None,
-                                          'prefix_type'      :q.EIEIOPrefixType.LOWER_HALF_WORD}
+                                          'prefix'           : 7,
+                                          'prefix_type'      : q.EIEIOPrefixType.UPPER_HALF_WORD}
 
 populations = list()
 projections = list()
