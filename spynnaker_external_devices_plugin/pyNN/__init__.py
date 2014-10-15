@@ -17,3 +17,5 @@ from spynnaker_external_devices_plugin.pyNN.control_models.\
     munich_motor_control import MunichMotorControl
 from spynnaker_external_devices_plugin.pyNN.control_models.reverse_ip_tag_multi_cast_source \
     import ReverseIpTagMultiCastSource
+
+from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType

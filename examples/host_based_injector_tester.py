@@ -14,9 +14,14 @@ for _ in range(number_of_packets):
 #    data = bytearray()
 #    data.append(0)
 #    data.append(7)
+
     header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_16_BIT, count_param=1)
     message = EIEIOMessage(eieio_header=header, data=data)
+    message.write_key(0x18)
     udp_connection.send_eieio_message(message)
+
+    header = EIEIOHeader()
+
 
 for _ in range(number_of_packets):
     data = bytearray(struct.pack("<H", 7))
