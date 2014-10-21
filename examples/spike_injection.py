@@ -37,7 +37,7 @@ weight_to_spike = 2.0
 populations.append(p.Population(nNeurons, p.IF_curr_exp,
                                 cell_params_lif, label='pop_1'))
 populations.append(p.Population(nNeurons, q.ReverseIpTagMultiCastSource,
-                                cell_params_spike_injector,
+                                cell_params_spike_injector_with_prefix,
                                 label='spike_injector_1'))
 
 projections.append(p.Projection(populations[1], populations[0],
