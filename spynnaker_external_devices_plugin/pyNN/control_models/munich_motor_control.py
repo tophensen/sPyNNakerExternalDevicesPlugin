@@ -1,26 +1,23 @@
+import os
+
+from spinn_front_end_common.utilities import packet_conversions
 from spinn_machine.processor import Processor
 from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
     AbstractPopulationVertex
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_motor_device import MunichMotorDevice
-from spynnaker.pyNN.utilities import packet_conversions
 from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.utilities.conf import config
 from pacman.model.resources.cpu_cycles_per_tick_resource import \
     CPUCyclesPerTickResource
-
 from pacman.model.constraints.vertex_has_dependent_constraint import \
     VertexHasDependentConstraint
 from pacman.model.resources.dtcm_resource import DTCMResource
 from pacman.model.resources.sdram_resource import SDRAMResource
 from pacman.model.constraints.partitioner_maximum_size_constraint \
     import PartitionerMaximumSizeConstraint
-
-
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
-
-import os
 
 
 class MunichMotorControl(AbstractPopulationVertex):

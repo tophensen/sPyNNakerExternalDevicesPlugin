@@ -1,3 +1,6 @@
+import os
+from enum import Enum
+
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 from pacman.model.constraints.key_allocator_routing_constraint import \
@@ -6,17 +9,15 @@ from pacman.model.constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
 from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
-from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
+from spinn_front_end_common.models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
-from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
+from spinn_front_end_common.abstract_models.abstract_reverse_iptagable_vertex \
     import AbstractReverseIPTagableVertex
 from spynnaker.pyNN.utilities.conf import config
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
-import os
 import math
-from enum import Enum
 
 
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
