@@ -1,4 +1,5 @@
-from spynnaker_external_devices_plugin.pyNN.interfaces.abstract_munich_device import AbstractMunichDevice
+from spynnaker_external_devices_plugin.pyNN.interfaces.abstract_munich_device \
+    import AbstractMunichDevice
 
 
 class MunichMotorDevice(AbstractMunichDevice):

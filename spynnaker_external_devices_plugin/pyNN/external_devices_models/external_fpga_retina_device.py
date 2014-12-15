@@ -68,7 +68,8 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice)
         self.add_constraint(command_constraint)
         #add routing key constraint
         routing_key_constraint = \
-            KeyAllocatorRoutingConstraint(self.generate_routing_info)
+            KeyAllocatorRoutingConstraint(self.generate_routing_info,
+                                          self.key_with_neuron_id)
         self.add_constraint(routing_key_constraint)
 
     def get_commands(self):
@@ -94,6 +95,13 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice)
                    'payload': mgmt_payload, 'repeat': 5, 'delay': 100}
         commands.append(command)
         return commands
+
+    def key_with_neuron_id(self):
+        keys = list()
+        key, mask = self.generate_routing_info(None)
+        for neuron_id in range(0, self._n_atoms):
+            keys.append(key + neuron_id)
+        return keys
 
     # noinspection PyUnusedLocal
     def generate_routing_info(self, subedge):

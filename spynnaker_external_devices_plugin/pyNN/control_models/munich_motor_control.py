@@ -31,7 +31,8 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     CORE_APP_IDENTIFIER = constants.MUNICH_MOTOR_CONTROL_CORE_APPLICATION_ID
 
-    def __init__(self, n_neurons, virtual_chip_coords, connected_chip_coords,
+    def __init__(self, n_neurons, spikes_per_second, ring_buffer_sigma,
+                 timescale_factor, virtual_chip_coords, connected_chip_coords,
                  connected_chip_edge, machine_time_step, speed=30,
                  sample_time=4096, update_time=512, delay_time=5,
                  delta_threshold=23, continue_if_not_different=True,
@@ -42,7 +43,10 @@ class MunichMotorControl(AbstractPopulationVertex):
         AbstractPopulationVertex.__init__(
             self, binary="robot_motor_control.aplx", label=label, n_neurons=6,
             max_atoms_per_core=6, n_params=3,
-            machine_time_step=machine_time_step)
+            spikes_per_second=spikes_per_second,
+            ring_buffer_sigma=ring_buffer_sigma,
+            machine_time_step=machine_time_step,
+            timescale_factor=timescale_factor)
 
         max_constraint = \
             PartitionerMaximumSizeConstraint(MunichMotorControl._N_ATOMS)
@@ -121,7 +125,7 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     #inhirrited from data specable vertex
     @staticmethod
-    def get_binary_file_name():
+    def get_binary_file_name(self):
         common_binary_path = os.path.join(config.get("SpecGeneration",
                                                      "common_binary_folder"))
 
@@ -171,7 +175,7 @@ class MunichMotorControl(AbstractPopulationVertex):
     def get_parameters(self):
         raise NotImplementedError
 
-    def get_cpu_usage_for_atoms(self, vertex_slice):
+    def get_cpu_usage_for_atoms(self, vertex_slice, graph):
         return (vertex_slice.hi_atom - vertex_slice.lo_atom) * \
                (Processor.CPU_AVAILABLE / self._n_atoms)
 
@@ -180,3 +184,6 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     def write_synapse_parameters(self, spec, subvertex):
         pass
+
+    def is_population_vertex(self):
+        return True

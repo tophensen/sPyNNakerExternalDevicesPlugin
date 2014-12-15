@@ -31,17 +31,16 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                ('CONFIGURATION', 1)])
 
     _CONFIGURATION_REGION_SIZE = 28
-
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
     #constrcutor
-    def __init__(self, n_neurons, host_port_number, host_ip_address,
+    def __init__(self, n_neurons, host_port_number, host_ip_address, tag,
                  virtual_key, label, machine_time_step, check_key=True,
-                 prefix=None, prefix_type=None, tag=None, key_left_shift=0):
+                 prefix=None, timescale_factor=None, key_left_shift=0):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
-        AbstractDataSpecableVertex.__init__(self, n_neurons, label,
-                                            machine_time_step)
+        AbstractDataSpecableVertex.__init__(
+            self, n_neurons, label, machine_time_step, timescale_factor)
         AbstractReverseIPTagableVertex.__init__(
             self, tag=tag, address=host_ip_address, port=host_port_number)
         #set params
@@ -50,29 +49,13 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         self._virtual_key = virtual_key
         self._prefix = prefix
         self._check_key = check_key
-        self._prefix_type = prefix_type
         self._key_left_shift = key_left_shift
-        #validate params
-        if self._prefix is not None and self._prefix_type is None:
-            raise exceptions.ConfigurationException(
-                "To use a prefix, you must declaire which position to use the "
-                "prefix in on the prefix_type parameter.")
-
         self._mask, active_bits_of_mask = self._calculate_mask(n_neurons)
 
         #key =( key  ored prefix )and mask
         temp_vertial_key = virtual_key
         if self._prefix is not None:
-            if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
-                temp_vertial_key |= self._prefix
-            if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
-                temp_vertial_key |= (self._prefix << 16)
-        else:
-            if (self._prefix_type is None
-                    or self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD):
-                self._prefix = (self._virtual_key >> 16) & 0xFFFF
-            elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
-                self._prefix = self._virtual_key & 0xFFFF
+            temp_vertial_key |= self._prefix
 
         #check that mask key combo = key
         masked_key = temp_vertial_key & self._mask
@@ -97,7 +80,8 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
         #add routing constraint
         routing_key_constraint =\
-            KeyAllocatorRoutingConstraint(self.generate_routing_info)
+            KeyAllocatorRoutingConstraint(self.generate_routing_info,
+                                          self.get_key_with_neuron_id)
         self.add_constraint(routing_key_constraint)
         #add placement constraint
         placement_constraint = PlacerChipAndCoreConstraint(0, 0)
@@ -128,13 +112,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         return self._CONFIGURATION_REGION_SIZE
 
     def get_binary_file_name(self):
-         # Rebuild executable name
-        common_binary_path = os.path.join(config.get("SpecGeneration",
-                                                     "common_binary_folder"))
-
-        binary_name = os.path.join(common_binary_path,
-                                   'reverse_iptag_multicast_source.aplx')
-        return binary_name
+        return 'reverse_iptag_multicast_source.aplx'
 
     def get_cpu_usage_for_atoms(self, vertex_slice, graph):
         return 0
@@ -144,6 +122,13 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         overloaded from component vertex
         """
         return self._virtual_key, self._mask
+
+    def get_key_with_neuron_id(self):
+        keys = list()
+        key, mask = self.generate_routing_info(None)
+        for neuron_id in range(0, self._n_atoms):
+            keys.append(key + neuron_id)
+        return keys
 
     def generate_data_spec(self, subvertex, placement, sub_graph, graph,
                            routing_info, hostname, graph_mapper,
@@ -187,10 +172,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         if self._prefix is None:
             spec.write_value(data=0)
         else:
-            if self._prefix_type is EIEIOPrefixType.LOWER_HALF_WORD:
-                spec.write_value(data=self._prefix)
-            else:
-                spec.write_value(data=self._prefix << 16)
+            spec.write_value(data=self._prefix << 16)
 
         #key left shift
         spec.write_value(data=self._key_left_shift)

@@ -57,7 +57,8 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
         self.add_constraint(command_constraint)
         #add routing key constraint
         routing_key_constraint = \
-            KeyAllocatorRoutingConstraint(self.generate_routing_info)
+            KeyAllocatorRoutingConstraint(self.generate_routing_info,
+                                          self.key_with_neuron_id)
         self.add_constraint(routing_key_constraint)
 
     def add_constraints_to_subverts(self, subverts):
@@ -135,6 +136,13 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
                    'payload': mgmt_payload, 'repeat': 5, 'delay': 1000}
         commands.append(command)
         return commands
+
+    def key_with_neuron_id(self):
+        keys = list()
+        key, mask = self.generate_routing_info(None)
+        for neuron_id in range(0, self._n_atoms):
+            keys.append(key + neuron_id)
+        return keys
 
     def generate_routing_info(self, subedge):
         """
