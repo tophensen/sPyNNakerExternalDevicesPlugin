@@ -9,9 +9,11 @@ from pacman.model.constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
 from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
-from spinn_front_end_common.models.abstract_data_specable_vertex \
+from spynnaker.pyNN.models.abstract_models.abstract_comm_models.abstract_iptagable_vertex import \
+    AbstractIPTagableVertex
+from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
-from spinn_front_end_common.abstract_models.abstract_reverse_iptagable_vertex \
+from spynnaker.pyNN.models.abstract_models.abstract_comm_models.abstract_reverse_iptagable_vertex \
     import AbstractReverseIPTagableVertex
 from spynnaker.pyNN.utilities.conf import config
 from spynnaker.pyNN import exceptions
@@ -22,7 +24,8 @@ import math
 
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                                   AbstractDataSpecableVertex,
-                                  AbstractReverseIPTagableVertex):
+                                  AbstractReverseIPTagableVertex,
+                                  AbstractIPTagableVertex):
 
     #internal params
     _SPIKE_INJECTOR_REGIONS = Enum(
@@ -36,7 +39,8 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     #constrcutor
     def __init__(self, n_neurons, host_port_number, host_ip_address,
-                 virtual_key, label, machine_time_step, check_key=True,
+                 virtual_key, label, machine_time_step, buffer_ip_tag_tag_id,
+                 buffer_ip_tag_port, buffer_ip_tag_address, check_key=True,
                  prefix=None, prefix_type=None, tag=None, key_left_shift=0):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
@@ -44,6 +48,10 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                                             machine_time_step)
         AbstractReverseIPTagableVertex.__init__(
             self, tag=tag, address=host_ip_address, port=host_port_number)
+        AbstractIPTagableVertex.__init__(
+            self, buffer_ip_tag_tag_id, buffer_ip_tag_port,
+            buffer_ip_tag_address)
+
         #set params
         self._host_port_number = host_port_number
         self._host_ip_address = host_ip_address
@@ -79,7 +87,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         if self._virtual_key != masked_key:
             raise exceptions.ConfigurationException(
                 "The mask calculated from your number of neurons has the "
-                "protential to interfere with the key, please reduce the number "
+                "potential to interfere with the key, please reduce the number "
                 "of neurons or reduce the virtual key")
 
         #check that neuron mask does not interfere with key
@@ -209,3 +217,5 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         spec.end_specification()
         data_writer.close()
 
+    def is_ip_tagable_vertex(self):
+        return True
