@@ -34,9 +34,10 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
     #constrcutor
-    def __init__(self, n_neurons, host_port_number, host_ip_address, tag,
-                 virtual_key, label, machine_time_step, check_key=True,
-                 prefix=None, timescale_factor=None, key_left_shift=0):
+    def __init__(self, n_neurons, host_port_number, host_ip_address,
+                 virtual_key, label, machine_time_step, tag=None,
+                 check_key=True, prefix=None, timescale_factor=None,
+                 key_left_shift=0):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
         AbstractDataSpecableVertex.__init__(
