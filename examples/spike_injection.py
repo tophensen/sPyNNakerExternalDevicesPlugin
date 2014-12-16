@@ -1,12 +1,12 @@
-import spynnaker.pyNN as p
-import spynnaker_external_devices_plugin.pyNN as q
+import spynnaker.pyNN as frontend
+import spynnaker_external_devices_plugin.pyNN as externaldevices
 
-p.setup(timestep=1.0, min_delay=1.0, max_delay=144.0)
+frontend.setup(timestep=1.0, min_delay=1.0, max_delay=144.0)
 
 nNeurons = 100
 run_time = 10000
 
-cell_params_lif = {'cm'        : 0.25, # nF
+cell_params_lif = {'cm'        : 0.25,  # nF
                    'i_offset'  : 0.0,
                    'tau_m'     : 20.0,
                    'tau_refrac': 2.0,
@@ -34,15 +34,16 @@ projections = list()
 
 weight_to_spike = 2.0
 
-populations.append(p.Population(nNeurons, p.IF_curr_exp,
-                                cell_params_lif, label='pop_1'))
-populations.append(p.Population(nNeurons, q.ReverseIpTagMultiCastSource,
-                                cell_params_spike_injector_with_prefix,
-                                label='spike_injector_1'))
+populations.append(frontend.Population(nNeurons, frontend.IF_curr_exp,
+                                       cell_params_lif, label='pop_1'))
+populations.append(
+    frontend.Population(nNeurons, externaldevices.ReverseIpTagMultiCastSource,
+                        cell_params_spike_injector_with_prefix,
+                        label='spike_injector_1'))
 
-projections.append(p.Projection(populations[1], populations[0],
-                                p.AllToAllConnector()))
+projections.append(frontend.Projection(populations[1], populations[0],
+                                       frontend.AllToAllConnector()))
 
 
-p.run(run_time)
-#p.end()
+frontend.run(run_time)
+#frontend.end()
