@@ -3,6 +3,7 @@ from spynnaker_external_devices_plugin.pyNN.interfaces.abstract_munich_device \
 
 
 class MunichMotorDevice(AbstractMunichDevice):
+
     MANAGEMENT_BIT = 0x400
     RATE_CODING_ACTUATORS_ENABLE = 0x40
 
@@ -22,3 +23,6 @@ class MunichMotorDevice(AbstractMunichDevice):
 
     def get_commands(self, last_runtime_tic):
         return list()
+
+    def is_external_device(self):
+        return True

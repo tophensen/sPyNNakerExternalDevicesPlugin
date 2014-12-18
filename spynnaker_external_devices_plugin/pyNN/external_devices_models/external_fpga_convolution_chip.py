@@ -14,4 +14,5 @@ class ExternalFPGAConvolutionChip(AbstractFPGADevice):
     def model_name(self):
         return "a external convolution chip which communicates via a fpga board"
 
-
+    def is_external_device(self):
+        return True

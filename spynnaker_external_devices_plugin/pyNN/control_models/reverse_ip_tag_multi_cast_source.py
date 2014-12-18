@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 
 from data_specification.data_specification_generator import \
@@ -14,10 +13,8 @@ from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
 from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
     import AbstractReverseIPTagableVertex
 
-from spynnaker.pyNN.utilities.conf import config
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
-from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
 import math
 
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,

@@ -13,6 +13,7 @@ from spynnaker_external_devices_plugin.pyNN.interfaces.abstract_munich_device\
 
 
 class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
+
     #key codes for the robot retina
     MANAGEMENT_BIT = 0x400
     LEFT_RETINA_ENABLE = 0x45
@@ -180,3 +181,6 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
         return (packet_conversions.get_x_from_robot_retina(details),
                 packet_conversions.get_y_from_robot_retina(details),
                 packet_conversions.get_spike_value_from_robot_retina(details))
+
+    def is_external_retina(self):
+        return True

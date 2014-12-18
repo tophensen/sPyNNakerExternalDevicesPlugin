@@ -10,6 +10,7 @@ from spinn_machine.abstract_virtual_vertex \
 #inhittance imports
 from abc import ABCMeta
 from six import add_metaclass
+from abc import abstractmethod
 
 
 @add_metaclass(ABCMeta)
@@ -28,4 +29,11 @@ class AbstractExternalDevice(AbstractVirtualVertex):
     @property
     def model_name(self):
         return "ExternalDevice:{}".format(self.label)
+
+    @abstractmethod
+    def is_external_device(self):
+        """ helper method for is instance
+
+        :return:
+        """
 

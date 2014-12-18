@@ -146,3 +146,6 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice)
             packet_conversions.get_y_from_fpga_retina(details, mode), \
             packet_conversions.get_spike_value_from_fpga_retina(details,
                                                                 mode)
+
+    def is_external_retina(self):
+        return True

@@ -1,8 +1,14 @@
-from spynnaker_external_devices_plugin.pyNN.abstract_models.abstract_external_device import AbstractExternalDevice
+from spynnaker_external_devices_plugin.pyNN.abstract_models.\
+    abstract_external_device import AbstractExternalDevice
 from pacman.model.constraints.placer_chip_and_core_constraint \
     import PlacerChipAndCoreConstraint
 
+from abc import ABCMeta
+from six import add_metaclass
+from abc import abstractmethod
 
+
+@add_metaclass(ABCMeta)
 class AbstractExternalRetinaDevice(AbstractExternalDevice):
 
     UP_POLARITY = "UP"
@@ -49,3 +55,13 @@ class AbstractExternalRetinaDevice(AbstractExternalDevice):
             return n_neurons
         else:
             return n_neurons / (n_neurons >> 11)
+
+    def is_external_device(self):
+        return True
+
+    @abstractmethod
+    def is_external_retina(self):
+        """helper method for is_instance
+
+        :return:
+        """

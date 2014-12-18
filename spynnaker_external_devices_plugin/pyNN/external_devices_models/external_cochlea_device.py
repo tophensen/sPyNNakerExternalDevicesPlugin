@@ -16,3 +16,6 @@ class ExternalCochleaDevice(AbstractExternalDevice):
     @property
     def model_name(self):
         return "ExternalCochleaDevice:{}".format(self.label)
+
+    def is_external_device(self):
+        return True
