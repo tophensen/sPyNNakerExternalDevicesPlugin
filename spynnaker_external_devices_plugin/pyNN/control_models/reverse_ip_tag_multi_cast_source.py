@@ -9,11 +9,11 @@ from pacman.model.constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
 from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
-from spynnaker.pyNN.models.abstract_models.abstract_comm_models.abstract_iptagable_vertex import \
+from spynnaker.pyNN.models.abstract_models.abstract_iptagable_vertex import \
     AbstractIPTagableVertex
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
-from spynnaker.pyNN.models.abstract_models.abstract_comm_models.abstract_reverse_iptagable_vertex \
+from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
     import AbstractReverseIPTagableVertex
 from spynnaker.pyNN.utilities.conf import config
 from spynnaker.pyNN import exceptions
@@ -24,8 +24,7 @@ import math
 
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                                   AbstractDataSpecableVertex,
-                                  AbstractReverseIPTagableVertex,
-                                  AbstractIPTagableVertex):
+                                  AbstractReverseIPTagableVertex):
 
     #internal params
     _SPIKE_INJECTOR_REGIONS = Enum(
@@ -38,19 +37,17 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
     #constrcutor
-    def __init__(self, n_neurons, host_port_number, host_ip_address,
-                 virtual_key, label, machine_time_step, buffer_ip_tag_tag_id,
-                 buffer_ip_tag_port, buffer_ip_tag_address, check_key=True,
+    def __init__(self, n_neurons, machine_time_step, timescale_factor,
+                 host_port_number, host_ip_address,
+                 virtual_key, label, check_key=True,
                  prefix=None, prefix_type=None, tag=None, key_left_shift=0):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
         AbstractDataSpecableVertex.__init__(self, n_neurons, label,
-                                            machine_time_step)
+                                            machine_time_step,
+                                            timescale_factor)
         AbstractReverseIPTagableVertex.__init__(
             self, tag=tag, address=host_ip_address, port=host_port_number)
-        AbstractIPTagableVertex.__init__(
-            self, buffer_ip_tag_tag_id, buffer_ip_tag_port,
-            buffer_ip_tag_address)
 
         #set params
         self._host_port_number = host_port_number
@@ -105,7 +102,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
         #add routing constraint
         routing_key_constraint =\
-            KeyAllocatorRoutingConstraint(self.generate_routing_info)
+            KeyAllocatorRoutingConstraint(self.generate_routing_info, None)
         self.add_constraint(routing_key_constraint)
         #add placement constraint
         placement_constraint = PlacerChipAndCoreConstraint(0, 0)
@@ -137,15 +134,11 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     def get_binary_file_name(self):
          # Rebuild executable name
-        common_binary_path = os.path.join(config.get("SpecGeneration",
-                                                     "common_binary_folder"))
-
-        binary_name = os.path.join(common_binary_path,
-                                   'reverse_iptag_multicast_source.aplx')
-        return binary_name
+        return 'reverse_iptag_multicast_source.aplx'
 
     def get_cpu_usage_for_atoms(self, vertex_slice, graph):
-        return 0
+        print "Hello!"
+        return 1
 
     def generate_routing_info(self, subedge):
         """
@@ -216,6 +209,3 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         #close spec
         spec.end_specification()
         data_writer.close()
-
-    def is_ip_tagable_vertex(self):
-        return True
