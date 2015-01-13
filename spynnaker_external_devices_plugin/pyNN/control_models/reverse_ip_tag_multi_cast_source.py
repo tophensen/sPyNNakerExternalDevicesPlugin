@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 
 from data_specification.data_specification_generator import \
@@ -8,14 +9,18 @@ from pacman.model.constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
 from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
+from spynnaker.pyNN.models.abstract_models.abstract_iptagable_vertex import \
+    AbstractIPTagableVertex
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
     import AbstractReverseIPTagableVertex
-
+from spynnaker.pyNN.utilities.conf import config
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
+from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
 import math
+
 
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                                   AbstractDataSpecableVertex,
@@ -28,38 +33,58 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                ('CONFIGURATION', 1)])
 
     _CONFIGURATION_REGION_SIZE = 28
+    
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
     #constrcutor
-    def __init__(self, n_neurons, host_port_number, host_ip_address,
-                 virtual_key, label, machine_time_step, timescale_factor=None,
-                 tag=None, check_key=True, prefix=None, key_left_shift=0):
+    def __init__(self, n_neurons, machine_time_step, timescale_factor,
+                 host_port_number, host_ip_address,
+                 virtual_key, label, check_key=True,
+                 prefix=None, prefix_type=None, tag=None, key_left_shift=0):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
         AbstractDataSpecableVertex.__init__(
-            self, n_neurons, label, machine_time_step, timescale_factor)
+            self, n_neurons, label, machine_time_step,
+            timescale_factor)
         AbstractReverseIPTagableVertex.__init__(
             self, tag=tag, address=host_ip_address, port=host_port_number)
+        
         #set params
         self._host_port_number = host_port_number
         self._host_ip_address = host_ip_address
         self._virtual_key = virtual_key
         self._prefix = prefix
         self._check_key = check_key
+        self._prefix_type = prefix_type
         self._key_left_shift = key_left_shift
+        #validate params
+        if self._prefix is not None and self._prefix_type is None:
+            raise exceptions.ConfigurationException(
+                "To use a prefix, you must declaire which position to use the "
+                "prefix in on the prefix_type parameter.")
+
         self._mask, active_bits_of_mask = self._calculate_mask(n_neurons)
 
         #key =( key  ored prefix )and mask
         temp_vertial_key = virtual_key
         if self._prefix is not None:
-            temp_vertial_key |= self._prefix
+            if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
+                temp_vertial_key |= self._prefix
+            if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
+                temp_vertial_key |= (self._prefix << 16)
+        else:
+            if (self._prefix_type is None
+                    or self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD):
+                self._prefix = (self._virtual_key >> 16) & 0xFFFF
+            elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
+                self._prefix = self._virtual_key & 0xFFFF
 
         #check that mask key combo = key
         masked_key = temp_vertial_key & self._mask
         if self._virtual_key != masked_key:
             raise exceptions.ConfigurationException(
                 "The mask calculated from your number of neurons has the "
-                "protential to interfere with the key, please reduce the number "
+                "potential to interfere with the key, please reduce the number "
                 "of neurons or reduce the virtual key")
 
         #check that neuron mask does not interfere with key
@@ -112,7 +137,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         return 'reverse_iptag_multicast_source.aplx'
 
     def get_cpu_usage_for_atoms(self, vertex_slice, graph):
-        return 0
+        return 1
 
     def generate_routing_info(self, subedge):
         """
@@ -169,7 +194,10 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         if self._prefix is None:
             spec.write_value(data=0)
         else:
-            spec.write_value(data=self._prefix << 16)
+            if self._prefix_type is EIEIOPrefixType.LOWER_HALF_WORD:
+                spec.write_value(data=self._prefix)
+            else:
+                spec.write_value(data=self._prefix << 16)
 
         #key left shift
         spec.write_value(data=self._key_left_shift)
@@ -187,4 +215,3 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         #close spec
         spec.end_specification()
         data_writer.close()
-

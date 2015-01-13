@@ -1,6 +1,7 @@
 import os
 
-from spinn_front_end_common.utilities import packet_conversions
+#from spinn_front_end_common.utilities import packet_conversions
+from spynnaker.pyNN.utilities import packet_conversions
 from spinn_machine.processor import Processor
 from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
     AbstractPopulationVertex
