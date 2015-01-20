@@ -19,30 +19,31 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice)
     MODE_16 = "16"
 
     def __init__(self, mode, virtual_chip_coords, connected_chip_coords,
-                 connected_chip_edge, polarity, machine_time_step, label=None,
-                 n_neurons=None):
+                 connected_chip_edge, polarity, machine_time_step,
+                 timescale_factor, spikes_per_second, ring_buffer_sigma,
+                 label=None, n_neurons=None):
 
         if mode == ExternalFPGARetinaDevice.MODE_128:
-            if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or
-               self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
+            if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
+                    polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
                 n_neurons = 128 * 128
             else:
                 n_neurons = 128 * 128 * 2
         elif mode == ExternalFPGARetinaDevice.MODE_64:
-            if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or
-               self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
+            if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
+                    polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
                 n_neurons = 64 * 64
             else:
                 n_neurons = 64 * 64 * 2
         elif mode == ExternalFPGARetinaDevice.MODE_32:
-            if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or
-               self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
+            if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
+                    polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
                 n_neurons = 32 * 32
             else:
                 n_neurons = 32 * 32 * 2
         elif mode == ExternalFPGARetinaDevice.MODE_16:
-            if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or
-               self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
+            if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
+                    polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
                 n_neurons = 16 * 16
             else:
                 n_neurons = 16 * 16 * 2
@@ -109,20 +110,20 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice)
         """
         over writes component method, return the key and mask
         """
-        if self.polarity is None:
+        if self._polarity is None:
             key = \
                 self._virtual_chip_coords['x'] << 24 | \
                 self._virtual_chip_coords['y'] << 16
             mask = 0xffff0000
             return key, mask
-        elif self.polarity == ExternalFPGARetinaDevice.UP_POLARITY:
+        elif self._polarity == ExternalFPGARetinaDevice.UP_POLARITY:
             key = \
                 self._virtual_chip_coords['x'] << 24 | \
                 self._virtual_chip_coords['y'] << 16 | \
                 1 << 14
             mask = 0xffffC000
             return key, mask
-        elif self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY:
+        elif self._polarity == ExternalFPGARetinaDevice.DOWN_POLARITY:
             key = \
                 self._virtual_chip_coords['x'] << 24 | \
                 self._virtual_chip_coords['y'] << 16

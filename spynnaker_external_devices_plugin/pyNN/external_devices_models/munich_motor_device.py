@@ -8,8 +8,9 @@ class MunichMotorDevice(AbstractMunichDevice):
     RATE_CODING_ACTUATORS_ENABLE = 0x40
 
     def __init__(self, n_neurons, virtual_chip_coords, connected_chip_coords,
-                 connected_chip_edge, machine_time_step, label=None,
-                 neuron_controlled=True):
+                 connected_chip_edge, machine_time_step,
+                 timescale_factor, spikes_per_second, ring_buffer_sigma,
+                 label=None, neuron_controlled=True):
         AbstractMunichDevice.__init__(
             self, n_neurons, virtual_chip_coords, connected_chip_coords,
             connected_chip_edge, machine_time_step=machine_time_step,

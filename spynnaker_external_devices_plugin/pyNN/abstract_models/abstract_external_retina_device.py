@@ -23,7 +23,7 @@ class AbstractExternalRetinaDevice(AbstractExternalDevice):
             connected_node_edge, machine_time_step, label=label,
             max_atoms_per_core=self._get_max_atoms_per_core(n_neurons))
 
-        self.polarity = polarity
+        self._polarity = polarity
 
     @property
     def requires_retina_page(self):
@@ -37,7 +37,7 @@ class AbstractExternalRetinaDevice(AbstractExternalDevice):
         ordered_subverts = sorted(subverts, key=lambda x: x.lo_atom)
 
         start_point = 0
-        if self.polarity == AbstractExternalRetinaDevice.UP_POLARITY:
+        if self._polarity == AbstractExternalRetinaDevice.UP_POLARITY:
             start_point = 8
 
         for subvert in ordered_subverts:
