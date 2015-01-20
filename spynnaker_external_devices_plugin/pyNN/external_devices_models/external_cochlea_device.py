@@ -7,7 +7,8 @@ class ExternalCochleaDevice(AbstractExternalDevice):
 
     def __init__(self, n_neurons, virtual_chip_coords,
                  connected_chip_coords, connected_chip_edge, max_atoms_per_core,
-                 machine_time_step, label=None):
+                 machine_time_step, timescale_factor, spikes_per_second,
+                 ring_buffer_sigma, label=None):
         super(ExternalCochleaDevice, self).__init__(
             n_neurons, virtual_chip_coords, connected_chip_coords,
             connected_chip_edge, machine_time_step, label=label,

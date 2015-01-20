@@ -38,8 +38,8 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     #constrcutor
     def __init__(self, n_neurons, machine_time_step, timescale_factor,
-                 host_port_number, host_ip_address,
-                 virtual_key, label, check_key=True,
+                 spikes_per_second, ring_buffer_sigma, host_port_number,
+                 host_ip_address, virtual_key, label, check_key=True,
                  prefix=None, prefix_type=None, tag=None, key_left_shift=0):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)

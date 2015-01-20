@@ -3,8 +3,8 @@ retina example that just feeds data from retina to vis
 """
 
 #!/usr/bin/python
-import spynnaker_external_devices_plugin.pyNN as p
-import visualiser.visualiser_constants as modes
+import spynnaker.pyNN as p
+import spynnaker_external_devices_plugin.pyNN as q
 import numpy, pylab
 import retina_lib as retina_lib
 
@@ -32,45 +32,47 @@ link = 4
 
 populations = list()
 projections = list()
-
-populations.append(p.Population(1, p.MunichRetinaDevice,
-                   {'virtual_chip_coords': virtual_chip_coords,
-                    'connected_chip_coords': connected_chip_coords,
-                    'connected_chip_edge': link,
-                    'polarity': p.MunichRetinaDevice.DOWN_POLARITY,
-                    'position': p.MunichRetinaDevice.RIGHT_RETINA},
-                   label='External retina'))
-
-populations.append(p.Population(1, p.MunichRetinaDevice,
-                   {'virtual_chip_coords': virtual_chip_coords,
-                    'connected_chip_coords': connected_chip_coords,
-                    'connected_chip_edge': link,
-                    'polarity': p.MunichRetinaDevice.UP_POLARITY,
-                    'position': p.MunichRetinaDevice.RIGHT_RETINA},
-                   label='External retina'))
-
 '''
+populations.append(p.Population(1, q.MunichRetinaDevice,
+                   {'virtual_chip_coords': virtual_chip_coords,
+                    'connected_chip_coords': connected_chip_coords,
+                    'connected_chip_edge': link,
+                    '_polarity': q.MunichRetinaDevice.DOWN_POLARITY,
+                    'position': q.MunichRetinaDevice.RIGHT_RETINA},
+                   label='External retina'))
+
+populations.append(p.Population(1, q.MunichRetinaDevice,
+                   {'virtual_chip_coords': virtual_chip_coords,
+                    'connected_chip_coords': connected_chip_coords,
+                    'connected_chip_edge': link,
+                    '_polarity': q.MunichRetinaDevice.UP_POLARITY,
+                    'position': q.MunichRetinaDevice.RIGHT_RETINA},
+                   label='External retina'))
+
+
 populations.append(p.Population(1, p.MunichRetinaDevice,
                   {'virtual_chip_coords': virtual_chip_coords,
                     'connected_chip_coords':connected_chip_coords,
                     'connected_chip_edge':link,
                     'unique_id': 'L'},
                    label='External retina'))
+'''
 
-
-populations.append(p.Population(16*16, p.ExternalFPGARetinaDevice,
+populations.append(p.Population(128*128, q.ExternalFPGARetinaDevice,
                    {'virtual_chip_coords': virtual_chip_coords,
                     'connected_chip_coords':connected_chip_coords,
-                    'connected_chip_edge':link},
+                    'connected_chip_edge':link,
+                    'mode': "16",
+                    'polarity': q.ExternalFPGARetinaDevice.MERGED_POLARITY},
                    label='External retina'))
 
-
+'''
 populations.append(p.Population(p.ExternalFPGARetinaDevice.MODE_128,
                                 p.ExternalFPGARetinaDevice,
                                 {'virtual_chip_coords': virtual_chip_coords,
                                  'connected_chip_coords': connected_chip_coords,
                                  'connected_chip_edge': link,
-                                 'polarity': p.ExternalFPGARetinaDevice.UP_POLARITY},
+                                 '_polarity': p.ExternalFPGARetinaDevice.UP_POLARITY},
                                 label='External retina'))
 
 populations.append(p.Population(p.ExternalFPGARetinaDevice.MODE_128,
@@ -78,7 +80,7 @@ populations.append(p.Population(p.ExternalFPGARetinaDevice.MODE_128,
                    {'virtual_chip_coords': virtual_chip_coords,
                     'connected_chip_coords': connected_chip_coords,
                     'connected_chip_edge': link,
-                    'polarity': p.ExternalFPGARetinaDevice.DOWN_POLARITY},
+                    '_polarity': p.ExternalFPGARetinaDevice.DOWN_POLARITY},
                    label='External retina'))
 '''
 
@@ -88,8 +90,8 @@ populations.append(p.Population(p.ExternalFPGARetinaDevice.MODE_128,
 #    loopConnections.append(singleConnection)
 
 populations.append(p.Population(1024, p.IF_curr_exp, cell_params_lif, label='pop_1'))
-projections.append(p.Projection(populations[0], populations[2], p.FromListConnector(retina_lib.subSamplerConnector2D(128,32,.2,1))))
-projections.append(p.Projection(populations[1], populations[2], p.FromListConnector(retina_lib.subSamplerConnector2D(128,32,.2,1))))
+projections.append(p.Projection(populations[0], populations[1], p.FromListConnector(retina_lib.subSamplerConnector2D(128,32,.2,1))))
+#projections.append(p.Projection(populations[1], populations[2], p.FromListConnector(retina_lib.subSamplerConnector2D(128,32,.2,1))))
 
 populations[0].record(visualiser_mode=modes.TOPOLOGICAL, visualiser_2d_dimension={'x':128, 'y':128})
 populations[1].record(visualiser_mode=modes.TOPOLOGICAL, visualiser_2d_dimension={'x':128, 'y':128})

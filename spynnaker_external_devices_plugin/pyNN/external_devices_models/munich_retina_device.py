@@ -28,8 +28,9 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
     RIGHT_RETINA = "RIGHT"
 
     def __init__(self, virtual_chip_coords, connected_chip_coords,
-                 connected_chip_edge, position, machine_time_step, label=None,
-                 n_neurons=None,
+                 connected_chip_edge, position, machine_time_step,
+                 timescale_factor, spikes_per_second, ring_buffer_sigma,
+                 label=None, n_neurons=None,
                  polarity=AbstractExternalRetinaDevice.MERGED_POLARITY):
 
         if polarity == MunichRetinaDevice.MERGED_POLARITY:
@@ -68,9 +69,9 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
 
         start_point = 0
         if self.position == self.RIGHT_RETINA:
-            if self.polarity == AbstractExternalRetinaDevice.UP_POLARITY:
+            if self._polarity == AbstractExternalRetinaDevice.UP_POLARITY:
                 start_point = 8
-        elif self.polarity == AbstractExternalRetinaDevice.UP_POLARITY:
+        elif self._polarity == AbstractExternalRetinaDevice.UP_POLARITY:
             start_point = 24
         else:
             start_point = 16
@@ -153,7 +154,7 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
         """
         processor_id = subedge.presubvertex.placement.processor.idx % 16
         if self.position == self.RIGHT_RETINA:
-            if self.polarity == MunichRetinaDevice.UP_POLARITY:
+            if self._polarity == MunichRetinaDevice.UP_POLARITY:
                 part_1 = \
                     packet_conversions.get_key_from_coords(0, 6, processor_id)
                 key = part_1 | (1 << 14)
@@ -162,7 +163,7 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
                 key = packet_conversions.get_key_from_coords(0, 6, processor_id)
                 return key, 0xffff7800
         else:
-            if self.polarity == MunichRetinaDevice.UP_POLARITY:
+            if self._polarity == MunichRetinaDevice.UP_POLARITY:
                 key = \
                     packet_conversions.get_key_from_coords(0, 7, processor_id) \
                     | (1 << 14)
@@ -174,8 +175,8 @@ class MunichRetinaDevice(AbstractExternalRetinaDevice, AbstractMunichDevice):
     @property
     def model_name(self):
         return "external retina device at " \
-               "position {} and polarity {}".format(self.position,
-                                                    self.polarity)
+               "position {} and _polarity {}".format(self.position,
+                                                    self._polarity)
 
     @staticmethod
     def get_packet_retina_coords(details):
