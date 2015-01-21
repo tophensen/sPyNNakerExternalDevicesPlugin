@@ -145,11 +145,11 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         """
         return self._virtual_key, self._mask
 
-    def get_key_with_neuron_id(self):
-        keys = list()
+    def get_key_with_neuron_id(self, vertex_slice, vertex, placement, subedge):
+        keys = dict()
         key, mask = self.generate_routing_info(None)
         for neuron_id in range(0, self._n_atoms):
-            keys.append(key + neuron_id)
+            keys[neuron_id] = key
         return keys
 
     def generate_data_spec(self, subvertex, placement, sub_graph, graph,
