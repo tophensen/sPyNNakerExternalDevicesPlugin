@@ -88,7 +88,13 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 "of neurons or reduce the virtual key")
 
         #check that neuron mask does not interfere with key
-        bits_of_key = int(math.log(self._virtual_key, 2)) + 1
+        if self._virtual_key < 0:
+           raise exceptions.ConfigurationException(
+                "Virtual keys must be positive")
+        elif self._virtual_key == 0:
+             bits_of_key = 0
+        else:
+             bits_of_key = int(math.ceil(math.log(self._virtual_key, 2)))
         if (32 - bits_of_key) < active_bits_of_mask:
             raise exceptions.ConfigurationException(
                 "The mask calculated from your number of neurons has the "
