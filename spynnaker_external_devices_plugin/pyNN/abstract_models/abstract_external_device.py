@@ -4,7 +4,7 @@ from pacman.model.constraints.\
     VertexRequiresVirtualChipInMachineConstraint
 
 #spinnmachine imports
-from spinn_machine.abstract_virtual_vertex \
+from pacman.model.partitionable_graph.abstract_virtual_vertex \
     import AbstractVirtualVertex
 
 #inhittance imports
