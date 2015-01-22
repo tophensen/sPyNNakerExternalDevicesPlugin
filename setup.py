@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="sPyNNakerExternalDevicesPlugin",
-    version="2015.006",
+    version="2015.007",
     description="Spinnaker External Devices Plugin",
     url="https://github.com/SpiNNakerManchester/SpyNNaker",
     packages=['spynnaker_external_devices_plugin',
