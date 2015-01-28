@@ -1,24 +1,23 @@
-import os
-from enum import Enum
-
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
+
 from pacman.model.constraints.key_allocator_routing_constraint import \
     KeyAllocatorRoutingConstraint
 from pacman.model.constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
 from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
-from spynnaker.pyNN.models.abstract_models.abstract_iptagable_vertex import \
-    AbstractIPTagableVertex
+
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
     import AbstractReverseIPTagableVertex
-from spynnaker.pyNN.utilities.conf import config
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
+
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
+
+from enum import Enum
 import math
 
 
@@ -39,7 +38,8 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
     #constrcutor
     def __init__(self, n_neurons, machine_time_step, timescale_factor,
                  spikes_per_second, ring_buffer_sigma, host_port_number,
-                 host_ip_address, virtual_key, label, check_key=True,
+                 host_ip_address, label, virtual_key=None,
+                 check_key=True,
                  prefix=None, prefix_type=None, tag=None, key_left_shift=0):
 
         AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
@@ -89,12 +89,12 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
         #check that neuron mask does not interfere with key
         if self._virtual_key < 0:
-           raise exceptions.ConfigurationException(
+            raise exceptions.ConfigurationException(
                 "Virtual keys must be positive")
         elif self._virtual_key == 0:
-             bits_of_key = 0
+            bits_of_key = 0
         else:
-             bits_of_key = int(math.ceil(math.log(self._virtual_key, 2)))
+            bits_of_key = int(math.ceil(math.log(self._virtual_key, 2)))
         if (32 - bits_of_key) < active_bits_of_mask:
             raise exceptions.ConfigurationException(
                 "The mask calculated from your number of neurons has the "
@@ -171,9 +171,6 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         spec.comment("\n*** Spec for block of {} neurons ***\n"
                      .format(self.model_name))
 
-        vertex_slice = graph_mapper.get_subvertex_slice(subvertex)
-        subvert_in_edges = sub_graph.incoming_subedges_from_subvertex(subvertex)
-
         spec.comment("\nReserving memory space for data regions:\n\n")
 
         # Reserve memory regions:
@@ -185,7 +182,8 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             size=self._CONFIGURATION_REGION_SIZE, label='CONFIGURATION')
 
         #set up system region writes
-        self._write_basic_setup_info(spec, ReverseIpTagMultiCastSource.CORE_APP_IDENTIFIER)
+        self._write_basic_setup_info(
+            spec, ReverseIpTagMultiCastSource.CORE_APP_IDENTIFIER)
 
         #set up configuration region writes
         spec.switch_write_focus(
