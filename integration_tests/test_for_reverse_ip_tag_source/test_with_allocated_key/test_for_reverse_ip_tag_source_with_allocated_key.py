@@ -3,7 +3,15 @@ import spynnaker_external_devices_plugin.pyNN as externaldevices
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
 import pylab
 
-frontend.setup(timestep=1.0, min_delay=1.0, max_delay=144.0)
+from spynnaker.pyNN.utilities.database.socket_address import SocketAddress
+socket_addresses = list()
+socket_addresses.append(SocketAddress(
+    listen_port=19998, notify_port_no=19999, notify_host_name="localhost"))
+socket_addresses.append(SocketAddress(
+    listen_port=19997, notify_port_no=19996, notify_host_name="localhost"))
+
+frontend.setup(timestep=1.0, min_delay=1.0, max_delay=144.0,
+               database_socket_addresses=socket_addresses)
 
 nNeurons = 100
 run_time = 10000
