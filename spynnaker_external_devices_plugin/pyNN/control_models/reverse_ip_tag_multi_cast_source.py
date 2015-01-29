@@ -69,52 +69,53 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         if virtual_key is not None:
             self._mask, active_bits_of_mask = self._calculate_mask(n_neurons)
 
-         #key =( key  ored prefix )and mask
-        temp_vertial_key = virtual_key
-        if self._prefix is not None:
-            if temp_vertial_key is None:
-                temp_vertial_key = 0
-            if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
-                temp_vertial_key |= self._prefix
-            if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
-                temp_vertial_key |= (self._prefix << 16)
-        else:
-            if temp_vertial_key is None:
-                temp_vertial_key = 0
-            if (self._prefix_type is None
-                    or self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD):
-                self._prefix = (self._virtual_key >> 16) & 0xFFFF
-            elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
-                self._prefix = self._virtual_key & 0xFFFF
-
-        if temp_vertial_key is not None:
-            #check that mask key combo = key
-            masked_key = temp_vertial_key & self._mask
-            if self._virtual_key != masked_key:
-                raise exceptions.ConfigurationException(
-                    "The mask calculated from your number of neurons has the "
-                    "potential to interfere with the key, please reduce the "
-                    "number of neurons or reduce the virtual key")
-
-            #check that neuron mask does not interfere with key
-            if self._virtual_key < 0:
-                raise exceptions.ConfigurationException(
-                    "Virtual keys must be positive")
-            elif self._virtual_key == 0:
-                bits_of_key = 0
+            #key =( key  ored prefix )and mask
+            temp_vertial_key = virtual_key
+            if self._prefix is not None:
+                if temp_vertial_key is None:
+                    temp_vertial_key = 0
+                if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
+                    temp_vertial_key |= self._prefix
+                if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
+                    temp_vertial_key |= (self._prefix << 16)
             else:
-                bits_of_key = int(math.ceil(math.log(self._virtual_key, 2)))
-            if (32 - bits_of_key) < active_bits_of_mask:
-                raise exceptions.ConfigurationException(
-                    "The mask calculated from your number of neurons has the "
-                    "capability to interfere with the key due to its size, "
-                    "please reduce the number of neurons or reduce the virtual"
-                    " key")
+                if temp_vertial_key is None:
+                    temp_vertial_key = 0
 
-            if self._key_left_shift > 16 or self._key_left_shift < 0:
-                raise exceptions.ConfigurationException(
-                    "the key left shift must be within a range of 0 and 16. "
-                    "Please change this param and try again")
+                if (self._prefix_type is None
+                        or self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD):
+                    self._prefix = (self._virtual_key >> 16) & 0xFFFF
+                elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
+                    self._prefix = self._virtual_key & 0xFFFF
+
+            if temp_vertial_key is not None:
+                #check that mask key combo = key
+                masked_key = temp_vertial_key & self._mask
+                if self._virtual_key != masked_key:
+                    raise exceptions.ConfigurationException(
+                        "The mask calculated from your number of neurons has the "
+                        "potential to interfere with the key, please reduce the "
+                        "number of neurons or reduce the virtual key")
+
+                #check that neuron mask does not interfere with key
+                if self._virtual_key < 0:
+                    raise exceptions.ConfigurationException(
+                        "Virtual keys must be positive")
+                elif self._virtual_key == 0:
+                    bits_of_key = 0
+                else:
+                    bits_of_key = int(math.ceil(math.log(self._virtual_key, 2)))
+                if (32 - bits_of_key) < active_bits_of_mask:
+                    raise exceptions.ConfigurationException(
+                        "The mask calculated from your number of neurons has the "
+                        "capability to interfere with the key due to its size, "
+                        "please reduce the number of neurons or reduce the virtual"
+                        " key")
+
+                if self._key_left_shift > 16 or self._key_left_shift < 0:
+                    raise exceptions.ConfigurationException(
+                        "the key left shift must be within a range of 0 and 16. "
+                        "Please change this param and try again")
             #add routing constraint
             routing_key_constraint =\
                 KeyAllocatorRoutingConstraint(self.generate_routing_info,
