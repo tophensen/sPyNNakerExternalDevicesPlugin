@@ -7,6 +7,7 @@ from pacman.model.constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
 from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
+from pacman.utilities import utility_calls
 
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
@@ -32,26 +33,27 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                ('CONFIGURATION', 1)])
 
     _CONFIGURATION_REGION_SIZE = 28
+    _max_atoms_per_core = 2048
     
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
     #constrcutor
     def __init__(self, n_neurons, machine_time_step, timescale_factor,
                  spikes_per_second, ring_buffer_sigma, host_port_number,
-                 host_ip_address, label, virtual_key=None,
-                 check_key=True,
-                 prefix=None, prefix_type=None, tag=None, key_left_shift=0):
+                 label, virtual_key=None, check_key=True, prefix=None,
+                 prefix_type=None, tag=None, key_left_shift=0):
 
-        AbstractPartitionableVertex.__init__(self, n_neurons, label, n_neurons)
         AbstractDataSpecableVertex.__init__(
             self, n_neurons, label, machine_time_step,
             timescale_factor)
-        AbstractReverseIPTagableVertex.__init__(
-            self, tag=tag, address=host_ip_address, port=host_port_number)
+        AbstractPartitionableVertex.__init__(
+            self, n_neurons, label,
+            ReverseIpTagMultiCastSource._max_atoms_per_core)
+        AbstractReverseIPTagableVertex.__init__(self, tag=tag,
+                                                port=host_port_number)
         
         #set params
         self._host_port_number = host_port_number
-        self._host_ip_address = host_ip_address
         self._virtual_key = virtual_key
         self._prefix = prefix
         self._check_key = check_key
@@ -63,54 +65,62 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 "To use a prefix, you must declaire which position to use the "
                 "prefix in on the prefix_type parameter.")
 
-        self._mask, active_bits_of_mask = self._calculate_mask(n_neurons)
+        active_bits_of_mask = None
+        if virtual_key is not None:
+            self._mask, active_bits_of_mask = self._calculate_mask(n_neurons)
 
-        #key =( key  ored prefix )and mask
+         #key =( key  ored prefix )and mask
         temp_vertial_key = virtual_key
         if self._prefix is not None:
+            if temp_vertial_key is None:
+                temp_vertial_key = 0
             if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
                 temp_vertial_key |= self._prefix
             if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
                 temp_vertial_key |= (self._prefix << 16)
         else:
+            if temp_vertial_key is None:
+                temp_vertial_key = 0
             if (self._prefix_type is None
                     or self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD):
                 self._prefix = (self._virtual_key >> 16) & 0xFFFF
             elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
                 self._prefix = self._virtual_key & 0xFFFF
 
-        #check that mask key combo = key
-        masked_key = temp_vertial_key & self._mask
-        if self._virtual_key != masked_key:
-            raise exceptions.ConfigurationException(
-                "The mask calculated from your number of neurons has the "
-                "potential to interfere with the key, please reduce the number "
-                "of neurons or reduce the virtual key")
+        if temp_vertial_key is not None:
+            #check that mask key combo = key
+            masked_key = temp_vertial_key & self._mask
+            if self._virtual_key != masked_key:
+                raise exceptions.ConfigurationException(
+                    "The mask calculated from your number of neurons has the "
+                    "potential to interfere with the key, please reduce the "
+                    "number of neurons or reduce the virtual key")
 
-        #check that neuron mask does not interfere with key
-        if self._virtual_key < 0:
-            raise exceptions.ConfigurationException(
-                "Virtual keys must be positive")
-        elif self._virtual_key == 0:
-            bits_of_key = 0
-        else:
-            bits_of_key = int(math.ceil(math.log(self._virtual_key, 2)))
-        if (32 - bits_of_key) < active_bits_of_mask:
-            raise exceptions.ConfigurationException(
-                "The mask calculated from your number of neurons has the "
-                "capability to interfere with the key due to its size, "
-                "please reduce the number of neurons or reduce the virtual key")
+            #check that neuron mask does not interfere with key
+            if self._virtual_key < 0:
+                raise exceptions.ConfigurationException(
+                    "Virtual keys must be positive")
+            elif self._virtual_key == 0:
+                bits_of_key = 0
+            else:
+                bits_of_key = int(math.ceil(math.log(self._virtual_key, 2)))
+            if (32 - bits_of_key) < active_bits_of_mask:
+                raise exceptions.ConfigurationException(
+                    "The mask calculated from your number of neurons has the "
+                    "capability to interfere with the key due to its size, "
+                    "please reduce the number of neurons or reduce the virtual"
+                    " key")
 
-        if self._key_left_shift > 16 or self._key_left_shift < 0:
-            raise exceptions.ConfigurationException(
-                "the key left shift must be within a range of 0 and 16. Please"
-                "change this param and try again")
+            if self._key_left_shift > 16 or self._key_left_shift < 0:
+                raise exceptions.ConfigurationException(
+                    "the key left shift must be within a range of 0 and 16. "
+                    "Please change this param and try again")
+            #add routing constraint
+            routing_key_constraint =\
+                KeyAllocatorRoutingConstraint(self.generate_routing_info,
+                                              self.get_key_with_neuron_id)
+            self.add_constraint(routing_key_constraint)
 
-        #add routing constraint
-        routing_key_constraint =\
-            KeyAllocatorRoutingConstraint(self.generate_routing_info,
-                                          self.get_key_with_neuron_id)
-        self.add_constraint(routing_key_constraint)
         #add placement constraint
         placement_constraint = PlacerChipAndCoreConstraint(0, 0)
         self.add_constraint(placement_constraint)
@@ -188,6 +198,14 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         #set up configuration region writes
         spec.switch_write_focus(
             region=self._SPIKE_INJECTOR_REGIONS.CONFIGURATION.value)
+
+        if self._virtual_key is None:
+            subedge_routing_info = \
+                routing_info.get_subedge_information_from_subedge(
+                    sub_graph.outgoing_subedges_from_subvertex(subvertex)[0])
+            self._mask = subedge_routing_info.mask
+            self._virtual_key = subedge_routing_info.key
+
         #add prefix boolean value
         if self._prefix is None:
             spec.write_value(data=0)
