@@ -1,13 +1,13 @@
-#pacman imports
+# pacman imports
 from pacman.model.constraints.\
     vertex_requires_virtual_chip_in_machine_constraint import \
     VertexRequiresVirtualChipInMachineConstraint
 
-#spinnmachine imports
+# spinnmachine imports
 from pacman.model.partitionable_graph.abstract_virtual_vertex \
     import AbstractVirtualVertex
 
-#inhittance imports
+# inheritance imports
 from abc import ABCMeta
 from six import add_metaclass
 from abc import abstractmethod
@@ -23,7 +23,8 @@ class AbstractExternalDevice(AbstractVirtualVertex):
             connected_node_edge, machine_time_step, label, max_atoms_per_core)
         vertex_virtual_chip_constraint = \
             VertexRequiresVirtualChipInMachineConstraint(
-                virtual_chip_coords, connected_node_coords, connected_node_edge)
+                virtual_chip_coords, connected_node_coords,
+                connected_node_edge)
         self.add_constraint(vertex_virtual_chip_constraint)
 
     @property
@@ -36,4 +37,3 @@ class AbstractExternalDevice(AbstractVirtualVertex):
 
         :return:
         """
-

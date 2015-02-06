@@ -1,6 +1,6 @@
 import os
 
-#from spinn_front_end_common.utilities import packet_conversions
+# from spinn_front_end_common.utilities import packet_conversions
 from spynnaker.pyNN.utilities import packet_conversions
 from spinn_machine.processor import Processor
 from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
@@ -94,7 +94,7 @@ class MunichMotorControl(AbstractPopulationVertex):
 
         #reserve regions
         self.reserve_memory_regions(spec)
-        
+
         #write system info
         spec.switch_write_focus(region=self.SYSTEM_REGION)
         spec.write_value(data=0xBEEF0000)
@@ -148,7 +148,7 @@ class MunichMotorControl(AbstractPopulationVertex):
         spec.reserveMemRegion(region=self.SYSTEM_REGION,
                               size=self.SYSTEM_SIZE,
                               label='setup')
-        
+
         spec.reserveMemRegion(region=self.PARAMS_REGION,
                               size=self.PARAMS_SIZE,
                               label='params')

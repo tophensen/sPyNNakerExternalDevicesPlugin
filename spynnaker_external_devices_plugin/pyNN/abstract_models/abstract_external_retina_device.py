@@ -50,8 +50,8 @@ class AbstractExternalRetinaDevice(AbstractExternalDevice):
 
     @staticmethod
     def _get_max_atoms_per_core(n_neurons):
-        if (n_neurons >> 11) <= 0:  # if the keys dont touce p,
-                                     # then just 1 subvert is needed
+        # if the keys dont touce p, then just 1 subvert is needed
+        if (n_neurons >> 11) <= 0:
             return n_neurons
         else:
             return n_neurons / (n_neurons >> 11)
