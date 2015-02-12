@@ -1,6 +1,5 @@
 import os
 
-#from spinn_front_end_common.utilities import packet_conversions
 from spynnaker.pyNN.utilities import packet_conversions
 from spinn_machine.processor import Processor
 from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
@@ -19,6 +18,9 @@ from pacman.model.constraints.partitioner_maximum_size_constraint \
     import PartitionerMaximumSizeConstraint
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class MunichMotorControl(AbstractPopulationVertex):
@@ -42,10 +44,14 @@ class MunichMotorControl(AbstractPopulationVertex):
         """
         constructor that depends upon the Component vertex
         """
+        if n_neurons != 6:
+            logger.warning(
+                "The Munich Motor control will have exactly 6 neurons!")
+
         AbstractPopulationVertex.__init__(
             self, binary="robot_motor_control.aplx", label=label, n_neurons=6,
-            max_atoms_per_core=
-            MunichMotorControl._model_based_max_atoms_per_core,
+            max_atoms_per_core=(MunichMotorControl
+                                ._model_based_max_atoms_per_core),
             n_params=3, spikes_per_second=spikes_per_second,
             ring_buffer_sigma=ring_buffer_sigma,
             machine_time_step=machine_time_step,
@@ -99,10 +105,10 @@ class MunichMotorControl(AbstractPopulationVertex):
 
         spec.comment("\n*** Spec for robot motor control ***\n\n")
 
-        #reserve regions
+        # reserve regions
         self.reserve_memory_regions(spec)
-        
-        #write system info
+
+        # write system info
         spec.switch_write_focus(region=self.SYSTEM_REGION)
         spec.write_value(data=0xBEEF0000)
         spec.write_value(data=0)
@@ -110,12 +116,12 @@ class MunichMotorControl(AbstractPopulationVertex):
         spec.write_value(data=0)
         edge_key = None
 
-        #locate correct subedge for key
+        # locate correct subedge for key
         for subedge in subvertex.out_subedges:
             if subedge.edge == self.out_going_edge:
                 edge_key = routing_info.get_key_from_subedge(subedge)
 
-        #write params to memory
+        # write params to memory
         spec.switch_write_focus(region=self.PARAMS_REGION)
         spec.write_value(data=edge_key)
         spec.write_value(data=self.speed)
@@ -132,7 +138,7 @@ class MunichMotorControl(AbstractPopulationVertex):
         spec.end_specification()
         data_writer.close()
 
-    #inhirrited from data specable vertex
+    # inherited from data specable vertex
     @staticmethod
     def get_binary_file_name(self):
         common_binary_path = os.path.join(config.get("SpecGeneration",
@@ -156,7 +162,7 @@ class MunichMotorControl(AbstractPopulationVertex):
         spec.reserveMemRegion(region=self.SYSTEM_REGION,
                               size=self.SYSTEM_SIZE,
                               label='setup')
-        
+
         spec.reserveMemRegion(region=self.PARAMS_REGION,
                               size=self.PARAMS_SIZE,
                               label='params')

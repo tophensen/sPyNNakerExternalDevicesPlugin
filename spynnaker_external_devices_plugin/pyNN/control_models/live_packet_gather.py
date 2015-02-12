@@ -150,49 +150,55 @@ class LivePacketGather(
         """
         spec.switch_write_focus(
             region=self._LIVE_DATA_GATHER_REGIONS.CONFIG.value)
-        #has prefix
+
+        # has prefix
         if self._use_prefix:
             spec.write_value(data=1)
         else:
             spec.write_value(data=0)
 
-        #prefix
+        # prefix
         if self._key_prefix is not None:
             spec.write_value(data=self._key_prefix)
         else:
             spec.write_value(data=0)
 
-        #prefix type
+        # prefix type
         if self._prefix_type is not None:
             spec.write_value(data=self._prefix_type.value)
         else:
             spec.write_value(data=0)
-        #packet type
+
+        # packet type
         spec.write_value(data=self._message_type.value)
-        #rightshift
+
+        # rightshift
         spec.write_value(data=self._right_shift)
-        #payload as time stamp
+
+        # payload as time stamp
         if self._payload_as_time_stamps:
             spec.write_value(data=1)
         else:
             spec.write_value(data=0)
 
-        #payload has prefix
+        # payload has prefix
         if self._use_payload_prefix:
             spec.write_value(data=1)
         else:
             spec.write_value(data=0)
-        #payload prefix
+        # payload prefix
         if self._payload_prefix is not None:
             spec.write_value(data=self._payload_prefix)
         else:
             spec.write_value(data=0)
-        #rightshift
+
+        # rightshift
         spec.write_value(data=self._payload_right_shift)
 
-        #sdp tag
+        # sdp tag
         spec.write_value(data=self._tag)
-        #number of packets to send per time stamp
+
+        # number of packets to send per time stamp
         spec.write_value(data=self._number_of_packets_sent_per_time_step)
 
     def write_setup_info(self, spec):
@@ -222,7 +228,7 @@ class LivePacketGather(
     def get_binary_file_name(self):
         return 'live_packet_gather.aplx'
 
-    #inherited from partitionable vertex
+    # inherited from partitionable vertex
     def get_cpu_usage_for_atoms(self, vertex_slice, graph):
         return 0
 
