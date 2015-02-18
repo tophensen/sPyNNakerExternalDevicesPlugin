@@ -1,6 +1,6 @@
-from pacman.model.constraints.key_allocator_routing_constraint import \
+from pacman.model.constraints.key_allocator_constraints.key_allocator_routing_constraint import \
     KeyAllocatorRoutingConstraint
-from pacman.model.constraints.vertex_requires_multi_cast_source_constraint \
+from pacman.model.constraints.utility_constraints.vertex_requires_multi_cast_source_constraint \
     import VertexRequiresMultiCastSourceConstraint
 #from spinn_front_end_common.utilities import packet_conversions
 from spynnaker.pyNN.utilities import packet_conversions

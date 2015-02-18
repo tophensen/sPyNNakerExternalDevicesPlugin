@@ -11,11 +11,11 @@ from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.utilities.conf import config
 from pacman.model.resources.cpu_cycles_per_tick_resource import \
     CPUCyclesPerTickResource
-from pacman.model.constraints.vertex_has_dependent_constraint import \
+from pacman.model.constraints.utility_constraints.vertex_has_dependent_constraint import \
     VertexHasDependentConstraint
 from pacman.model.resources.dtcm_resource import DTCMResource
 from pacman.model.resources.sdram_resource import SDRAMResource
-from pacman.model.constraints.partitioner_maximum_size_constraint \
+from pacman.model.constraints.partitioner_constraints.partitioner_maximum_size_constraint \
     import PartitionerMaximumSizeConstraint
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator

@@ -1,11 +1,11 @@
-from spynnaker_external_devices_plugin.pyNN.abstract_models.\
-    abstract_external_device import AbstractExternalDevice
-from pacman.model.constraints.placer_chip_and_core_constraint \
-    import PlacerChipAndCoreConstraint
-
 from abc import ABCMeta
 from six import add_metaclass
 from abc import abstractmethod
+
+from spynnaker_external_devices_plugin.pyNN.abstract_models.\
+    abstract_external_device import AbstractExternalDevice
+from pacman.model.constraints.placer_constraints.placer_chip_and_core_constraint \
+    import PlacerChipAndCoreConstraint
 
 
 @add_metaclass(ABCMeta)

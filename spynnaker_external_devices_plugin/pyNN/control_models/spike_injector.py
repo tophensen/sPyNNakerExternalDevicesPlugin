@@ -1,6 +1,7 @@
 from spynnaker_external_devices_plugin.pyNN import ReverseIpTagMultiCastSource
 from spynnaker.pyNN.utilities.conf import config
 
+
 class SpikeInjector(ReverseIpTagMultiCastSource):
 
     def __init__(self, n_neurons, machine_time_step, timescale_factor,

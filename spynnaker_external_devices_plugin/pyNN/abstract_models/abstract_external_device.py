@@ -1,6 +1,5 @@
 #pacman imports
-from pacman.model.constraints.\
-    vertex_requires_virtual_chip_in_machine_constraint import \
+from pacman.model.constraints.utility_constraints.vertex_requires_virtual_chip_in_machine_constraint import \
     VertexRequiresVirtualChipInMachineConstraint
 
 #spinnmachine imports

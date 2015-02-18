@@ -1,24 +1,20 @@
+from enum import Enum
+
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
-
-from pacman.model.constraints.key_allocator_routing_constraint import \
+from pacman.model.constraints.key_allocator_constraints.key_allocator_routing_constraint import \
     KeyAllocatorRoutingConstraint
-from pacman.model.constraints.placer_chip_and_core_constraint import \
+from pacman.model.constraints.placer_constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
 from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
-from pacman.utilities import utility_calls
-
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
     import AbstractReverseIPTagableVertex
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
-
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
-
-from enum import Enum
 import math
 
 
@@ -40,8 +36,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
     #constrcutor
     def __init__(self, n_neurons, machine_time_step, timescale_factor,
                  spikes_per_second, ring_buffer_sigma, host_port_number,
-                 label, virtual_key=None, check_key=True, prefix=None,
-                 prefix_type=None, tag=None, key_left_shift=0):
+                 label, board_address=None, virtual_key=None, check_key=True,
+                 prefix=None, prefix_type=None, tag=None, key_left_shift=0,
+                 port_num=1):
 
         AbstractDataSpecableVertex.__init__(
             self, n_neurons, label, machine_time_step,
@@ -49,8 +46,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         AbstractPartitionableVertex.__init__(
             self, n_neurons, label,
             ReverseIpTagMultiCastSource._max_atoms_per_core)
-        AbstractReverseIPTagableVertex.__init__(self, tag=tag,
-                                                port=host_port_number)
+        AbstractReverseIPTagableVertex.__init__(
+            self, tag=tag, port=host_port_number, board_address=board_address,
+            port_num=port_num)
         
         #set params
         self._host_port_number = host_port_number
