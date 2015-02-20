@@ -103,6 +103,10 @@ class LivePacketGather(
         """
         return True
 
+    @property
+    def number_of_packets_sent_per_time_step(self):
+        return self._number_of_packets_sent_per_time_step
+
     @number_of_packets_sent_per_time_step.setter
     def number_of_packets_sent_per_time_step(self, new_value):
         """

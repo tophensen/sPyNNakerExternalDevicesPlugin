@@ -169,7 +169,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     def generate_data_spec(self, subvertex, placement, sub_graph, graph,
                            routing_info, hostname, graph_mapper,
-                           report_folder):
+                           report_folder, tag_infos):
         # Create new DataSpec for this processor:
         data_writer, report_writer = \
             self.get_data_spec_file_writers(
