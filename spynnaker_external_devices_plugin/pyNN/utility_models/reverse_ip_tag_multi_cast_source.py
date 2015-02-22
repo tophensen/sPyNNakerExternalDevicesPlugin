@@ -1,12 +1,16 @@
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 
-from pacman.model.constraints.key_allocator_routing_constraint import \
-    KeyAllocatorRoutingConstraint
 from pacman.model.constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
 from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
+from spynnaker.pyNN.models.abstract_models\
+    .abstract_provides_keys_and_masks_vertex \
+    import AbstractProvidesKeysAndMasksVertex
+from pacman.model.constraints.key_allocator_fixed_key_and_mask_constraint \
+    import KeyAllocatorFixedKeyAndMaskConstraint
+from pacman.model.routing_info.key_and_mask import KeyAndMask
 
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
@@ -18,12 +22,12 @@ from spynnaker.pyNN.utilities import constants
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
 
 from enum import Enum
-import math
 
 
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                                   AbstractDataSpecableVertex,
-                                  AbstractReverseIPTagableVertex):
+                                  AbstractReverseIPTagableVertex,
+                                  AbstractProvidesKeysAndMasksVertex):
 
     # internal params
     _SPIKE_INJECTOR_REGIONS = Enum(
@@ -36,7 +40,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
-    # constrcutor
+    # constructor
     def __init__(self, n_neurons, machine_time_step, timescale_factor,
                  spikes_per_second, ring_buffer_sigma, host_port_number,
                  label, virtual_key=None, check_key=True, prefix=None,
@@ -70,9 +74,8 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 "To use a prefix, you must declaire which position to use the "
                 "prefix in on the prefix_type parameter.")
 
-        active_bits_of_mask = None
         if virtual_key is not None:
-            self._mask, active_bits_of_mask = self._calculate_mask(n_neurons)
+            self._mask, max_key = self._calculate_mask(n_neurons)
 
             # key =( key  ored prefix )and mask
             temp_vertial_key = virtual_key
@@ -109,12 +112,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 if self._virtual_key < 0:
                     raise exceptions.ConfigurationException(
                         "Virtual keys must be positive")
-                elif self._virtual_key == 0:
-                    bits_of_key = 0
-                else:
-                    bits_of_key = int(math.ceil(math.log(
-                        self._virtual_key, 2)))
-                if (32 - bits_of_key) < active_bits_of_mask:
+                if self._virtual_key + n_neurons - 1 > max_key:
                     raise exceptions.ConfigurationException(
                         "The mask calculated from your number of neurons has "
                         "the capability to interfere with the key due to its "
@@ -127,10 +125,8 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                         "0 and 16. Please change this param and try again")
 
             # add routing constraint
-            routing_key_constraint =\
-                KeyAllocatorRoutingConstraint(self.generate_routing_info,
-                                              self.get_key_with_neuron_id)
-            self.add_constraint(routing_key_constraint)
+            self.add_constraint(KeyAllocatorFixedKeyAndMaskConstraint(
+                                [KeyAndMask(self._virtual_key, self._mask)]))
 
         # add placement constraint
         placement_constraint = PlacerChipAndCoreConstraint(0, 0)
@@ -138,17 +134,16 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     @staticmethod
     def _calculate_mask(n_neurons):
-        temp_value = math.floor(math.log(n_neurons, 2))
-        max_value = int(math.pow(2, 32))
-        active_mask_bit_range = \
-            int(math.log(int(math.pow(2, temp_value + 1)), 2)) + 1
-        mask = max_value - int(math.pow(2, temp_value + 1))
-        return mask, active_mask_bit_range
+
+        # TODO: Re-enable once allowed by the neuron models
+        # temp_value = int(math.ceil(math.log(n_neurons, 2)))
+        # max_key = (int(math.pow(2, temp_value)) - 1)
+        max_key = 2047
+        mask = 0xFFFFFFFF - max_key
+        return mask, max_key
 
     def get_sdram_usage_for_atoms(self, vertex_slice, graph):
         return constants.SETUP_SIZE + self._CONFIGURATION_REGION_SIZE
-        # 3 words from the system region of the dsg/e,
-        # 3 words for configuration and 6 *4 words for app pointer table
 
     @property
     def model_name(self):
@@ -165,19 +160,6 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     def get_cpu_usage_for_atoms(self, vertex_slice, graph):
         return 1
-
-    def generate_routing_info(self, subedge):
-        """
-        overloaded from component vertex
-        """
-        return self._virtual_key, self._mask
-
-    def get_key_with_neuron_id(self, vertex_slice, vertex, placement, subedge):
-        keys = dict()
-        key, _ = self.generate_routing_info(None)
-        for neuron_id in range(0, self._n_atoms):
-            keys[neuron_id] = key
-        return keys
 
     def generate_data_spec(self, subvertex, placement, sub_graph, graph,
                            routing_info, hostname, graph_mapper,

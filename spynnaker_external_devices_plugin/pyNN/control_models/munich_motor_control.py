@@ -1,19 +1,21 @@
 import os
 
-from spynnaker.pyNN.utilities import packet_conversions
 from spinn_machine.processor import Processor
 from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
     AbstractPopulationVertex
+from spynnaker.pyNN.models.abstract_models.abstract_provides_fixed_mask_vertex\
+    import AbstractProvidesFixedMaskVertex
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_motor_device import MunichMotorDevice
 from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.utilities.conf import config
 from pacman.model.resources.cpu_cycles_per_tick_resource import \
     CPUCyclesPerTickResource
-from pacman.model.constraints.vertex_has_dependent_constraint import \
-    VertexHasDependentConstraint
 from pacman.model.resources.dtcm_resource import DTCMResource
 from pacman.model.resources.sdram_resource import SDRAMResource
+from spynnaker.pyNN.models.abstract_models\
+    .abstract_vertex_with_dependent_vertices import \
+    AbstractVertexWithEdgeToDependentVertices
 from pacman.model.constraints.partitioner_maximum_size_constraint \
     import PartitionerMaximumSizeConstraint
 from data_specification.data_specification_generator import \
@@ -23,7 +25,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class MunichMotorControl(AbstractPopulationVertex):
+class MunichMotorControl(AbstractPopulationVertex,
+                         AbstractProvidesFixedMaskVertex,
+                         AbstractVertexWithEdgeToDependentVertices):
 
     SYSTEM_REGION = 0
     PARAMS_REGION = 1
@@ -57,19 +61,15 @@ class MunichMotorControl(AbstractPopulationVertex):
             machine_time_step=machine_time_step,
             timescale_factor=timescale_factor)
 
+        AbstractVertexWithEdgeToDependentVertices.__init__(
+            self, MunichMotorDevice(
+                1, virtual_chip_coords, connected_chip_coords,
+                connected_chip_edge, machine_time_step, timescale_factor,
+                ring_buffer_sigma, spikes_per_second))
+
         max_constraint = \
             PartitionerMaximumSizeConstraint(MunichMotorControl._N_ATOMS)
         self.add_constraint(max_constraint)
-
-        dependant_vertex_constraint =\
-            VertexHasDependentConstraint(
-                MunichMotorDevice(
-                    1, virtual_chip_coords, connected_chip_coords,
-                    connected_chip_edge, machine_time_step, timescale_factor,
-                    ring_buffer_sigma, spikes_per_second))
-        self.add_constraint(dependant_vertex_constraint)
-
-        self._binary = "robot_motor_control.aplx"
 
         self.virtual_chip_coords = virtual_chip_coords
         self.connected_chip_coords = connected_chip_coords
@@ -82,6 +82,12 @@ class MunichMotorControl(AbstractPopulationVertex):
         self.delay_time = delay_time
         self.delta_threshold = delta_threshold
         self.continue_if_not_different = continue_if_not_different
+
+    def get_fixed_mask_for_partitioned_edge(self, partitioned_edge):
+
+        # The only edge out of this vertex should be the one to the
+        # robot motor itself
+        return 0xFFFF0000
 
     @staticmethod
     def set_model_max_atoms_per_core(new_value):
@@ -119,7 +125,9 @@ class MunichMotorControl(AbstractPopulationVertex):
         # locate correct subedge for key
         for subedge in subvertex.out_subedges:
             if subedge.edge == self.out_going_edge:
-                edge_key = routing_info.get_key_from_subedge(subedge)
+                edge_keys_and_masks = routing_info.get_key_from_subedge(
+                    subedge)
+                edge_key = edge_keys_and_masks[0].key
 
         # write params to memory
         spec.switch_write_focus(region=self.PARAMS_REGION)
@@ -173,19 +181,12 @@ class MunichMotorControl(AbstractPopulationVertex):
 
     def get_resources_used_by_atoms(self, vertex_slice, graph):
         resources = list()
+
         # noinspection PyTypeChecker
         resources.append(CPUCyclesPerTickResource(0))
         resources.append(DTCMResource(0))
         resources.append(SDRAMResource(self.SYSTEM_SIZE + self.PARAMS_SIZE))
         return resources
-
-    def generate_routing_info(self, subedge):
-        """
-        overload component method and returns virtual chip key for routing info
-        """
-        x, y, p = subedge.postsubvertex.placement.processor.get_coordinates()
-        key = packet_conversions.get_key_from_coords(x, y, p)
-        return key, 0xffff0000
 
     def get_parameters(self):
         raise NotImplementedError

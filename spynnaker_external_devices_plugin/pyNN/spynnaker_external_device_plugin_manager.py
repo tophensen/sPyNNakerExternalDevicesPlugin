@@ -4,6 +4,7 @@ from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spynnaker_external_devices_plugin.pyNN import LivePacketGather
 from spynnaker.pyNN import get_spynnaker
 
+
 class SpynnakerExternalDevicePluginManager(object):
 
     def __init__(self):
@@ -18,6 +19,7 @@ class SpynnakerExternalDevicePluginManager(object):
             payload_right_shift=0, number_of_packets_sent_per_time_step=0):
 
         _spinnaker = get_spynnaker()
+
         # locate the live spike recorder
         if (port, hostname) in self._live_spike_recorders:
             live_spike_recorder = self._live_spike_recorders[(port, hostname)]
