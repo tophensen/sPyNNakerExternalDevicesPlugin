@@ -48,7 +48,10 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                  connected_to_real_chip_link_id, position, machine_time_step,
                  timescale_factor, spikes_per_second, ring_buffer_sigma,
                  label=None, n_neurons=None,
-                 polarity=MunichRetinaDevice.MERGED_POLARITY):
+                 polarity=None):
+
+        if polarity is None:
+            polarity = MunichRetinaDevice.MERGED_POLARITY
 
         fixed_n_neurons = n_neurons
         if polarity == MunichRetinaDevice.MERGED_POLARITY:

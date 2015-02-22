@@ -8,8 +8,6 @@ from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
 from spynnaker.pyNN.models.abstract_models\
     .abstract_provides_keys_and_masks_vertex \
     import AbstractProvidesKeysAndMasksVertex
-from pacman.model.constraints.key_allocator_fixed_key_and_mask_constraint \
-    import KeyAllocatorFixedKeyAndMaskConstraint
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
@@ -78,17 +76,17 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             self._mask, max_key = self._calculate_mask(n_neurons)
 
             # key =( key  ored prefix )and mask
-            temp_vertial_key = virtual_key
+            temp_vertual_key = virtual_key
             if self._prefix is not None:
-                if temp_vertial_key is None:
-                    temp_vertial_key = 0
+                if temp_vertual_key is None:
+                    temp_vertual_key = 0
                 if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
-                    temp_vertial_key |= self._prefix
+                    temp_vertual_key |= self._prefix
                 if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
-                    temp_vertial_key |= (self._prefix << 16)
+                    temp_vertual_key |= (self._prefix << 16)
             else:
-                if temp_vertial_key is None:
-                    temp_vertial_key = 0
+                if temp_vertual_key is None:
+                    temp_vertual_key = 0
 
                 if (self._prefix_type is None
                         or (self._prefix_type
@@ -97,10 +95,10 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
                     self._prefix = self._virtual_key & 0xFFFF
 
-            if temp_vertial_key is not None:
+            if temp_vertual_key is not None:
 
                 # check that mask key combo = key
-                masked_key = temp_vertial_key & self._mask
+                masked_key = temp_vertual_key & self._mask
                 if self._virtual_key != masked_key:
                     raise exceptions.ConfigurationException(
                         "The mask calculated from your number of neurons has "
@@ -112,7 +110,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 if self._virtual_key < 0:
                     raise exceptions.ConfigurationException(
                         "Virtual keys must be positive")
-                if self._virtual_key + n_neurons - 1 > max_key:
+                if n_neurons > max_key:
                     raise exceptions.ConfigurationException(
                         "The mask calculated from your number of neurons has "
                         "the capability to interfere with the key due to its "
@@ -124,13 +122,15 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                         "the key left shift must be within a range of "
                         "0 and 16. Please change this param and try again")
 
-            # add routing constraint
-            self.add_constraint(KeyAllocatorFixedKeyAndMaskConstraint(
-                                [KeyAndMask(self._virtual_key, self._mask)]))
-
         # add placement constraint
         placement_constraint = PlacerChipAndCoreConstraint(0, 0)
         self.add_constraint(placement_constraint)
+
+    def get_keys_and_masks_for_partitioned_edge(self, partitioned_edge,
+                                                graph_mapper):
+        if self._virtual_key is not None:
+            return [KeyAndMask(self._virtual_key, self._mask)]
+        return None
 
     @staticmethod
     def _calculate_mask(n_neurons):
