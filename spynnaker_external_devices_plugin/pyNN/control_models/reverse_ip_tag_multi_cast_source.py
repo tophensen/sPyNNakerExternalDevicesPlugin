@@ -38,7 +38,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                  spikes_per_second, ring_buffer_sigma, host_port_number,
                  label, board_address=None, virtual_key=None, check_key=True,
                  prefix=None, prefix_type=None, tag=None, key_left_shift=0,
-                 port_num=1):
+                 sdp_port=1):
 
         AbstractDataSpecableVertex.__init__(
             self, n_neurons, label, machine_time_step,
@@ -48,7 +48,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             ReverseIpTagMultiCastSource._max_atoms_per_core)
         AbstractReverseIPTagableVertex.__init__(
             self, tag=tag, port=host_port_number, board_address=board_address,
-            port_num=port_num)
+            sdp_port=sdp_port)
         
         #set params
         self._host_port_number = host_port_number
