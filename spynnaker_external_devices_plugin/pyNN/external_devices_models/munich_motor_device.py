@@ -1,4 +1,4 @@
-from pacman.model.partitionable_graph.abstract_virtual_vertex \
+from pacman.model.abstract_classes.abstract_virtual_vertex \
     import AbstractVirtualVertex
 
 
@@ -24,5 +24,5 @@ class MunichMotorDevice(AbstractVirtualVertex):
     def model_name(self):
         return "external motor device"
 
-    def is_external_device(self):
+    def is_virtual_vertex(self):
         return True

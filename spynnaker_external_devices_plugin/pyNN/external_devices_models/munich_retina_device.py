@@ -4,10 +4,11 @@ from spynnaker.pyNN.models.abstract_models\
 from spynnaker.pyNN.models.abstract_models\
     .abstract_provides_keys_and_masks_vertex \
     import AbstractProvidesKeysAndMasksVertex
-from pacman.model.routing_info.key_and_mask import KeyAndMask
-from pacman.model.partitionable_graph.abstract_virtual_vertex \
-    import AbstractVirtualVertex
 from spynnaker.pyNN import exceptions
+
+from pacman.model.routing_info.key_and_mask import KeyAndMask
+from pacman.model.abstract_classes.abstract_virtual_vertex \
+    import AbstractVirtualVertex
 
 
 # robot with 7 7 1
@@ -47,13 +48,11 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                  connected_to_real_chip_x, connected_to_real_chip_y,
                  connected_to_real_chip_link_id, position, machine_time_step,
                  timescale_factor, spikes_per_second, ring_buffer_sigma,
-                 label=None, n_neurons=None,
-                 polarity=None):
+                 label=None, n_neurons=None, polarity=None):
 
         if polarity is None:
             polarity = MunichRetinaDevice.MERGED_POLARITY
 
-        fixed_n_neurons = n_neurons
         if polarity == MunichRetinaDevice.MERGED_POLARITY:
 
             # There are 128 x 128 retina "pixels" x 2 polarities
@@ -111,12 +110,11 @@ class MunichRetinaDevice(AbstractVirtualVertex,
         """
         commands_key = (self._virtual_chip_x << 24 | self._virtual_chip_y << 16
                         | self.MANAGEMENT_BIT)
-        commands_mask = 0xFFFFF400
+        commands_mask = 0xFFFFFBB8
         commands = list()
 
         # change the retina key it transmits with
         # (based off if its right or left)
-        key_set_command = None
         if self._position == self.RIGHT_RETINA:
             key_set_command = commands_key | self.RIGHT_RETINA_KEY_SET
         else:
@@ -132,7 +130,6 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                          'delay': 1000})
 
         # make retina enabled (dependant on if its a left or right retina
-        enable_command = None
         if self._position == self.RIGHT_RETINA:
             enable_command = commands_key | self.RIGHT_RETINA_ENABLE
         else:
@@ -141,7 +138,6 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                          'repeat': 5, 'delay': 1000})
 
         # disable retina
-        disable_command = None
         if self._position == self.RIGHT_RETINA:
             disable_command = commands_key | self.RIGHT_RETINA_DISABLE
         else:
@@ -156,5 +152,8 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                "_position {} and _polarity {}".format(self._position,
                                                       self._polarity)
 
-    def is_external_retina(self):
+    def recieves_multicast_commands(self):
+        return True
+
+    def is_virtual_vertex(self):
         return True

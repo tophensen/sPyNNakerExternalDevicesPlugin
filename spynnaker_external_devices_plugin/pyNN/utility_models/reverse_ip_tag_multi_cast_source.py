@@ -1,15 +1,17 @@
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 
+
 from pacman.model.constraints.placer_chip_and_core_constraint import \
     PlacerChipAndCoreConstraint
-from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
+from pacman.model.abstract_classes.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
+from pacman.model.routing_info.key_and_mask import KeyAndMask
+
+
 from spynnaker.pyNN.models.abstract_models\
     .abstract_provides_keys_and_masks_vertex \
     import AbstractProvidesKeysAndMasksVertex
-from pacman.model.routing_info.key_and_mask import KeyAndMask
-
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
@@ -17,7 +19,9 @@ from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
 
+
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
+
 
 from enum import Enum
 

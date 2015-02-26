@@ -59,10 +59,12 @@ populations.append(p.Population(1, p.MunichRetinaDevice,
 '''
 
 populations.append(p.Population(128*128, q.ExternalFPGARetinaDevice,
-                   {'virtual_chip_coords': virtual_chip_coords,
-                    'connected_chip_coords':connected_chip_coords,
-                    'connected_chip_edge':link,
-                    'mode': "16",
+                   {'virtual_chip_x': 0,
+                    'virtual_chip_y': 5,
+                    'connected_to_real_chip_x': 0,
+                    'connected_to_real_chip_y': 0,
+                    'connected_to_real_chip_link_id': link,
+                    'mode': "128",
                     'polarity': q.ExternalFPGARetinaDevice.MERGED_POLARITY},
                    label='External retina'))
 
@@ -92,8 +94,5 @@ populations.append(p.Population(p.ExternalFPGARetinaDevice.MODE_128,
 populations.append(p.Population(1024, p.IF_curr_exp, cell_params_lif, label='pop_1'))
 projections.append(p.Projection(populations[0], populations[1], p.FromListConnector(retina_lib.subSamplerConnector2D(128,32,.2,1))))
 #projections.append(p.Projection(populations[1], populations[2], p.FromListConnector(retina_lib.subSamplerConnector2D(128,32,.2,1))))
-
-populations[0].record(visualiser_mode=modes.TOPOLOGICAL, visualiser_2d_dimension={'x':128, 'y':128})
-populations[1].record(visualiser_mode=modes.TOPOLOGICAL, visualiser_2d_dimension={'x':128, 'y':128})
 #populations[1].record()
 p.run(100000)

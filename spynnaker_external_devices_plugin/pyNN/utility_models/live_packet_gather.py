@@ -1,20 +1,24 @@
-from pacman.model.partitionable_graph.abstract_partitionable_vertex \
+from pacman.model.abstract_classes.abstract_partitionable_vertex \
     import AbstractPartitionableVertex
 from pacman.model.constraints.placer_chip_and_core_constraint \
     import PlacerChipAndCoreConstraint
-
 from spynnaker.pyNN.models.abstract_models.abstract_iptagable_vertex import \
     AbstractIPTagableVertex
+
+
 from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN import exceptions
 
+
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 
+
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
+
 
 from enum import Enum
 

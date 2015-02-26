@@ -7,11 +7,14 @@ from spynnaker.pyNN.models.abstract_models\
     import AbstractProvidesKeysAndMasksVertex
 
 
-from pacman.model.partitionable_graph.abstract_virtual_vertex \
+from pacman.model.abstract_classes.abstract_virtual_vertex \
     import AbstractVirtualVertex
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 
+
 import logging
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -103,24 +106,22 @@ class ExternalFPGARetinaDevice(AbstractVirtualVertex,
 
         if fixed_n_neurons != n_neurons:
             logger.warn("The specified number of neurons for the FPGA retina"
-                        "device has been ignored;", fixed_n_neurons,
-                        "will be used instead")
+                        "device has been ignored {} will be used instead"
+                        .format(fixed_n_neurons))
         AbstractVirtualVertex.__init__(
             self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
             connected_to_real_chip_x, connected_to_real_chip_y,
             connected_to_real_chip_link_id, max_atoms_per_core=2048,
             label=label)
 
-        self._commands_key = (self._virtual_chip_x << 24
-                              | self._virtual_chip_y + 1 << 16)
-        self._commands_mask = 0xFFFF0000
+        self._commands_mask = 0xFFFFFBB8
         commands = list()
-        commands.append({'t': 0, "cp": 1, 'key': self._commands_key | 0xFFFF,
+        commands.append({'t': 0, "cp": 1, 'key': None, 'key_prefix': 0xFFFF,
                          'payload': 1, 'repeat': 5, 'delay': 100})
-        commands.append({'t': -1, "cp": 1, 'key': self._commands_key | 0xFFFe,
+        commands.append({'t': -1, "cp": 1, 'key': None, 'key_prefix': 0xFFFe,
                          'payload': 0, 'repeat': 5, 'delay': 100})
         AbstractSendMeMulticastCommandsVertex.__init__(
-            self, commands, self._commands_key, self._commands_mask)
+            self, commands, None, self._commands_mask)
 
     def get_keys_and_masks_for_partitioned_edge(self, partitioned_edge,
                                                 graph_mapper):
@@ -149,5 +150,12 @@ class ExternalFPGARetinaDevice(AbstractVirtualVertex,
         """
         return "external FPGA retina device"
 
-    def is_external_retina(self):
+    @staticmethod
+    def is_external_retina():
+        return True
+
+    def is_virtual_vertex(self):
+        return True
+
+    def recieves_multicast_commands(self):
         return True
