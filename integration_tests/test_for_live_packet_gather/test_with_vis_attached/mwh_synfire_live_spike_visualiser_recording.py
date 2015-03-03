@@ -60,7 +60,7 @@ populations.append(p.Population(1, p.SpikeSourceArray, spikeArray, label='inputS
 projections.append(p.Projection(populations[0], populations[0], p.FromListConnector(loopConnections)))
 projections.append(p.Projection(populations[1], populations[0], p.FromListConnector(injectionConnection)))
 
-q.activate_live_output_for(populations[0], "spinn-1.cs.man.ac.uk")
+q.activate_live_output_for(populations[0])
 populations[0].set_constraint(p.PlacerChipAndCoreConstraint(0,0,4))
 populations[1].set_constraint(p.PlacerChipAndCoreConstraint(0,0,5))
 
