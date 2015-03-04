@@ -1,3 +1,5 @@
+import logging
+
 from spynnaker.pyNN.models.abstract_models\
     .abstract_send_me_multicast_commands_vertex \
     import AbstractSendMeMulticastCommandsVertex
@@ -5,14 +7,9 @@ from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.models.abstract_models\
     .abstract_provides_keys_and_masks_vertex \
     import AbstractProvidesKeysAndMasksVertex
-
-
-from pacman.model.abstract_classes.abstract_virtual_vertex \
+from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
 from pacman.model.routing_info.key_and_mask import KeyAndMask
-
-
-import logging
 
 
 logger = logging.getLogger(__name__)
@@ -121,7 +118,7 @@ class ExternalFPGARetinaDevice(AbstractVirtualVertex,
         commands.append({'t': -1, "cp": 1, 'key': None, 'key_prefix': 0xFFFe,
                          'payload': 0, 'repeat': 5, 'delay': 100})
         AbstractSendMeMulticastCommandsVertex.__init__(
-            self, commands, None, self._commands_mask)
+            self, commands, self._commands_mask)
 
     def get_keys_and_masks_for_partitioned_edge(self, partitioned_edge,
                                                 graph_mapper):

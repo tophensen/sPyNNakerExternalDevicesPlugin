@@ -7,7 +7,7 @@ from spynnaker.pyNN.models.abstract_models\
 from spynnaker.pyNN import exceptions
 
 from pacman.model.routing_info.key_and_mask import KeyAndMask
-from pacman.model.abstract_classes.abstract_virtual_vertex \
+from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
 
 
@@ -77,7 +77,7 @@ class MunichRetinaDevice(AbstractVirtualVertex,
         # add commands
         commands, commands_key, commands_mask = self._get_commands()
         AbstractSendMeMulticastCommandsVertex.__init__(
-            self, commands, commands_key, commands_mask)
+            self, commands, commands_mask)
 
     def get_keys_and_masks_for_partitioned_edge(self, partitioned_edge,
                                                 graph_mapper):
@@ -108,8 +108,7 @@ class MunichRetinaDevice(AbstractVirtualVertex,
         """
         method that returns the commands for the retina external device
         """
-        commands_key = (self._virtual_chip_x << 24 | self._virtual_chip_y << 16
-                        | self.MANAGEMENT_BIT)
+        commands_key = self.MANAGEMENT_BIT
         commands_mask = 0xFFFFFBB8
         commands = list()
 
@@ -125,7 +124,8 @@ class MunichRetinaDevice(AbstractVirtualVertex,
         key_set_payload = (self._virtual_chip_x << 24
                            | self._virtual_chip_y << 16)
 
-        commands.append({'t': 0, "cp": 1, 'key': key_set_command,
+        commands.append({'t': 0, "cp": 1, 'key': None,
+                         'key_prefix': key_set_command,
                          'payload': key_set_payload, 'repeat': 5,
                          'delay': 1000})
 
@@ -134,7 +134,8 @@ class MunichRetinaDevice(AbstractVirtualVertex,
             enable_command = commands_key | self.RIGHT_RETINA_ENABLE
         else:
             enable_command = commands_key | self.LEFT_RETINA_ENABLE
-        commands.append({'t': 0, "cp": 1, 'key': enable_command, 'payload': 1,
+        commands.append({'t': 0, "cp": 1, 'key': None,
+                         'key_prefix': enable_command, 'payload': 1,
                          'repeat': 5, 'delay': 1000})
 
         # disable retina
@@ -142,7 +143,8 @@ class MunichRetinaDevice(AbstractVirtualVertex,
             disable_command = commands_key | self.RIGHT_RETINA_DISABLE
         else:
             disable_command = commands_key | self.LEFT_RETINA_DISABLE
-        commands.append({'t': -1, "cp": 1, 'key': disable_command,
+        commands.append({'t': -1, "cp": 1, 'key': None,
+                         'key_prefix': disable_command,
                          'payload': 1, 'repeat': 5, 'delay': 1000})
         return commands, commands_key, commands_mask
 

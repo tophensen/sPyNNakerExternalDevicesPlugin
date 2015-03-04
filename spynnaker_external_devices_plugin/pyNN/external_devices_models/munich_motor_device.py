@@ -1,4 +1,4 @@
-from pacman.model.abstract_classes.abstract_virtual_vertex \
+from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
 
 

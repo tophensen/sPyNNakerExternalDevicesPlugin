@@ -1,11 +1,9 @@
-from pacman.model.resources.resource_container import ResourceContainer
 from spinn_machine.processor import Processor
 
 
-from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
-    AbstractPopulationVertex
-from spynnaker.pyNN.models.abstract_models.abstract_provides_fixed_mask_vertex\
-    import AbstractProvidesFixedMaskVertex
+from spynnaker.pyNN.models.abstract_models.\
+    abstract_requires_synaptic_manager_population_vertex import \
+    AbstractRequiresSynapticManagerPopulationVertex
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_motor_device import MunichMotorDevice
 from spynnaker.pyNN.utilities import constants
@@ -15,6 +13,7 @@ from spynnaker.pyNN.models.abstract_models\
 from spynnaker.pyNN import exceptions
 
 
+from pacman.model.resources.resource_container import ResourceContainer
 from pacman.model.resources.cpu_cycles_per_tick_resource import \
     CPUCyclesPerTickResource
 from pacman.model.resources.dtcm_resource import DTCMResource
@@ -32,8 +31,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class MunichMotorControl(AbstractPopulationVertex,
-                         AbstractProvidesFixedMaskVertex,
+class MunichMotorControl(AbstractRequiresSynapticManagerPopulationVertex,
                          AbstractVertexWithEdgeToDependentVertices):
 
     SYSTEM_REGION = 0
@@ -60,7 +58,7 @@ class MunichMotorControl(AbstractPopulationVertex,
             logger.warning(
                 "The Munich Motor control will have exactly 6 neurons!")
 
-        AbstractPopulationVertex.__init__(
+        AbstractRequiresSynapticManagerPopulationVertex.__init__(
             self, binary="robot_motor_control.aplx", label=label, n_neurons=6,
             max_atoms_per_core=(MunichMotorControl
                                 ._model_based_max_atoms_per_core),
@@ -68,7 +66,6 @@ class MunichMotorControl(AbstractPopulationVertex,
             ring_buffer_sigma=ring_buffer_sigma,
             machine_time_step=machine_time_step,
             timescale_factor=timescale_factor)
-        AbstractProvidesFixedMaskVertex.__init__(self)
 
         dependent_vertices = list()
         dependent_vertices.append(
@@ -91,13 +88,6 @@ class MunichMotorControl(AbstractPopulationVertex,
         self._delay_time = delay_time
         self._delta_threshold = delta_threshold
         self._continue_if_not_different = continue_if_not_different
-
-    def get_fixed_mask_for_partitioned_edge(self, partitioned_edge,
-                                            graph_mapper):
-
-        # The only edge out of this vertex should be the one to the
-        # robot motor itself
-        return 0xFFFFF800
 
     @staticmethod
     def set_model_max_atoms_per_core(new_value):
