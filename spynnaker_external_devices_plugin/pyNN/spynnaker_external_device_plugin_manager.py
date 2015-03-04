@@ -36,5 +36,5 @@ class SpynnakerExternalDevicePluginManager(object):
 
         # create the edge and add
         edge = PartitionableEdge(vertex_to_record_from,
-                                 live_spike_recorder, "recorder_edge")
+                                 live_spike_recorder, label="recorder_edge")
         _spinnaker.add_edge(edge)
