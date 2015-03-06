@@ -4,6 +4,7 @@ from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spynnaker_external_devices_plugin.pyNN import LivePacketGather
 from spynnaker.pyNN import get_spynnaker
 
+
 class SpynnakerExternalDevicePluginManager(object):
 
     def __init__(self):
@@ -11,6 +12,7 @@ class SpynnakerExternalDevicePluginManager(object):
 
     def add_edge_to_recorder_vertex(
             self, vertex_to_record_from, port, hostname, tag=None,
+            board_address=None,
             strip_sdp=True, use_prefix=False, key_prefix=None,
             prefix_type=None, message_type=EIEIOTypeParam.KEY_32_BIT,
             right_shift=0, payload_as_time_stamps=True,
@@ -25,10 +27,10 @@ class SpynnakerExternalDevicePluginManager(object):
 
             live_spike_recorder = LivePacketGather(
                 _spinnaker.machine_time_step, _spinnaker.timescale_factor,
-                tag, port, hostname, strip_sdp, use_prefix, key_prefix,
-                prefix_type, message_type, right_shift, payload_as_time_stamps,
-                use_payload_prefix, payload_prefix, payload_right_shift,
-                number_of_packets_sent_per_time_step)
+                hostname, port, board_address, tag, strip_sdp, use_prefix,
+                key_prefix, prefix_type, message_type, right_shift,
+                payload_as_time_stamps, use_payload_prefix, payload_prefix,
+                payload_right_shift, number_of_packets_sent_per_time_step)
             self._live_spike_recorders[(port, hostname)] = live_spike_recorder
             _spinnaker.add_vertex(live_spike_recorder)
 

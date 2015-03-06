@@ -1,6 +1,5 @@
 import os
 
-#from spinn_front_end_common.utilities import packet_conversions
 from spynnaker.pyNN.utilities import packet_conversions
 from spinn_machine.processor import Processor
 from spynnaker.pyNN.models.abstract_models.abstract_population_vertex import \
@@ -11,11 +10,11 @@ from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.utilities.conf import config
 from pacman.model.resources.cpu_cycles_per_tick_resource import \
     CPUCyclesPerTickResource
-from pacman.model.constraints.vertex_has_dependent_constraint import \
+from pacman.model.constraints.utility_constraints.vertex_has_dependent_constraint import \
     VertexHasDependentConstraint
 from pacman.model.resources.dtcm_resource import DTCMResource
 from pacman.model.resources.sdram_resource import SDRAMResource
-from pacman.model.constraints.partitioner_maximum_size_constraint \
+from pacman.model.constraints.partitioner_constraints.partitioner_maximum_size_constraint \
     import PartitionerMaximumSizeConstraint
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
@@ -31,6 +30,7 @@ class MunichMotorControl(AbstractPopulationVertex):
     _N_ATOMS = 6
 
     CORE_APP_IDENTIFIER = constants.MUNICH_MOTOR_CONTROL_CORE_APPLICATION_ID
+    _model_based_max_atoms_per_core = 6
 
     def __init__(self, n_neurons, spikes_per_second, ring_buffer_sigma,
                  timescale_factor, virtual_chip_coords, connected_chip_coords,
@@ -43,8 +43,9 @@ class MunichMotorControl(AbstractPopulationVertex):
         """
         AbstractPopulationVertex.__init__(
             self, binary="robot_motor_control.aplx", label=label, n_neurons=6,
-            max_atoms_per_core=6, n_params=3,
-            spikes_per_second=spikes_per_second,
+            max_atoms_per_core=(MunichMotorControl
+                                ._model_based_max_atoms_per_core),
+            n_params=3, spikes_per_second=spikes_per_second,
             ring_buffer_sigma=ring_buffer_sigma,
             machine_time_step=machine_time_step,
             timescale_factor=timescale_factor)
@@ -55,9 +56,10 @@ class MunichMotorControl(AbstractPopulationVertex):
 
         dependant_vertex_constraint =\
             VertexHasDependentConstraint(
-                MunichMotorDevice(1, virtual_chip_coords,
-                                  connected_chip_coords,
-                                  connected_chip_edge, machine_time_step))
+                MunichMotorDevice(
+                    1, virtual_chip_coords, connected_chip_coords,
+                    connected_chip_edge, machine_time_step, timescale_factor,
+                    ring_buffer_sigma, spikes_per_second))
         self.add_constraint(dependant_vertex_constraint)
 
         self._binary = "robot_motor_control.aplx"
@@ -74,9 +76,13 @@ class MunichMotorControl(AbstractPopulationVertex):
         self.delta_threshold = delta_threshold
         self.continue_if_not_different = continue_if_not_different
 
+    @staticmethod
+    def set_model_max_atoms_per_core(new_value):
+        MunichMotorControl._model_based_max_atoms_per_core = new_value
+
     def generate_data_spec(self, subvertex, placement, subgraph, graph,
                            routing_info, hostname, graph_subgraph_mapper,
-                           report_folder):
+                           report_folder, ip_tags, reverse_ip_tags):
         """
         Model-specific construction of the data blocks necessary to build a
         single external retina device.
@@ -92,22 +98,23 @@ class MunichMotorControl(AbstractPopulationVertex):
 
         spec.comment("\n*** Spec for robot motor control ***\n\n")
 
-        #reserve regions
+        # reserve regions
         self.reserve_memory_regions(spec)
-        
-        #write system info
+
+        # write system info
         spec.switch_write_focus(region=self.SYSTEM_REGION)
         spec.write_value(data=0xBEEF0000)
         spec.write_value(data=0)
         spec.write_value(data=0)
         spec.write_value(data=0)
         edge_key = None
-        #locate correct subedge for key
+
+        # locate correct subedge for key
         for subedge in subvertex.out_subedges:
             if subedge.edge == self.out_going_edge:
-                edge_key = subedge.key
+                edge_key = routing_info.get_key_from_subedge(subedge)
 
-        #write params to memory
+        # write params to memory
         spec.switch_write_focus(region=self.PARAMS_REGION)
         spec.write_value(data=edge_key)
         spec.write_value(data=self.speed)
@@ -124,7 +131,7 @@ class MunichMotorControl(AbstractPopulationVertex):
         spec.end_specification()
         data_writer.close()
 
-    #inhirrited from data specable vertex
+    # inherited from data specable vertex
     @staticmethod
     def get_binary_file_name(self):
         common_binary_path = os.path.join(config.get("SpecGeneration",
@@ -148,7 +155,7 @@ class MunichMotorControl(AbstractPopulationVertex):
         spec.reserveMemRegion(region=self.SYSTEM_REGION,
                               size=self.SYSTEM_SIZE,
                               label='setup')
-        
+
         spec.reserveMemRegion(region=self.PARAMS_REGION,
                               size=self.PARAMS_SIZE,
                               label='params')
@@ -183,7 +190,7 @@ class MunichMotorControl(AbstractPopulationVertex):
     def get_n_synapse_type_bits(self):
         return 1
 
-    def write_synapse_parameters(self, spec, subvertex):
+    def write_synapse_parameters(self, spec, subvertex, vertex_slice):
         pass
 
     def is_population_vertex(self):

@@ -3,7 +3,15 @@ import spynnaker_external_devices_plugin.pyNN as externaldevices
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
 import pylab
 
-frontend.setup(timestep=1.0, min_delay=1.0, max_delay=144.0)
+from spynnaker.pyNN.utilities.database.socket_address import SocketAddress
+socket_addresses = list()
+socket_addresses.append(SocketAddress(
+    listen_port=19998, notify_port_no=19999, notify_host_name="localhost"))
+socket_addresses.append(SocketAddress(
+    listen_port=19997, notify_port_no=19996, notify_host_name="localhost"))
+
+frontend.setup(timestep=1.0, min_delay=1.0, max_delay=144.0,
+               database_socket_addresses=socket_addresses)
 
 nNeurons = 100
 run_time = 10000
@@ -19,15 +27,7 @@ cell_params_lif = {'cm'        : 0.25,  # nF
                    'v_thresh'  : -50.0
                   }
 
-cell_params_spike_injector = {'port' : 12345,
-                              'virtual_key'      : 0x70000,
-                              'prefix'           : None,
-                              'tag'              : None}
-
-cell_params_spike_injector_with_prefix = {'port' : 12345,
-                                          'virtual_key'      : 0x70800,
-                                          'prefix'           : 7,
-                                          'prefix_type': EIEIOPrefixType.UPPER_HALF_WORD}
+cell_params_spike_injector = {'port': 12345}
 
 populations = list()
 projections = list()
@@ -38,13 +38,15 @@ populations.append(frontend.Population(nNeurons, frontend.IF_curr_exp,
                                        cell_params_lif, label='pop_1'))
 populations.append(
     frontend.Population(nNeurons, externaldevices.ReverseIpTagMultiCastSource,
-                        cell_params_spike_injector_with_prefix, label='spike_injector_1'))
+                        cell_params_spike_injector,
+                        label='spike_injector_1'))
 
 populations[0].record()
 externaldevices.activate_live_output_for(populations[0])
 
-projections.append(frontend.Projection(populations[1], populations[0],
-                                       frontend.OneToOneConnector(weights=weight_to_spike)))
+projections.append(frontend.Projection(
+    populations[1], populations[0],
+    frontend.OneToOneConnector(weights=weight_to_spike)))
 
 loopConnections = list()
 for i in range(0, nNeurons - 1):
@@ -69,8 +71,5 @@ if spikes is not None:
     pylab.show()
 else:
     print "No spikes received"
-
-
-
 
 frontend.end()
