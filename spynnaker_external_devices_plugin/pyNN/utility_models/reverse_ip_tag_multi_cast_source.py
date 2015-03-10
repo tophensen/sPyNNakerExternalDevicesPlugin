@@ -7,11 +7,12 @@ from pacman.model.constraints.placer_chip_and_core_constraint import \
 from pacman.model.abstract_classes.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
 from pacman.model.routing_info.key_and_mask import KeyAndMask
-
+from pacman.model.constraints.key_allocator_fixed_key_and_mask_constraint \
+    import KeyAllocatorFixedKeyAndMaskConstraint
 
 from spynnaker.pyNN.models.abstract_models\
-    .abstract_provides_keys_and_masks_vertex \
-    import AbstractProvidesKeysAndMasksVertex
+    .abstract_provides_outgoing_edge_constraints \
+    import AbstractProvidesOutgoingEdgeConstraints
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
@@ -29,7 +30,7 @@ from enum import Enum
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                                   AbstractDataSpecableVertex,
                                   AbstractReverseIPTagableVertex,
-                                  AbstractProvidesKeysAndMasksVertex):
+                                  AbstractProvidesOutgoingEdgeConstraints):
 
     # internal params
     _SPIKE_INJECTOR_REGIONS = Enum(
@@ -44,7 +45,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     # constructor
     def __init__(self, n_neurons, machine_time_step, timescale_factor,
-                 spikes_per_second, ring_buffer_sigma, host_port_number,
+                 spikes_per_second, ring_buffer_sigma, port,
                  label, virtual_key=None, check_key=True, prefix=None,
                  prefix_type=None, tag=None, key_left_shift=0):
 
@@ -60,10 +61,10 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             self, n_neurons, label,
             ReverseIpTagMultiCastSource._max_atoms_per_core)
         AbstractReverseIPTagableVertex.__init__(self, tag=tag,
-                                                port=host_port_number)
+                                                port=port)
 
         # set params
-        self._host_port_number = host_port_number
+        self._port = port
         self._virtual_key = virtual_key
         self._prefix = prefix
         self._check_key = check_key
@@ -92,9 +93,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 if temp_vertual_key is None:
                     temp_vertual_key = 0
 
-                if (self._prefix_type is None
-                        or (self._prefix_type
-                            == EIEIOPrefixType.UPPER_HALF_WORD)):
+                if (self._prefix_type is None or
+                    (self._prefix_type ==
+                        EIEIOPrefixType.UPPER_HALF_WORD)):
                     self._prefix = (self._virtual_key >> 16) & 0xFFFF
                 elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
                     self._prefix = self._virtual_key & 0xFFFF
@@ -130,11 +131,11 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         placement_constraint = PlacerChipAndCoreConstraint(0, 0)
         self.add_constraint(placement_constraint)
 
-    def get_keys_and_masks_for_partitioned_edge(self, partitioned_edge,
-                                                graph_mapper):
+    def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
         if self._virtual_key is not None:
-            return [KeyAndMask(self._virtual_key, self._mask)]
-        return None
+            return list([KeyAllocatorFixedKeyAndMaskConstraint(
+                [KeyAndMask(self._virtual_key, self._mask)])])
+        return list()
 
     @staticmethod
     def _calculate_mask(n_neurons):

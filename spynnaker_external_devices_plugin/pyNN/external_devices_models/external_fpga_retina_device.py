@@ -4,11 +4,15 @@ from spynnaker.pyNN.models.abstract_models\
     .abstract_send_me_multicast_commands_vertex \
     import AbstractSendMeMulticastCommandsVertex
 from spynnaker.pyNN import exceptions
+from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
 from spynnaker.pyNN.models.abstract_models\
-    .abstract_provides_keys_and_masks_vertex \
-    import AbstractProvidesKeysAndMasksVertex
+    .abstract_provides_outgoing_edge_constraints \
+    import AbstractProvidesOutgoingEdgeConstraints
 from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
+
+from pacman.model.constraints.key_allocator_fixed_key_and_mask_constraint \
+    import KeyAllocatorFixedKeyAndMaskConstraint
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 
 
@@ -56,7 +60,7 @@ def get_spike_value_from_fpga_retina(key, mode):
 
 class ExternalFPGARetinaDevice(AbstractVirtualVertex,
                                AbstractSendMeMulticastCommandsVertex,
-                               AbstractProvidesKeysAndMasksVertex):
+                               AbstractProvidesOutgoingEdgeConstraints):
 
     MODE_128 = "128"
     MODE_64 = "64"
@@ -66,13 +70,16 @@ class ExternalFPGARetinaDevice(AbstractVirtualVertex,
     DOWN_POLARITY = "DOWN"
     MERGED_POLARITY = "MERGED"
 
-    def __init__(self, mode, virtual_chip_x, virtual_chip_y,
-                 connected_to_real_chip_x, connected_to_real_chip_y,
-                 connected_to_real_chip_link_id, polarity, machine_time_step,
-                 timescale_factor, spikes_per_second, ring_buffer_sigma,
-                 label=None, n_neurons=None):
+    def __init__(
+            self, mode, connected_to_real_chip_x, connected_to_real_chip_y,
+            connected_to_real_chip_link_id, polarity, machine_time_step,
+            timescale_factor, spikes_per_second, ring_buffer_sigma,
+            label=None, n_neurons=None):
         self._polarity = polarity
         fixed_n_neurons = n_neurons
+        self._fixed_x = 5
+        self._fixed_y = 0
+        self._fixed_mask = None
         if mode == ExternalFPGARetinaDevice.MODE_128:
             if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
                     polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
@@ -101,27 +108,20 @@ class ExternalFPGARetinaDevice(AbstractVirtualVertex,
             raise exceptions.ConfigurationException("the FPGA retina does not "
                                                     "recongise this mode")
 
-        if fixed_n_neurons != n_neurons:
+        if fixed_n_neurons != n_neurons and n_neurons is not None:
             logger.warn("The specified number of neurons for the FPGA retina"
-                        "device has been ignored {} will be used instead"
+                        " device has been ignored {} will be used instead"
                         .format(fixed_n_neurons))
         AbstractVirtualVertex.__init__(
-            self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
+            self, fixed_n_neurons, self._fixed_x, self._fixed_y,
             connected_to_real_chip_x, connected_to_real_chip_y,
             connected_to_real_chip_link_id, max_atoms_per_core=2048,
             label=label)
+        AbstractSendMeMulticastCommandsVertex.__init__(self, commands=[
+            MultiCastCommand(0, 0x0000FFFF, 0xFFFF0000, 1, 5, 100),
+            MultiCastCommand(-1, 0x0000FFFE, 0xFFFF0000, 0, 5, 100)])
 
-        self._commands_mask = 0xFFFFFBB8
-        commands = list()
-        commands.append({'t': 0, "cp": 1, 'key': None, 'key_prefix': 0xFFFF,
-                         'payload': 1, 'repeat': 5, 'delay': 100})
-        commands.append({'t': -1, "cp": 1, 'key': None, 'key_prefix': 0xFFFe,
-                         'payload': 0, 'repeat': 5, 'delay': 100})
-        AbstractSendMeMulticastCommandsVertex.__init__(
-            self, commands, self._commands_mask)
-
-    def get_keys_and_masks_for_partitioned_edge(self, partitioned_edge,
-                                                graph_mapper):
+    def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
 
         # Hack to use the neural modelling fixed mask
         mask = 0xFFFFF800
@@ -136,9 +136,10 @@ class ExternalFPGARetinaDevice(AbstractVirtualVertex,
             index += 8
 
         # The key is the virtual core number
-        key = (self._virtual_chip_x << 24 | self._virtual_chip_y << 16
-               | index << 11)
-        return [KeyAndMask(key, mask)]
+        key = (self._virtual_chip_x << 24 | self._virtual_chip_y << 16 |
+               index << 11)
+        return list(
+            [KeyAllocatorFixedKeyAndMaskConstraint([KeyAndMask(key, mask)])])
 
     @property
     def model_name(self):
@@ -146,10 +147,6 @@ class ExternalFPGARetinaDevice(AbstractVirtualVertex,
         name for debugs
         """
         return "external FPGA retina device"
-
-    @staticmethod
-    def is_external_retina():
-        return True
 
     def is_virtual_vertex(self):
         return True
