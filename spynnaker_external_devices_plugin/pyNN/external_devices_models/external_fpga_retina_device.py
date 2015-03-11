@@ -11,7 +11,8 @@ from spynnaker.pyNN.models.abstract_models\
 from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
 
-from pacman.model.constraints.key_allocator_fixed_key_and_mask_constraint \
+from pacman.model.constraints.key_allocator_constraints\
+    .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 

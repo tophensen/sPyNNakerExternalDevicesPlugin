@@ -7,7 +7,8 @@ from spynnaker.pyNN.models.abstract_models\
 from spynnaker.pyNN.models.abstract_models\
     .abstract_provides_outgoing_edge_constraints \
     import AbstractProvidesOutgoingEdgeConstraints
-from pacman.model.constraints.key_allocator_fixed_mask_constraint \
+from pacman.model.constraints.key_allocator_constraints\
+    .key_allocator_fixed_mask_constraint \
     import KeyAllocatorFixedMaskConstraint
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
