@@ -1,22 +1,23 @@
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 
-
-from pacman.model.constraints.placer_chip_and_core_constraint import \
-    PlacerChipAndCoreConstraint
 from pacman.model.abstract_classes.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 from pacman.model.constraints.key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
+from pacman.model.constraints.tag_allocator_constraints \
+    .tag_allocator_require_reverse_iptag_constraint \
+    import TagAllocatorRequireReverseIptagConstraint
+from pacman.model.constraints.placer_constraints\
+    .placer_radial_placement_from_chip_constraint \
+    import PlacerRadialPlacementFromChipConstraint
 
 from spynnaker.pyNN.models.abstract_models\
     .abstract_provides_outgoing_edge_constraints \
     import AbstractProvidesOutgoingEdgeConstraints
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
-from spynnaker.pyNN.models.abstract_models.abstract_reverse_iptagable_vertex \
-    import AbstractReverseIPTagableVertex
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
 
@@ -29,7 +30,6 @@ from enum import Enum
 
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                                   AbstractDataSpecableVertex,
-                                  AbstractReverseIPTagableVertex,
                                   AbstractProvidesOutgoingEdgeConstraints):
 
     # internal params
@@ -43,11 +43,11 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
 
-    # constructor
     def __init__(self, n_neurons, machine_time_step, timescale_factor,
                  spikes_per_second, ring_buffer_sigma, port,
-                 label, virtual_key=None, check_key=True, prefix=None,
-                 prefix_type=None, tag=None, key_left_shift=0):
+                 label, board_address=None, virtual_key=None, check_key=True,
+                 prefix=None, prefix_type=None, tag=None, key_left_shift=0,
+                 sdp_port=1):
 
         if n_neurons > ReverseIpTagMultiCastSource._max_atoms_per_core:
             raise Exception("This model can currently only cope with {} atoms"
@@ -60,8 +60,8 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         AbstractPartitionableVertex.__init__(
             self, n_neurons, label,
             ReverseIpTagMultiCastSource._max_atoms_per_core)
-        AbstractReverseIPTagableVertex.__init__(self, tag=tag,
-                                                port=port)
+        self.add_constraint(TagAllocatorRequireReverseIptagConstraint(
+            port, sdp_port, board_address, tag))
 
         # set params
         self._port = port
@@ -128,7 +128,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                         "0 and 16. Please change this param and try again")
 
         # add placement constraint
-        placement_constraint = PlacerChipAndCoreConstraint(0, 0)
+        placement_constraint = PlacerRadialPlacementFromChipConstraint(0, 0)
         self.add_constraint(placement_constraint)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
@@ -168,7 +168,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     def generate_data_spec(self, subvertex, placement, sub_graph, graph,
                            routing_info, hostname, graph_mapper,
-                           report_folder):
+                           report_folder, ip_tags, reverse_ip_tags):
         # Create new DataSpec for this processor:
         data_writer, report_writer = \
             self.get_data_spec_file_writers(

@@ -74,7 +74,7 @@ class MunichMotorControl(AbstractDataSpecableVertex,
 
     def generate_data_spec(self, subvertex, placement, subgraph, graph,
                            routing_info, hostname, graph_subgraph_mapper,
-                           report_folder):
+                           report_folder, ip_tags, reverse_ip_tags):
         """
         Model-specific construction of the data blocks necessary to build a
         single external retina device.

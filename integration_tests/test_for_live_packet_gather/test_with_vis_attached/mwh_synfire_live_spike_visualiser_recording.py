@@ -4,7 +4,7 @@ Synfirechain-like example
 #!/usr/bin/python
 import os
 import spynnaker.pyNN as p
-import spynnaker_external_devices_plugin as q
+import spynnaker_external_devices_plugin.pyNN as q
 #import pyNN.spiNNaker as p
 import numpy, pylab
 
@@ -60,12 +60,14 @@ populations.append(p.Population(1, p.SpikeSourceArray, spikeArray, label='inputS
 projections.append(p.Projection(populations[0], populations[0], p.FromListConnector(loopConnections)))
 projections.append(p.Projection(populations[1], populations[0], p.FromListConnector(injectionConnection)))
 
-populations[0].record()
-populations[0].set_constraint(p.PlacerChipAndCoreConstraint(0,0,2))
-populations[1].set_constraint(p.PlacerChipAndCoreConstraint(0,0,3))
+q.activate_live_output_for(populations[0])
+populations[0].set_constraint(p.PlacerChipAndCoreConstraint(0,0,4))
+populations[1].set_constraint(p.PlacerChipAndCoreConstraint(0,0,5))
 
 run_time = 100
 print "Running for {} ms".format(run_time)
+
+populations[0].record()
 p.run(run_time)
 
 v = None
