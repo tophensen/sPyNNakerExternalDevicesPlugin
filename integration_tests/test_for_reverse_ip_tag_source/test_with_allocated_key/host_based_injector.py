@@ -1,23 +1,21 @@
-from spinnman.data.little_endian_byte_array_byte_reader import \
-    LittleEndianByteArrayByteReader
-from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
-from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
-from spinnman.messages.eieio.eieio_header import EIEIOHeader
-from spinnman.messages.eieio.eieio_message import EIEIOMessage
-from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
-from spinnman.connections.udp_packet_connections.reverse_iptag_connection \
-    import ReverseIPTagConnection
-from spinnman import constants
-
-from spynnaker.pyNN.utilities.conf import config
-from spinnman.connections.udp_packet_connections.eieio_command_connection \
-    import EieioCommandConnection
-
-
 import threading
 import sqlite3 as sqlite
 from time import sleep
 import math
+
+from spinnman.data.little_endian_byte_array_byte_reader import \
+    LittleEndianByteArrayByteReader
+from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
+from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
+from spinnman.messages.eieio.eieio_data_header import EIEIOHeader
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message import EIEIODataMessage
+from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
+from spinnman.connections.udp_packet_connections.reverse_iptag_connection \
+    import ReverseIPTagConnection
+from spinnman import constants
+from spynnaker.pyNN.utilities.conf import config
+from spinnman.connections.udp_packet_connections.eieio_command_connection \
+    import EieioCommandConnection
 
 
 class HostBasedInjector(object):
@@ -96,7 +94,7 @@ class HostBasedInjector(object):
         spike_id = spike * math.floor((max_neurons / self._max_spikes))
         key = key_to_neuron_id_mapping[spike_id]
         header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_32_BIT)
-        message = EIEIOMessage(eieio_header=header)
+        message = EIEIODataMessage(eieio_header=header)
         message.write_data(key)
         print "injecting with key {}\n".format(key)
         self._injection_connection.send_eieio_message(message)

@@ -1,7 +1,6 @@
-from spinnman.messages.eieio.eieio_header import EIEIOHeader
-from spinnman.messages.eieio.eieio_message import EIEIOMessage
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header import EIEIODataHeader
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message import EIEIODataMessage
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
-from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
 from spynnaker.pyNN.utilities.conf import config
 from spinnman.connections.udp_packet_connections.reverse_iptag_connection \
     import ReverseIPTagConnection
@@ -14,111 +13,111 @@ key = 0x70800
 #key = 0x800
 payload = 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_32_BIT)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_32_BIT)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key)
 udp_connection.send_eieio_message(message)
 key += 1
 
 '''
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key, payload)
 injection_connection.send_eieio_message(message)
 key += 1
 payload += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_16_BIT, prefix_param=0xfff0,
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_16_BIT, prefix_param=0xfff0,
                      prefix_type=EIEIOPrefixType.UPPER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key)
 injection_connection.send_eieio_message(message)
 key += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT,
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT,
                      prefix_param=0xfff0,
                      prefix_type=EIEIOPrefixType.UPPER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key, payload)
 injection_connection.send_eieio_message(message)
 key += 1
 payload += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_16_BIT,
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_16_BIT,
                      prefix_param=0xfff0,
                      prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key)
 injection_connection.send_eieio_message(message)
 key += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key, payload)
 injection_connection.send_eieio_message(message)
 key += 1
 payload += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_16_BIT, prefix_param=0xfff0, payload_base=0xeee0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_16_BIT, prefix_param=0xfff0, payload_base=0xeee0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key)
 injection_connection.send_eieio_message(message)
 key += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT, prefix_param=0xfff0, payload_base=0xeee0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_16_BIT, prefix_param=0xfff0, payload_base=0xeee0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key, payload)
 injection_connection.send_eieio_message(message)
 key += 1
 payload += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_32_BIT)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_32_BIT)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key)
 injection_connection.send_eieio_message(message)
 key += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_32_BIT)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_32_BIT)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key, payload)
 injection_connection.send_eieio_message(message)
 key += 1
 payload += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_32_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.UPPER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_32_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.UPPER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key)
 injection_connection.send_eieio_message(message)
 key += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_32_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.UPPER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_32_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.UPPER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key, payload)
 injection_connection.send_eieio_message(message)
 key += 1
 payload += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_32_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_32_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key)
 injection_connection.send_eieio_message(message)
 key += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_32_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_32_BIT, prefix_param=0xfff0, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key, payload)
 injection_connection.send_eieio_message(message)
 key += 1
 payload += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_32_BIT, prefix_param=0xfff0, payload_base=0xeeee0000, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_32_BIT, prefix_param=0xfff0, payload_base=0xeeee0000, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key)
 injection_connection.send_eieio_message(message)
 key += 1
 
-header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_32_BIT, prefix_param=0xfff0, payload_base=0xeeee0000, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
-message = EIEIOMessage(eieio_header=header, data=bytearray())
+header = EIEIODataHeader(type_param=EIEIOTypeParam.KEY_PAYLOAD_32_BIT, prefix_param=0xfff0, payload_base=0xeeee0000, prefix_type=EIEIOPrefixType.LOWER_HALF_WORD)
+message = EIEIODataMessage(eieio_header=header, data=bytearray())
 message.write_data(key, payload)
 injection_connection.send_eieio_message(message)
 key += 1
@@ -126,7 +125,7 @@ payload += 1
 
 
 
-#class EIEIOHeader(object):
+#class EIEIODataHeader(object):
 #
 #    def __init__(self, type_param, count_param, tag_param=0, prefix_param=None,
 #                 payload_base=None, prefix_type=None, is_time=False):
@@ -138,7 +137,7 @@ payload += 1
 #    LOWER_HALF_WORD = (0, "apply prefix on lower half of the word")
 #    UPPER_HALF_WORD = (1, "apply prefix on top half of the word")
 
-#EIEIOMessage(AbstractEIEIOMessage):
+#EIEIODataMessage(AbstractEIEIOMessage):
 #
 #    def __init__(self, eieio_header, data=bytearray()):
 #        AbstractEIEIOMessage.__init__(self, data)
