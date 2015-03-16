@@ -1,27 +1,37 @@
-from enum import Enum
+from data_specification.data_specification_generator import \
+    DataSpecificationGenerator
 
-from data_specification.data_specification_generator \
-    import DataSpecificationGenerator
+from pacman.model.abstract_classes.abstract_partitionable_vertex import \
+    AbstractPartitionableVertex
+from pacman.model.routing_info.key_and_mask import KeyAndMask
 from pacman.model.constraints.key_allocator_constraints\
-    .key_allocator_routing_constraint import KeyAllocatorRoutingConstraint
-from pacman.model.partitionable_graph.abstract_partitionable_vertex \
-    import AbstractPartitionableVertex
+    .key_allocator_fixed_key_and_mask_constraint \
+    import KeyAllocatorFixedKeyAndMaskConstraint
 from pacman.model.constraints.tag_allocator_constraints \
     .tag_allocator_require_reverse_iptag_constraint \
     import TagAllocatorRequireReverseIptagConstraint
 from pacman.model.constraints.placer_constraints\
     .placer_radial_placement_from_chip_constraint \
     import PlacerRadialPlacementFromChipConstraint
+
+from spynnaker.pyNN.models.abstract_models\
+    .abstract_provides_outgoing_edge_constraints \
+    import AbstractProvidesOutgoingEdgeConstraints
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
+
+
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
-import math
+
+
+from enum import Enum
 
 
 class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
-                                  AbstractDataSpecableVertex):
+                                  AbstractDataSpecableVertex,
+                                  AbstractProvidesOutgoingEdgeConstraints):
 
     # internal params
     _SPIKE_INJECTOR_REGIONS = Enum(
@@ -40,6 +50,11 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                  prefix=None, prefix_type=None, tag=None, key_left_shift=0,
                  sdp_port=1):
 
+        if n_neurons > ReverseIpTagMultiCastSource._max_atoms_per_core:
+            raise Exception("This model can currently only cope with {} atoms"
+                            .format(ReverseIpTagMultiCastSource
+                                    ._max_atoms_per_core))
+
         AbstractDataSpecableVertex.__init__(
             self, n_neurons, label, machine_time_step,
             timescale_factor)
@@ -50,7 +65,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             port, sdp_port, board_address, tag))
 
         # set params
-        self._host_port_number = port
+        self._port = port
         self._virtual_key = virtual_key
         self._prefix = prefix
         self._check_key = check_key
@@ -63,85 +78,77 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                 "To use a prefix, you must declaire which position to use the "
                 "prefix in on the prefix_type parameter.")
 
-        active_bits_of_mask = None
         if virtual_key is not None:
-            self._mask, active_bits_of_mask = self._calculate_mask(n_neurons)
+            self._mask, max_key = self._calculate_mask(n_neurons)
 
             # key =( key  ored prefix )and mask
-            temp_vertial_key = virtual_key
+            temp_vertual_key = virtual_key
             if self._prefix is not None:
-                if temp_vertial_key is None:
-                    temp_vertial_key = 0
+                if temp_vertual_key is None:
+                    temp_vertual_key = 0
                 if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
-                    temp_vertial_key |= self._prefix
+                    temp_vertual_key |= self._prefix
                 if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
-                    temp_vertial_key |= (self._prefix << 16)
+                    temp_vertual_key |= (self._prefix << 16)
             else:
-                if temp_vertial_key is None:
-                    temp_vertial_key = 0
+                if temp_vertual_key is None:
+                    temp_vertual_key = 0
 
-                if (self._prefix_type is None
-                        or self._prefix_type
-                        == EIEIOPrefixType.UPPER_HALF_WORD):
+                if (self._prefix_type is None or
+                    (self._prefix_type ==
+                        EIEIOPrefixType.UPPER_HALF_WORD)):
                     self._prefix = (self._virtual_key >> 16) & 0xFFFF
                 elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
                     self._prefix = self._virtual_key & 0xFFFF
 
-            if temp_vertial_key is not None:
+            if temp_vertual_key is not None:
 
                 # check that mask key combo = key
-                masked_key = temp_vertial_key & self._mask
+                masked_key = temp_vertual_key & self._mask
                 if self._virtual_key != masked_key:
                     raise exceptions.ConfigurationException(
                         "The mask calculated from your number of neurons has "
                         "the potential to interfere with the key, please "
-                        "reduce the number of neurons or reduce the virtual "
-                        "key")
+                        "reduce the number of neurons or reduce the virtual"
+                        " key")
 
                 # check that neuron mask does not interfere with key
                 if self._virtual_key < 0:
                     raise exceptions.ConfigurationException(
                         "Virtual keys must be positive")
-                elif self._virtual_key == 0:
-                    bits_of_key = 0
-                else:
-                    bits_of_key = int(math.ceil(math.log(
-                                      self._virtual_key, 2)))
-                if (32 - bits_of_key) < active_bits_of_mask:
+                if n_neurons > max_key:
                     raise exceptions.ConfigurationException(
                         "The mask calculated from your number of neurons has "
                         "the capability to interfere with the key due to its "
-                        "size, please reduce the number of neurons or reduce "
+                        "size please reduce the number of neurons or reduce "
                         "the virtual key")
 
                 if self._key_left_shift > 16 or self._key_left_shift < 0:
                     raise exceptions.ConfigurationException(
-                        "the key left shift must be within a range of 0"
-                        " and 16. Please change this param and try again")
-
-            # add routing constraint
-            routing_key_constraint =\
-                KeyAllocatorRoutingConstraint(self.generate_routing_info,
-                                              self.get_key_with_neuron_id)
-            self.add_constraint(routing_key_constraint)
+                        "the key left shift must be within a range of "
+                        "0 and 16. Please change this param and try again")
 
         # add placement constraint
         placement_constraint = PlacerRadialPlacementFromChipConstraint(0, 0)
         self.add_constraint(placement_constraint)
 
+    def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
+        if self._virtual_key is not None:
+            return list([KeyAllocatorFixedKeyAndMaskConstraint(
+                [KeyAndMask(self._virtual_key, self._mask)])])
+        return list()
+
     @staticmethod
     def _calculate_mask(n_neurons):
-        temp_value = math.floor(math.log(n_neurons, 2))
-        max_value = int(math.pow(2, 32))
-        active_mask_bit_range = \
-            int(math.log(int(math.pow(2, temp_value + 1)), 2)) + 1
-        mask = max_value - int(math.pow(2, temp_value + 1))
-        return mask, active_mask_bit_range
+
+        # TODO: Re-enable once allowed by the neuron models
+        # temp_value = int(math.ceil(math.log(n_neurons, 2)))
+        # max_key = (int(math.pow(2, temp_value)) - 1)
+        max_key = 2047
+        mask = 0xFFFFFFFF - max_key
+        return mask, max_key
 
     def get_sdram_usage_for_atoms(self, vertex_slice, graph):
-
-        # 3 words from the system region of the dsg/e,
-        # 3 words for configuration and 6 *4 words for app pointer table
         return constants.SETUP_SIZE + self._CONFIGURATION_REGION_SIZE
 
     @property
@@ -159,19 +166,6 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     def get_cpu_usage_for_atoms(self, vertex_slice, graph):
         return 1
-
-    def generate_routing_info(self, subedge):
-        """
-        overloaded from component vertex
-        """
-        return self._virtual_key, self._mask
-
-    def get_key_with_neuron_id(self, vertex_slice, vertex, placement, subedge):
-        keys = dict()
-        key, _ = self.generate_routing_info(None)
-        for neuron_id in range(0, self._n_atoms):
-            keys[neuron_id] = key
-        return keys
 
     def generate_data_spec(self, subvertex, placement, sub_graph, graph,
                            routing_info, hostname, graph_mapper,
@@ -208,8 +202,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             subedge_routing_info = \
                 routing_info.get_subedge_information_from_subedge(
                     sub_graph.outgoing_subedges_from_subvertex(subvertex)[0])
-            self._mask = subedge_routing_info.mask
-            self._virtual_key = subedge_routing_info.key
+            key_and_mask = subedge_routing_info.keys_and_masks[0]
+            self._mask = key_and_mask.mask
+            self._virtual_key = key_and_mask.key
 
         # add prefix boolean value
         if self._prefix is None:

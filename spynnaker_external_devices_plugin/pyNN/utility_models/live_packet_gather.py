@@ -4,25 +4,29 @@ from pacman.model.constraints.placer_constraints\
 from pacman.model.constraints.tag_allocator_constraints\
     .tag_allocator_require_iptag_constraint \
     import TagAllocatorRequireIptagConstraint
-from pacman.model.partitionable_graph.abstract_partitionable_vertex \
+from pacman.model.abstract_classes.abstract_partitionable_vertex \
     import AbstractPartitionableVertex
+
 
 from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN import exceptions
 
+
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
+
 
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
 
+
 from enum import Enum
 
 
-class LivePacketGather(AbstractDataSpecableVertex,
-                       AbstractPartitionableVertex):
+class LivePacketGather(
+        AbstractDataSpecableVertex, AbstractPartitionableVertex):
 
     CORE_APP_IDENTIFIER = constants.APP_MONITOR_CORE_APPLICATION_ID
 
@@ -48,21 +52,21 @@ class LivePacketGather(AbstractDataSpecableVertex,
         """
         Creates a new AppMonitor Object.
         """
-        if (message_type == EIEIOTypeParam.KEY_PAYLOAD_32_BIT
-            or message_type == EIEIOTypeParam.KEY_PAYLOAD_16_BIT) \
-                and use_payload_prefix and payload_as_time_stamps:
+        if ((message_type == EIEIOTypeParam.KEY_PAYLOAD_32_BIT or
+             message_type == EIEIOTypeParam.KEY_PAYLOAD_16_BIT) and
+                use_payload_prefix and payload_as_time_stamps):
             raise exceptions.ConfigurationException(
                 "Timestamp can either be included as payload prefix or as "
                 "payload to each key, not both")
-        if (message_type == EIEIOTypeParam.KEY_32_BIT
-            or message_type == EIEIOTypeParam.KEY_16_BIT) and \
-                not use_payload_prefix and payload_as_time_stamps:
+        if ((message_type == EIEIOTypeParam.KEY_32_BIT or
+             message_type == EIEIOTypeParam.KEY_16_BIT) and
+                not use_payload_prefix and payload_as_time_stamps):
             raise exceptions.ConfigurationException(
                 "Timestamp can either be included as payload prefix or as"
                 " payload to each key, but current configuration does not "
                 "specify either of these")
-        if (not isinstance(prefix_type, EIEIOPrefixType)
-                and prefix_type is not None):
+        if (not isinstance(prefix_type, EIEIOPrefixType) and
+                prefix_type is not None):
             raise exceptions.ConfigurationException(
                 "the type of a prefix type should be of a EIEIOPrefixType, "
                 "which can be located in :"
@@ -96,19 +100,9 @@ class LivePacketGather(AbstractDataSpecableVertex,
 
     @property
     def model_name(self):
-        """ property methof for the model name
-
-        :return: the string rep of the model
-        :rtype: str
-        :raises None: does not raise any known exception
-        """
         return "live packet gather"
 
     def is_ip_tagable_vertex(self):
-        """ helper method for is_instance
-
-        :return:
-        """
         return True
 
     @property
@@ -155,8 +149,6 @@ class LivePacketGather(AbstractDataSpecableVertex,
         """
         Reserve SDRAM space for memory areas:
         1) Area for information on what data to record
-
-
         """
 
         spec.comment("\nReserving memory space for data regions:\n\n")
@@ -204,6 +196,7 @@ class LivePacketGather(AbstractDataSpecableVertex,
             spec.write_value(data=self._prefix_type.value)
         else:
             spec.write_value(data=0)
+
         # packet type
         spec.write_value(data=self._message_type.value)
 

@@ -15,4 +15,3 @@ class SpikeInjector(ReverseIpTagMultiCastSource):
             ring_buffer_sigma=ring_buffer_sigma,
             timescale_factor=timescale_factor,
             spikes_per_second=spikes_per_second, virtual_key=virtual_key)
-
