@@ -202,8 +202,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             subedge_routing_info = \
                 routing_info.get_subedge_information_from_subedge(
                     sub_graph.outgoing_subedges_from_subvertex(subvertex)[0])
-            self._mask = subedge_routing_info.mask
-            self._virtual_key = subedge_routing_info.key
+            key_and_mask = subedge_routing_info.keys_and_masks[0]
+            self._mask = key_and_mask.mask
+            self._virtual_key = key_and_mask.key
 
         # add prefix boolean value
         if self._prefix is None:
