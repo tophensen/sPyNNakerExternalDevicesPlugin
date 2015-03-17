@@ -14,6 +14,8 @@ from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_retina_device import MunichRetinaDevice
 from spynnaker_external_devices_plugin.pyNN.utility_models.\
     reverse_ip_tag_multi_cast_source import ReverseIpTagMultiCastSource
+from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
+    import SpikeInjector
 from spynnaker_external_devices_plugin.pyNN.utility_models.live_packet_gather \
     import LivePacketGather
 from spynnaker_external_devices_plugin.pyNN.\

@@ -84,22 +84,12 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             # key =( key  ored prefix )and mask
             temp_vertual_key = virtual_key
             if self._prefix is not None:
-                if temp_vertual_key is None:
-                    temp_vertual_key = 0
                 if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
                     temp_vertual_key |= self._prefix
                 if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
                     temp_vertual_key |= (self._prefix << 16)
             else:
-                if temp_vertual_key is None:
-                    temp_vertual_key = 0
-
-                if (self._prefix_type is None or
-                    (self._prefix_type ==
-                        EIEIOPrefixType.UPPER_HALF_WORD)):
-                    self._prefix = (self._virtual_key >> 16) & 0xFFFF
-                elif self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
-                    self._prefix = self._virtual_key & 0xFFFF
+                self._prefix = self._generate_prefix(virtual_key, prefix_type)
 
             if temp_vertual_key is not None:
 
@@ -131,6 +121,12 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         # add placement constraint
         placement_constraint = PlacerRadialPlacementFromChipConstraint(0, 0)
         self.add_constraint(placement_constraint)
+
+    @staticmethod
+    def _generate_prefix(virtual_key, prefix_type):
+        if prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
+            return virtual_key & 0xFFFF
+        return (virtual_key >> 16) & 0xFFFF
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
         if self._virtual_key is not None:
@@ -205,6 +201,12 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             key_and_mask = subedge_routing_info.keys_and_masks[0]
             self._mask = key_and_mask.mask
             self._virtual_key = key_and_mask.key
+
+            if self._prefix is None:
+                if self._prefix_type is None:
+                    self._prefix_type = EIEIOPrefixType.UPPER_HALF_WORD
+                self._prefix = self._generate_prefix(self._virtual_key,
+                                                     self._prefix_type)
 
         # add prefix boolean value
         if self._prefix is None:
