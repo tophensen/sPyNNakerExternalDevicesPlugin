@@ -1,0 +1,15 @@
+from setuptools import setup
+
+setup(
+    name="sPyNNakerExternalDevicesPlugin",
+    version="2015.008-alpha-01",
+    description="Spinnaker External Devices Plugin",
+    url="https://github.com/SpiNNakerManchester/SpyNNaker",
+    packages=['spynnaker_external_devices_plugin',
+              'spynnaker_external_devices_plugin.pyNN',
+              'spynnaker_external_devices_plugin.pyNN.connections',
+              'spynnaker_external_devices_plugin.pyNN.control_models',
+              'spynnaker_external_devices_plugin.pyNN.external_devices_models',
+              'spynnaker_external_devices_plugin.pyNN.utility_models'],
+    install_requires=['sPyNNaker >= 2015.004-alpha-04']
+)

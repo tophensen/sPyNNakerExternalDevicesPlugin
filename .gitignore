@@ -4,7 +4,9 @@
 /.settings
 /doc/build
 *.pyc
-/reports
-/application_generated_data_files
+reports*
+application_generated_data_files*
 /spynnaker/pyNN/model_binaries
 *build/
+/dist/
+/sPyNNakerExternalDevicesPlugin.egg-info/

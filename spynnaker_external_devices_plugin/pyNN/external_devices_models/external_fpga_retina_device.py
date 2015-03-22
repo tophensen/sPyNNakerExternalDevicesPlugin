@@ -1,129 +1,146 @@
-from pacman.model.constraints.key_allocator_routing_constraint import \
-    KeyAllocatorRoutingConstraint
-from pacman.model.constraints.vertex_requires_multi_cast_source_constraint \
-    import VertexRequiresMultiCastSourceConstraint
-from spynnaker_external_devices_plugin.pyNN.interfaces.abstract_FPGA_device \
-    import AbstractFPGADevice
-from spynnaker_external_devices_plugin.pyNN.abstract_models.\
-    abstract_external_retina_device import AbstractExternalRetinaDevice
-from spynnaker.pyNN.utilities import packet_conversions
+import logging
+
+from spynnaker.pyNN.models.abstract_models\
+    .abstract_send_me_multicast_commands_vertex \
+    import AbstractSendMeMulticastCommandsVertex
 from spynnaker.pyNN import exceptions
+from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
+from spynnaker.pyNN.models.abstract_models\
+    .abstract_provides_outgoing_edge_constraints \
+    import AbstractProvidesOutgoingEdgeConstraints
+from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
+    import AbstractVirtualVertex
+
+from pacman.model.constraints.key_allocator_constraints\
+    .key_allocator_fixed_key_and_mask_constraint \
+    import KeyAllocatorFixedKeyAndMaskConstraint
+from pacman.model.routing_info.key_and_mask import KeyAndMask
 
 
-class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice):
+logger = logging.getLogger(__name__)
+
+
+def get_y_from_fpga_retina(key, mode):
+    if mode == 128:
+        return key & 0x7f
+    elif mode == 64:
+        return key & 0x3f
+    elif mode == 32:
+        return key & 0x1f
+    elif mode == 16:
+        return key & 0xf
+    else:
+        return None
+
+
+def get_x_from_fpga_retina(key, mode):
+    if mode == 128:
+        return (key >> 7) & 0x7f
+    elif mode == 64:
+        return (key >> 6) & 0x3f
+    elif mode == 32:
+        return (key >> 5) & 0x1f
+    elif mode == 16:
+        return (key >> 4) & 0xf
+    else:
+        return None
+
+
+def get_spike_value_from_fpga_retina(key, mode):
+    if mode == 128:
+        return (key >> 14) & 0x1
+    elif mode == 64:
+        return (key >> 14) & 0x1
+    elif mode == 32:
+        return (key >> 14) & 0x1
+    elif mode == 16:
+        return (key >> 14) & 0x1
+    else:
+        return None
+
+
+class ExternalFPGARetinaDevice(AbstractVirtualVertex,
+                               AbstractSendMeMulticastCommandsVertex,
+                               AbstractProvidesOutgoingEdgeConstraints):
 
     MODE_128 = "128"
     MODE_64 = "64"
     MODE_32 = "32"
     MODE_16 = "16"
+    UP_POLARITY = "UP"
+    DOWN_POLARITY = "DOWN"
+    MERGED_POLARITY = "MERGED"
 
-    def __init__(self, mode, virtual_chip_coords, connected_chip_coords,
-                 connected_chip_edge, polarity, machine_time_step, label=None,
-                 n_neurons=None):
-
+    def __init__(
+            self, mode, connected_to_real_chip_x, connected_to_real_chip_y,
+            connected_to_real_chip_link_id, polarity, machine_time_step,
+            timescale_factor, spikes_per_second, ring_buffer_sigma,
+            label=None, n_neurons=None):
+        self._polarity = polarity
+        fixed_n_neurons = n_neurons
+        self._fixed_x = 5
+        self._fixed_y = 0
+        self._fixed_mask = None
         if mode == ExternalFPGARetinaDevice.MODE_128:
-            if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or
-               self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
-                n_neurons = 128 * 128
+            if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
+                    polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
+                fixed_n_neurons = 128 * 128
             else:
-                n_neurons = 128 * 128 * 2
+                fixed_n_neurons = 128 * 128 * 2
         elif mode == ExternalFPGARetinaDevice.MODE_64:
-            if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or
-               self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
-                n_neurons = 64 * 64
+            if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
+                    polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
+                fixed_n_neurons = 64 * 64
             else:
-                n_neurons = 64 * 64 * 2
+                fixed_n_neurons = 64 * 64 * 2
         elif mode == ExternalFPGARetinaDevice.MODE_32:
-            if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or
-               self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
-                n_neurons = 32 * 32
+            if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
+                    polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
+                fixed_n_neurons = 32 * 32
             else:
-                n_neurons = 32 * 32 * 2
+                fixed_n_neurons = 32 * 32 * 2
         elif mode == ExternalFPGARetinaDevice.MODE_16:
-            if (self.polarity == ExternalFPGARetinaDevice.UP_POLARITY or
-               self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
-                n_neurons = 16 * 16
+            if (polarity == ExternalFPGARetinaDevice.UP_POLARITY or
+                    polarity == ExternalFPGARetinaDevice.DOWN_POLARITY):
+                fixed_n_neurons = 16 * 16
             else:
-                n_neurons = 16 * 16 * 2
+                fixed_n_neurons = 16 * 16 * 2
         else:
             raise exceptions.ConfigurationException("the FPGA retina does not "
                                                     "recongise this mode")
 
-        AbstractExternalRetinaDevice.__init__(
-            self, n_neurons=n_neurons, virtual_chip_coords=virtual_chip_coords,
-            connected_node_coords=connected_chip_coords,
-            connected_node_edge=connected_chip_edge,
-            machine_time_step=machine_time_step, label=label, polarity=polarity)
+        if fixed_n_neurons != n_neurons and n_neurons is not None:
+            logger.warn("The specified number of neurons for the FPGA retina"
+                        " device has been ignored {} will be used instead"
+                        .format(fixed_n_neurons))
+        AbstractVirtualVertex.__init__(
+            self, fixed_n_neurons, self._fixed_x, self._fixed_y,
+            connected_to_real_chip_x, connected_to_real_chip_y,
+            connected_to_real_chip_link_id, max_atoms_per_core=2048,
+            label=label)
+        AbstractSendMeMulticastCommandsVertex.__init__(self, commands=[
+            MultiCastCommand(0, 0x0000FFFF, 0xFFFF0000, 1, 5, 100),
+            MultiCastCommand(-1, 0x0000FFFE, 0xFFFF0000, 0, 5, 100)])
 
-        AbstractFPGADevice.__init__(
-            self, n_neurons=n_neurons, virtual_chip_coords=virtual_chip_coords,
-            connected_node_coords=connected_chip_coords,
-            connected_node_edge=connected_chip_edge,
-            machine_time_step=machine_time_step, label=label,
-            max_atoms_per_core=self._get_max_atoms_per_core(n_neurons))
+    def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
 
-        #add commands constraint
-        command_constraint = \
-            VertexRequiresMultiCastSourceConstraint(self.get_commands())
-        self.add_constraint(command_constraint)
-        #add routing key constraint
-        routing_key_constraint = \
-            KeyAllocatorRoutingConstraint(self.generate_routing_info)
-        self.add_constraint(routing_key_constraint)
+        # Hack to use the neural modelling fixed mask
+        mask = 0xFFFFF800
+        vertex_slice = graph_mapper.get_subvertex_slice(
+            partitioned_edge.pre_subvertex)
 
-    def get_commands(self):
-        """
-        method that returns the commands for the retina external device
-        """
-        commands = list()
+        # Should be one subedge for each 2048 atoms
+        index = vertex_slice.lo_atom / 2048
 
-        mgmt_key = \
-            self._virtual_chip_coords['x'] << 24 | \
-            self._virtual_chip_coords['y'] + 1 << 16 | 0xffff
+        # The core index should be 8 higher for the up polarity
+        if self._polarity == ExternalFPGARetinaDevice.UP_POLARITY:
+            index += 8
 
-        mgmt_payload = 1
-        command = {'t': 0, "cp": 1, 'key': mgmt_key, 'payload': mgmt_payload,
-                   'repeat': 5, 'delay': 100}
-        commands.append(command)
-
-        mgmt_key = \
-            self._virtual_chip_coords['x'] << 24 | \
-            self._virtual_chip_coords['y'] + 1 << 16 | 0xfffe
-        mgmt_payload = 0
-        command = {'t': -1, "cp": 1, 'key': mgmt_key,
-                   'payload': mgmt_payload, 'repeat': 5, 'delay': 100}
-        commands.append(command)
-        return commands
-
-    # noinspection PyUnusedLocal
-    def generate_routing_info(self, subedge):
-        """
-        over writes component method, return the key and mask
-        """
-        if self.polarity is None:
-            key = \
-                self._virtual_chip_coords['x'] << 24 | \
-                self._virtual_chip_coords['y'] << 16
-            mask = 0xffff0000
-            return key, mask
-        elif self.polarity == ExternalFPGARetinaDevice.UP_POLARITY:
-            key = \
-                self._virtual_chip_coords['x'] << 24 | \
-                self._virtual_chip_coords['y'] << 16 | \
-                1 << 14
-            mask = 0xffffC000
-            return key, mask
-        elif self.polarity == ExternalFPGARetinaDevice.DOWN_POLARITY:
-            key = \
-                self._virtual_chip_coords['x'] << 24 | \
-                self._virtual_chip_coords['y'] << 16
-            mask = 0xffffC000
-            return key, mask
-        else:
-            raise exceptions.ConfigurationException(
-                "The FPGA retina requires the poloarity parameter to either be "
-                "UP, DOWN or None. Other values result in the Model not "
-                "knowing how to initlise its key and mask.")
+        # The key is the virtual core number
+        key = (self._virtual_chip_x << 24 | self._virtual_chip_y << 16 |
+               index << 11)
+        return list(
+            [KeyAllocatorFixedKeyAndMaskConstraint([KeyAndMask(key, mask)])])
 
     @property
     def model_name(self):
@@ -132,9 +149,8 @@ class ExternalFPGARetinaDevice(AbstractExternalRetinaDevice, AbstractFPGADevice)
         """
         return "external FPGA retina device"
 
-    @staticmethod
-    def get_packet_retina_coords(details, mode):
-        return packet_conversions.get_x_from_fpga_retina(details, mode), \
-            packet_conversions.get_y_from_fpga_retina(details, mode), \
-            packet_conversions.get_spike_value_from_fpga_retina(details,
-                                                                mode)
+    def is_virtual_vertex(self):
+        return True
+
+    def recieves_multicast_commands(self):
+        return True

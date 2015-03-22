@@ -1,23 +1,22 @@
-from spynnaker_external_devices_plugin.pyNN.interfaces.abstract_munich_device import AbstractMunichDevice
+from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
+    import AbstractVirtualVertex
 
 
-class MunichMotorDevice(AbstractMunichDevice):
-    MANAGEMENT_BIT = 0x400
-    RATE_CODING_ACTUATORS_ENABLE = 0x40
+class MunichMotorDevice(AbstractVirtualVertex):
 
-    def __init__(self, n_neurons, virtual_chip_coords, connected_chip_coords,
-                 connected_chip_edge, machine_time_step, label=None,
-                 neuron_controlled=True):
-        AbstractMunichDevice.__init__(
-            self, n_neurons, virtual_chip_coords, connected_chip_coords,
-            connected_chip_edge, machine_time_step=machine_time_step,
-            label=label, max_atoms_per_core=1)
+    def __init__(self, virtual_chip_x, virtual_chip_y,
+                 connected_to_real_chip_x, connected_to_real_chip_y,
+                 connected_to_real_chip_link_id):
 
-        self.neuron_controlled = neuron_controlled
+        AbstractVirtualVertex.__init__(
+            self, 6, virtual_chip_x, virtual_chip_y,
+            connected_to_real_chip_x, connected_to_real_chip_y,
+            connected_to_real_chip_link_id, "External Munich Motor",
+            max_atoms_per_core=6)
 
     @property
     def model_name(self):
         return "external motor device"
 
-    def get_commands(self, last_runtime_tic):
-        return list()
+    def is_virtual_vertex(self):
+        return True
