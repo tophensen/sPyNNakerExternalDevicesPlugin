@@ -1,4 +1,6 @@
 from spinnman.constants import CONNECTION_TYPE
+from spinnman.data.little_endian_byte_array_byte_writer\
+    import LittleEndianByteArrayByteWriter
 from spinnman.connections.abstract_classes.abstract_udp_connection \
     import AbstractUDPConnection
 
@@ -32,5 +34,6 @@ class SpynnakerSenderConnection(AbstractUDPConnection):
         return True
 
     def send_eieio_message(self, eieio_message, ip_address, port):
-        data = eieio_message.convert_to_byte_array()
-        self._socket.sendto(data, (ip_address, port))
+        writer = LittleEndianByteArrayByteWriter()
+        eieio_message.write_eieio_message(writer)
+        self._socket.sendto(writer.data, (ip_address, port))

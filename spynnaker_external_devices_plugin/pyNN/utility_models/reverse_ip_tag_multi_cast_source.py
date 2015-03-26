@@ -1,12 +1,15 @@
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 
-from pacman.model.abstract_classes.abstract_partitionable_vertex import \
+from pacman.model.partitionable_graph.abstract_partitionable_vertex import \
     AbstractPartitionableVertex
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
+from pacman.model.constraints.tag_allocator_constraints\
+    .tag_allocator_require_iptag_constraint\
+    import TagAllocatorRequireIptagConstraint
 from pacman.model.constraints.tag_allocator_constraints \
     .tag_allocator_require_reverse_iptag_constraint \
     import TagAllocatorRequireReverseIptagConstraint
@@ -23,7 +26,7 @@ from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities import constants
 
 
-from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
+from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
 
 
 from enum import Enum
@@ -39,7 +42,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         names=[('SYSTEM', 0),
                ('CONFIGURATION', 1)])
 
-    _CONFIGURATION_REGION_SIZE = 28
+    _CONFIGURATION_REGION_SIZE = 36
     _max_atoms_per_core = 2048
 
     CORE_APP_IDENTIFIER = constants.SPIKE_INJECTOR_CORE_APPLICATION_ID
@@ -48,7 +51,10 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                  spikes_per_second, ring_buffer_sigma, port,
                  label, board_address=None, virtual_key=None, check_key=True,
                  prefix=None, prefix_type=None, tag=None, key_left_shift=0,
-                 sdp_port=1):
+                 sdp_port=1, buffer_space=0, notify_buffer_space=False,
+                 space_before_notification=0, notification_tag=None,
+                 notification_ip_address=None, notification_port=None,
+                 notification_strip_sdp=True):
 
         if n_neurons > ReverseIpTagMultiCastSource._max_atoms_per_core:
             raise Exception("This model can currently only cope with {} atoms"
@@ -56,13 +62,16 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
                                     ._max_atoms_per_core))
 
         AbstractDataSpecableVertex.__init__(
-            self, n_neurons, label, machine_time_step,
-            timescale_factor)
+            self, machine_time_step, timescale_factor)
         AbstractPartitionableVertex.__init__(
             self, n_neurons, label,
             ReverseIpTagMultiCastSource._max_atoms_per_core)
         self.add_constraint(TagAllocatorRequireReverseIptagConstraint(
             port, sdp_port, board_address, tag))
+        if notify_buffer_space:
+            self.add_constraint(TagAllocatorRequireIptagConstraint(
+                notification_ip_address, notification_port,
+                notification_strip_sdp, board_address, notification_tag))
 
         # set params
         self._port = port
@@ -71,6 +80,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         self._check_key = check_key
         self._prefix_type = prefix_type
         self._key_left_shift = key_left_shift
+        self._buffer_space = buffer_space
+        self._space_before_notification = space_before_notification
+        self._notify_buffer_space = notify_buffer_space
 
         # validate params
         if self._prefix is not None and self._prefix_type is None:
@@ -84,9 +96,9 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
             # key =( key  ored prefix )and mask
             temp_vertual_key = virtual_key
             if self._prefix is not None:
-                if self._prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
+                if self._prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
                     temp_vertual_key |= self._prefix
-                if self._prefix_type == EIEIOPrefixType.UPPER_HALF_WORD:
+                if self._prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
                     temp_vertual_key |= (self._prefix << 16)
             else:
                 self._prefix = self._generate_prefix(virtual_key, prefix_type)
@@ -124,7 +136,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
     @staticmethod
     def _generate_prefix(virtual_key, prefix_type):
-        if prefix_type == EIEIOPrefixType.LOWER_HALF_WORD:
+        if prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return virtual_key & 0xFFFF
         return (virtual_key >> 16) & 0xFFFF
 
@@ -204,7 +216,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
 
             if self._prefix is None:
                 if self._prefix_type is None:
-                    self._prefix_type = EIEIOPrefixType.UPPER_HALF_WORD
+                    self._prefix_type = EIEIOPrefix.UPPER_HALF_WORD
                 self._prefix = self._generate_prefix(self._virtual_key,
                                                      self._prefix_type)
 
@@ -218,7 +230,7 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         if self._prefix is None:
             spec.write_value(data=0)
         else:
-            if self._prefix_type is EIEIOPrefixType.LOWER_HALF_WORD:
+            if self._prefix_type is EIEIOPrefix.LOWER_HALF_WORD:
                 spec.write_value(data=self._prefix)
             else:
                 spec.write_value(data=self._prefix << 16)
@@ -235,6 +247,17 @@ class ReverseIpTagMultiCastSource(AbstractPartitionableVertex,
         # add key and mask
         spec.write_value(data=self._virtual_key)
         spec.write_value(data=self._mask)
+
+        # Buffering control
+        spec.write_value(data=self._buffer_space)
+        spec.write_value(data=self._space_before_notification)
+
+        # Notification
+        if self._notify_buffer_space:
+            ip_tag = iter(ip_tags).next()
+            spec.write_value(data=ip_tag.tag)
+        else:
+            spec.write_value(data=0)
 
         # close spec
         spec.end_specification()

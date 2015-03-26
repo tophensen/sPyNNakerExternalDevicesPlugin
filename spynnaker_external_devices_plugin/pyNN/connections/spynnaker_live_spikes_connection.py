@@ -4,14 +4,13 @@ from spynnaker_external_devices_plugin.pyNN\
 from spynnaker_external_devices_plugin.pyNN.connections\
     .spynnaker_sender_connection import SpynnakerSenderConnection
 
-from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
-from spinnman.messages.eieio.eieio_message import EIEIOMessage
-from spinnman.messages.eieio.eieio_header import EIEIOHeader
+from spinnman.messages.eieio.data_messages.eieio_16bit\
+    .eieio_16bit_data_message import EIEIO16BitDataMessage
+from spinnman.messages.eieio.data_messages.eieio_32bit\
+    .eieio_32bit_data_message import EIEIO32BitDataMessage
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
 from spinnman.constants import TRAFFIC_TYPE
-from spinnman.data.little_endian_byte_array_byte_reader \
-    import LittleEndianByteArrayByteReader
 
 from threading import Thread
 
@@ -138,36 +137,20 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
             raise Exception(
                 "Only packets with a timestamp are currently considered")
 
-        time = 0
-        if header.payload_base is not None:
-            time = header.payload_base
-
-        packet_type = header.type_param
-        reader = LittleEndianByteArrayByteReader(packet.data)
         key_times_labels = dict()
-        for _ in range(0, header.count_param + 1):
-            next_time = time
-            key = None
-            label = None
-            if packet_type == EIEIOTypeParam.KEY_16_BIT:
-                key = reader.read_short()
-            elif packet_type == EIEIOTypeParam.KEY_32_BIT:
-                key = reader.read_int()
-            elif packet_type == EIEIOTypeParam.KEY_PAYLOAD_16_BIT:
-                key = reader.read_short()
-                next_time = time | reader.read_short()
-            elif packet_type == EIEIOTypeParam.KEY_PAYLOAD_32_BIT:
-                key = reader.read_int()
-                next_time = time | reader.read_int()
+        while packet.is_next_element:
+            element = packet.next_element
+            time = element.payload
+            key = element.key
             if key in self._key_to_neuron_id_and_label:
                 (neuron_id, label) = self._key_to_neuron_id_and_label[key]
-                if (next_time, label) not in key_times_labels:
-                    key_times_labels[(next_time, label)] = list()
-                key_times_labels[(next_time, label)].append(neuron_id)
+                if (time, label) not in key_times_labels:
+                    key_times_labels[(time, label)] = list()
+                key_times_labels[(time, label)].append(neuron_id)
 
-        for (key_time, label) in sorted(key_times_labels.keys()):
+        for (time, label) in sorted(key_times_labels.keys()):
             for callback in self._live_spike_callbacks[label]:
-                callback(label, key_time, key_times_labels[(key_time, label)])
+                callback(label, time, key_times_labels[(time, label)])
 
     def send_spike(self, label, neuron_id, send_full_keys=False):
         """ Send a spike from a single neuron
@@ -204,14 +187,18 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
         pos = 0
         while pos < len(neuron_ids):
 
-            message = EIEIOMessage(EIEIOHeader(EIEIOTypeParam.KEY_32_BIT))
+            message = None
+            if send_full_keys:
+                message = EIEIO32BitDataMessage()
+            else:
+                message = EIEIO16BitDataMessage()
 
             spikes_in_packet = 0
             while (pos < len(neuron_ids) and spikes_in_packet < max_keys):
                 key = neuron_ids[pos]
                 if send_full_keys:
                     key = self._neuron_id_to_key[label][key]
-                message.write_data(key)
+                message.add_key(key)
                 pos += 1
                 spikes_in_packet += 1
             ip_address, port = self._send_address_details[label]

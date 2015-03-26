@@ -1,6 +1,6 @@
-from pacman.model.partitionable_graph.partitionable_edge import \
-    PartitionableEdge
-from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
+from pacman.model.partitionable_graph.multi_cast_partitionable_edge\
+    import MultiCastPartitionableEdge
+from spinnman.messages.eieio.eieio_type import EIEIOType
 from spynnaker_external_devices_plugin.pyNN import LivePacketGather
 from spynnaker.pyNN import get_spynnaker
 from spynnaker.pyNN import IF_curr_exp
@@ -18,7 +18,7 @@ class SpynnakerExternalDevicePluginManager(object):
             self, vertex_to_record_from, port, hostname, tag=None,
             board_address=None,
             strip_sdp=True, use_prefix=False, key_prefix=None,
-            prefix_type=None, message_type=EIEIOTypeParam.KEY_32_BIT,
+            prefix_type=None, message_type=EIEIOType.KEY_32_BIT,
             right_shift=0, payload_as_time_stamps=True,
             use_payload_prefix=True, payload_prefix=None,
             payload_right_shift=0, number_of_packets_sent_per_time_step=0):
@@ -40,8 +40,8 @@ class SpynnakerExternalDevicePluginManager(object):
             _spinnaker.add_vertex(live_spike_recorder)
 
         # create the edge and add
-        edge = PartitionableEdge(vertex_to_record_from,
-                                 live_spike_recorder, label="recorder_edge")
+        edge = MultiCastPartitionableEdge(
+            vertex_to_record_from, live_spike_recorder, label="recorder_edge")
         _spinnaker.add_edge(edge)
 
     def create_munich_motor_population(
@@ -60,7 +60,7 @@ class SpynnakerExternalDevicePluginManager(object):
             sample_time, update_time, delay_time, delta_threshold,
             continue_if_not_different, "Robot Motor Control")
         spynnaker.add_vertex(motor_control)
-        edge = PartitionableEdge(population._get_vertex, motor_control,
-                                 label="Robot input edge")
+        edge = MultiCastPartitionableEdge(
+            population._get_vertex, motor_control, label="Robot input edge")
         spynnaker.add_edge(edge)
         return population

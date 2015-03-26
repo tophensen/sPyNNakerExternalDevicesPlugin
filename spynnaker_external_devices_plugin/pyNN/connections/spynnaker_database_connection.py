@@ -1,10 +1,11 @@
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.constants import CONNECTION_TYPE
+from spinnman.messages.eieio.command_messages.eieio_command_header \
+    import EIEIOCommandHeader
 from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
 from spinnman.data.little_endian_byte_array_byte_writer \
     import LittleEndianByteArrayByteWriter
-from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
 from spinnman.connections.abstract_classes.abstract_udp_connection \
     import AbstractUDPConnection
 
@@ -80,7 +81,7 @@ class SpynnakerDatabaseConnection(AbstractUDPConnection, Thread):
             # Read the read packet confirmation
             logger.info("Reading database")
             reader = LittleEndianByteArrayByteReader(bytearray(raw_data))
-            EIEIOCommandHeader.create_header_from_reader(reader)
+            EIEIOCommandHeader.read_eieio_header(reader)
             database_path = str(reader.read_bytes())
 
             # Call the callback
@@ -90,7 +91,7 @@ class SpynnakerDatabaseConnection(AbstractUDPConnection, Thread):
             logger.info(
                 "Notifying the toolchain that the database has been read")
             writer = LittleEndianByteArrayByteWriter()
-            EIEIOCommandHeader(1).write_command_header(writer)
+            EIEIOCommandHeader(1).write_eieio_header(writer)
             self._socket.sendto(writer.data, address)
 
             # Wait for the start of the simulation
