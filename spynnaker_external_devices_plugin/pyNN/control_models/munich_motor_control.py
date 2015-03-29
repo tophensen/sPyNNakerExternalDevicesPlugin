@@ -50,7 +50,7 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         """
 
         AbstractDataSpecableVertex.__init__(self, machine_timestep,
-                                            timescale_factor, None)
+                                            timescale_factor)
         AbstractPartitionableVertex.__init__(self, 6, label, 6, None)
         AbstractVertexWithEdgeToDependentVertices.__init__(
             self, [MunichMotorDevice(
