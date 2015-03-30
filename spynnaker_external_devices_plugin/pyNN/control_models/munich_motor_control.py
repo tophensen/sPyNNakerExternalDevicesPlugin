@@ -14,7 +14,7 @@ from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
     import AbstractDataSpecableVertex
 from spynnaker.pyNN import exceptions
 
-from pacman.model.abstract_classes.abstract_partitionable_vertex \
+from pacman.model.partitionable_graph.abstract_partitionable_vertex \
     import AbstractPartitionableVertex
 
 from data_specification.data_specification_generator import \
@@ -49,8 +49,8 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         """
         """
 
-        AbstractDataSpecableVertex.__init__(self, 6, label, machine_timestep,
-                                            timescale_factor, None)
+        AbstractDataSpecableVertex.__init__(self, machine_timestep,
+                                            timescale_factor)
         AbstractPartitionableVertex.__init__(self, 6, label, 6, None)
         AbstractVertexWithEdgeToDependentVertices.__init__(
             self, [MunichMotorDevice(

@@ -4,7 +4,7 @@ from pacman.model.constraints.placer_constraints\
 from pacman.model.constraints.tag_allocator_constraints\
     .tag_allocator_require_iptag_constraint \
     import TagAllocatorRequireIptagConstraint
-from pacman.model.abstract_classes.abstract_partitionable_vertex \
+from pacman.model.partitionable_graph.abstract_partitionable_vertex \
     import AbstractPartitionableVertex
 
 
@@ -18,8 +18,8 @@ from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 
 
-from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
-from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
+from spinnman.messages.eieio.eieio_type import EIEIOType
+from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
 
 
 from enum import Enum
@@ -36,15 +36,13 @@ class LivePacketGather(
                ('CONFIG', 1)])
     _CONFIG_SIZE = 44
 
-    """
-    A AbstractConstrainedVertex for the Monitoring application data and
-    forwarding them to the host
-
+    """ A Vertex for the Monitoring application data and forwarding them to \
+        the host
     """
     def __init__(self, machine_time_step, timescale_factor, ip_address,
                  port, board_address=None, tag=None, strip_sdp=True,
                  use_prefix=False, key_prefix=None, prefix_type=None,
-                 message_type=EIEIOTypeParam.KEY_32_BIT,
+                 message_type=EIEIOType.KEY_32_BIT,
                  right_shift=0, payload_as_time_stamps=True,
                  use_payload_prefix=True, payload_prefix=None,
                  payload_right_shift=0,
@@ -52,29 +50,28 @@ class LivePacketGather(
         """
         Creates a new AppMonitor Object.
         """
-        if ((message_type == EIEIOTypeParam.KEY_PAYLOAD_32_BIT or
-             message_type == EIEIOTypeParam.KEY_PAYLOAD_16_BIT) and
+        if ((message_type == EIEIOType.KEY_PAYLOAD_32_BIT or
+             message_type == EIEIOType.KEY_PAYLOAD_16_BIT) and
                 use_payload_prefix and payload_as_time_stamps):
             raise exceptions.ConfigurationException(
                 "Timestamp can either be included as payload prefix or as "
                 "payload to each key, not both")
-        if ((message_type == EIEIOTypeParam.KEY_32_BIT or
-             message_type == EIEIOTypeParam.KEY_16_BIT) and
+        if ((message_type == EIEIOType.KEY_32_BIT or
+             message_type == EIEIOType.KEY_16_BIT) and
                 not use_payload_prefix and payload_as_time_stamps):
             raise exceptions.ConfigurationException(
                 "Timestamp can either be included as payload prefix or as"
                 " payload to each key, but current configuration does not "
                 "specify either of these")
-        if (not isinstance(prefix_type, EIEIOPrefixType) and
+        if (not isinstance(prefix_type, EIEIOPrefix) and
                 prefix_type is not None):
             raise exceptions.ConfigurationException(
-                "the type of a prefix type should be of a EIEIOPrefixType, "
+                "the type of a prefix type should be of a EIEIOPrefix, "
                 "which can be located in :"
                 "spinnman..messages.eieio.eieio_prefix_type")
 
         AbstractDataSpecableVertex.__init__(
-            self, n_atoms=1, label="Monitor",
-            machine_time_step=machine_time_step,
+            self, machine_time_step=machine_time_step,
             timescale_factor=timescale_factor)
         AbstractPartitionableVertex.__init__(self, n_atoms=1, label="Monitor",
                                              max_atoms_per_core=1)

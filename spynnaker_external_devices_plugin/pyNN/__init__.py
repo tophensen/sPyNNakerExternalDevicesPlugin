@@ -5,7 +5,7 @@ and implementation for the PyNN High-level API
 """
 
 # external models
-from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
+from spinnman.messages.eieio.eieio_type import EIEIOType
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     external_cochlea_device import ExternalCochleaDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
@@ -30,7 +30,7 @@ spynnaker_external_devices = SpynnakerExternalDevicePluginManager()
 def activate_live_output_for(
         population, board_address=None, port=None, host=None, tag=None,
         strip_sdp=True, use_prefix=False, key_prefix=None,
-        prefix_type=None, message_type=EIEIOTypeParam.KEY_32_BIT,
+        prefix_type=None, message_type=EIEIOType.KEY_32_BIT,
         right_shift=0, payload_as_time_stamps=True,
         use_payload_prefix=True, payload_prefix=None,
         payload_right_shift=0, number_of_packets_sent_per_time_step=0):
