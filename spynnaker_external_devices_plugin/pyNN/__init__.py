@@ -66,8 +66,6 @@ def activate_live_output_for(
         port = conf.config.getint("Recording", "live_spike_port")
     if host is None:
         host = conf.config.get("Recording", "live_spike_host")
-    if tag is None:
-        tag = conf.config.getint("Recording", "live_spike_tag")
 
     # add new edge and vertex if required to spinnaker graph
     spynnaker_external_devices.add_edge_to_recorder_vertex(
