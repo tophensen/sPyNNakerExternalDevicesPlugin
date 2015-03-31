@@ -1,15 +1,16 @@
 from spynnaker.pyNN.models.abstract_models\
     .abstract_send_me_multicast_commands_vertex \
     import AbstractSendMeMulticastCommandsVertex
-from spynnaker.pyNN.models.abstract_models\
-    .abstract_provides_outgoing_edge_constraints \
-    import AbstractProvidesOutgoingEdgeConstraints
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
 from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
 from spynnaker.pyNN import exceptions
+
+from spinn_front_end_common.abstract_models\
+    .abstract_provides_outgoing_edge_constraints\
+    import AbstractProvidesOutgoingEdgeConstraints
 
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand

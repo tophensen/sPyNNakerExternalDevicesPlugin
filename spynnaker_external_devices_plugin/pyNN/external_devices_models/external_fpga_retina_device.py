@@ -5,11 +5,12 @@ from spynnaker.pyNN.models.abstract_models\
     import AbstractSendMeMulticastCommandsVertex
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
-from spynnaker.pyNN.models.abstract_models\
-    .abstract_provides_outgoing_edge_constraints \
-    import AbstractProvidesOutgoingEdgeConstraints
 from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
+
+from spinn_front_end_common.abstract_models\
+    .abstract_provides_outgoing_edge_constraints\
+    import AbstractProvidesOutgoingEdgeConstraints
 
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \

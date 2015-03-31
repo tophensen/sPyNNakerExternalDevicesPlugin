@@ -1,5 +1,4 @@
 import sqlite3 as sqlite
-from spynnaker.pyNN.utilities.conf import config
 
 
 class DatabaseReader(object):

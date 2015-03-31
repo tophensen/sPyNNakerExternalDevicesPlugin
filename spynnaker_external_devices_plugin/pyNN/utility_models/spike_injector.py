@@ -1,4 +1,5 @@
-from spynnaker_external_devices_plugin.pyNN import ReverseIpTagMultiCastSource
+from spinn_front_end_common.utility_models.reverse_ip_tag_multi_cast_source\
+    import ReverseIpTagMultiCastSource
 
 
 class SpikeInjector(ReverseIpTagMultiCastSource):

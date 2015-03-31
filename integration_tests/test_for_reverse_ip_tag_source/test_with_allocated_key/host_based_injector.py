@@ -7,9 +7,9 @@ from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
 from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
 from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
-from spinnman.messages.eieio.eieio_data_header import EIEIOHeader
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message import EIEIODataMessage
-from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
+from spinnman.messages.eieio.data_messages.eieio_data_header import EIEIOHeader
+from spinnman.messages.eieio.data_messages.eieio_data_message import EIEIODataMessage
+from spinnman.messages.eieio.eieio_type import EIEIOType
 from spinnman.connections.udp_packet_connections.reverse_iptag_connection \
     import ReverseIPTagConnection
 from spinnman import constants
@@ -93,7 +93,7 @@ class HostBasedInjector(object):
     def _inject_spike(self, spike, key_to_neuron_id_mapping, max_neurons):
         spike_id = spike * math.floor((max_neurons / self._max_spikes))
         key = key_to_neuron_id_mapping[spike_id]
-        header = EIEIOHeader(type_param=EIEIOTypeParam.KEY_32_BIT)
+        header = EIEIOHeader(type_param=EIEIOType.KEY_32_BIT)
         message = EIEIODataMessage(eieio_header=header)
         message.write_data(key)
         print "injecting with key {}\n".format(key)

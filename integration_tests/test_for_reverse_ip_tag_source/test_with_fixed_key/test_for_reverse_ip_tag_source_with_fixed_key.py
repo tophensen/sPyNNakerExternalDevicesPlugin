@@ -1,6 +1,6 @@
 import spynnaker.pyNN as frontend
 import spynnaker_external_devices_plugin.pyNN as externaldevices
-from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
+from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
 import pylab
 
 frontend.setup(timestep=1.0, min_delay=1.0, max_delay=144.0)
@@ -30,7 +30,7 @@ cell_params_spike_injector_with_key = \
     'host_ip_address'  : "localhost",
     'virtual_key'      : 0x70800,
     'prefix'           : 7,
-    'prefix_type': EIEIOPrefixType.UPPER_HALF_WORD}
+    'prefix_type': EIEIOPrefix.UPPER_HALF_WORD}
 
 populations = list()
 projections = list()
@@ -51,13 +51,13 @@ projections.append(frontend.Projection(
     populations[1], populations[0],
     frontend.OneToOneConnector(weights=weight_to_spike)))
 
-loopConnections = list()
+connections = list()
 for i in range(0, nNeurons - 1):
     singleConnection = (i, ((i + 1) % nNeurons), weight_to_spike, 3)
-    loopConnections.append(singleConnection)
+    connections.append(singleConnection)
 
 projections.append(frontend.Projection(populations[0], populations[0],
-                   frontend.FromListConnector(loopConnections)))
+                   frontend.FromListConnector(connections)))
 
 
 frontend.run(run_time)
