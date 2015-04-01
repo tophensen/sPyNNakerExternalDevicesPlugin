@@ -13,6 +13,4 @@ class SpikeInjector(ReverseIpTagMultiCastSource):
         ReverseIpTagMultiCastSource.__init__(
             self, port=port, label=label,
             n_neurons=n_neurons, machine_time_step=machine_time_step,
-            ring_buffer_sigma=ring_buffer_sigma,
-            timescale_factor=timescale_factor,
-            spikes_per_second=spikes_per_second, virtual_key=virtual_key)
+            timescale_factor=timescale_factor, virtual_key=virtual_key)
