@@ -36,7 +36,8 @@ class SpynnakerExternalDevicePluginManager(object):
                 hostname, port, board_address, tag, strip_sdp, use_prefix,
                 key_prefix, prefix_type, message_type, right_shift,
                 payload_as_time_stamps, use_payload_prefix, payload_prefix,
-                payload_right_shift, number_of_packets_sent_per_time_step)
+                payload_right_shift, number_of_packets_sent_per_time_step,
+                label="LiveSpikeReceiver")
             self._live_spike_recorders[(port, hostname)] = live_spike_recorder
             _spinnaker.add_vertex(live_spike_recorder)
 

@@ -76,7 +76,8 @@ class DatabaseReader(object):
             " JOIN Partitionable_vertices as pre_vertices"
             " ON edges.pre_vertex == pre_vertices.vertex_id"
             " WHERE pre_vertices.vertex_label == \"{}\""
-            " AND post_vertices.vertex_label == \"Monitor\"".format(label))
+            " AND post_vertices.vertex_label == \"LiveSpikeReceiver\""
+            .format(label))
         row = self._cursor.fetchone()
         return (row["ip_address"], row["port"], row["strip_sdp"])
 
