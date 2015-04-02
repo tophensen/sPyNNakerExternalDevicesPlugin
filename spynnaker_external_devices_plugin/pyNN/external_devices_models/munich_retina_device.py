@@ -59,6 +59,11 @@ class MunichRetinaDevice(AbstractVirtualVertex,
         if polarity is None:
             polarity = MunichRetinaDevice.MERGED_POLARITY
 
+        self._fixed_key = (virtual_chip_x << 24 | virtual_chip_y << 16)
+        self._fixed_mask = 0xFFFF8000
+        if polarity == MunichRetinaDevice.UP_POLARITY:
+            self._fixed_key |= 0x4000
+
         if polarity == MunichRetinaDevice.MERGED_POLARITY:
 
             # There are 128 x 128 retina "pixels" x 2 polarities
@@ -67,11 +72,12 @@ class MunichRetinaDevice(AbstractVirtualVertex,
 
             # There are 128 x 128 retina "pixels"
             fixed_n_neurons = 128 * 128
+            self._fixed_mask = 0xFFFFC000
 
         AbstractVirtualVertex.__init__(
             self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
             connected_to_real_chip_x, connected_to_real_chip_y,
-            connected_to_real_chip_link_id, max_atoms_per_core=2048,
+            connected_to_real_chip_link_id, max_atoms_per_core=fixed_n_neurons,
             label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands(position))
@@ -90,29 +96,8 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-
-        # Hack to use the neural modelling fixed mask
-        mask = 0xFFFFF800
-        vertex_slice = graph_mapper.get_subvertex_slice(
-            partitioned_edge.pre_subvertex)
-
-        # Should be one subedge for each 2048 atoms
-        index = vertex_slice.lo_atom / 2048
-
-        # The core index should be 8 higher for the up polarity
-        if self._position == MunichRetinaDevice.RIGHT_RETINA:
-            if self._polarity == MunichRetinaDevice.UP_POLARITY:
-                index += 8
-        elif self._polarity == MunichRetinaDevice.UP_POLARITY:
-            index += 24
-        else:
-            index += 16
-
-        # The key is the virtual core number
-        key = (self._virtual_chip_x << 24 | self._virtual_chip_y << 16 |
-               index << 11)
-        return list(
-            [KeyAllocatorFixedKeyAndMaskConstraint([KeyAndMask(key, mask)])])
+        return list([KeyAllocatorFixedKeyAndMaskConstraint(
+            [KeyAndMask(self._fixed_key, self._fixed_mask)])])
 
     def _get_commands(self, position):
         """
