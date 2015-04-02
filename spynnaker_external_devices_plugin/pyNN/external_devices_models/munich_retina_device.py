@@ -1,15 +1,16 @@
 from spynnaker.pyNN.models.abstract_models\
     .abstract_send_me_multicast_commands_vertex \
     import AbstractSendMeMulticastCommandsVertex
-from spynnaker.pyNN.models.abstract_models\
-    .abstract_provides_outgoing_edge_constraints \
-    import AbstractProvidesOutgoingEdgeConstraints
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
 from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
 from spynnaker.pyNN import exceptions
+
+from spinn_front_end_common.abstract_models\
+    .abstract_outgoing_edge_same_contiguous_keys_restrictor\
+    import AbstractOutgoingEdgeSameContiguousKeysRestrictor
 
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
@@ -30,7 +31,7 @@ def get_spike_value_from_robot_retina(key):
 
 class MunichRetinaDevice(AbstractVirtualVertex,
                          AbstractSendMeMulticastCommandsVertex,
-                         AbstractProvidesOutgoingEdgeConstraints):
+                         AbstractOutgoingEdgeSameContiguousKeysRestrictor):
 
     # key codes for the robot retina
     MANAGEMENT_BIT = 0x400
@@ -58,6 +59,11 @@ class MunichRetinaDevice(AbstractVirtualVertex,
         if polarity is None:
             polarity = MunichRetinaDevice.MERGED_POLARITY
 
+        self._fixed_key = (virtual_chip_x << 24 | virtual_chip_y << 16)
+        self._fixed_mask = 0xFFFF8000
+        if polarity == MunichRetinaDevice.UP_POLARITY:
+            self._fixed_key |= 0x4000
+
         if polarity == MunichRetinaDevice.MERGED_POLARITY:
 
             # There are 128 x 128 retina "pixels" x 2 polarities
@@ -66,15 +72,16 @@ class MunichRetinaDevice(AbstractVirtualVertex,
 
             # There are 128 x 128 retina "pixels"
             fixed_n_neurons = 128 * 128
+            self._fixed_mask = 0xFFFFC000
 
         AbstractVirtualVertex.__init__(
             self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
             connected_to_real_chip_x, connected_to_real_chip_y,
-            connected_to_real_chip_link_id, max_atoms_per_core=2048,
+            connected_to_real_chip_link_id, max_atoms_per_core=fixed_n_neurons,
             label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands(position))
-        AbstractProvidesOutgoingEdgeConstraints.__init__(self)
+        AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
 
         self._polarity = polarity
         self._position = position
@@ -89,29 +96,12 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-
-        # Hack to use the neural modelling fixed mask
-        mask = 0xFFFFF800
-        vertex_slice = graph_mapper.get_subvertex_slice(
-            partitioned_edge.pre_subvertex)
-
-        # Should be one subedge for each 2048 atoms
-        index = vertex_slice.lo_atom / 2048
-
-        # The core index should be 8 higher for the up polarity
-        if self._position == MunichRetinaDevice.RIGHT_RETINA:
-            if self._polarity == MunichRetinaDevice.UP_POLARITY:
-                index += 8
-        elif self._polarity == MunichRetinaDevice.UP_POLARITY:
-            index += 24
-        else:
-            index += 16
-
-        # The key is the virtual core number
-        key = (self._virtual_chip_x << 24 | self._virtual_chip_y << 16 |
-               index << 11)
-        return list(
-            [KeyAllocatorFixedKeyAndMaskConstraint([KeyAndMask(key, mask)])])
+        constraints = (AbstractOutgoingEdgeSameContiguousKeysRestrictor
+                       .get_outgoing_edge_constraints(
+                           self, partitioned_edge, graph_mapper))
+        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
+            [KeyAndMask(self._fixed_key, self._fixed_mask)]))
+        return constraints
 
     def _get_commands(self, position):
         """

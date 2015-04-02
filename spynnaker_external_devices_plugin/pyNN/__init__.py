@@ -4,26 +4,31 @@ and implementation for the PyNN High-level API
 (http://neuralensemble.org/trac/PyNN)
 """
 
-# external models
 from spinnman.messages.eieio.eieio_type import EIEIOType
+
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     external_cochlea_device import ExternalCochleaDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     external_fpga_retina_device import ExternalFPGARetinaDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_retina_device import MunichRetinaDevice
-from spynnaker_external_devices_plugin.pyNN.utility_models.\
-    reverse_ip_tag_multi_cast_source import ReverseIpTagMultiCastSource
 from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
     import SpikeInjector
-from spynnaker_external_devices_plugin.pyNN.utility_models.live_packet_gather \
-    import LivePacketGather
+from spynnaker_external_devices_plugin.pyNN import model_binaries
 from spynnaker_external_devices_plugin.pyNN.\
     spynnaker_external_device_plugin_manager import \
     SpynnakerExternalDevicePluginManager
+
 from spynnaker.pyNN.utilities import conf
 from spynnaker.pyNN import IF_curr_exp
+from spynnaker.pyNN.spinnaker import executable_finder
 
+from spinn_front_end_common.utility_models.live_packet_gather \
+    import LivePacketGather
+
+import os
+
+executable_finder.add_path(os.path.dirname(model_binaries.__file__))
 spynnaker_external_devices = SpynnakerExternalDevicePluginManager()
 
 

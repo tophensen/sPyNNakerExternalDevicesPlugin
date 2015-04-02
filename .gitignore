@@ -10,3 +10,4 @@ application_generated_data_files*
 *build/
 /dist/
 /sPyNNakerExternalDevicesPlugin.egg-info/
+*.aplx

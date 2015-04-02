@@ -4,15 +4,16 @@ from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.models.abstract_models\
     .abstract_vertex_with_dependent_vertices import \
     AbstractVertexWithEdgeToDependentVertices
-from spynnaker.pyNN.models.abstract_models\
-    .abstract_provides_outgoing_edge_constraints \
-    import AbstractProvidesOutgoingEdgeConstraints
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_mask_constraint \
     import KeyAllocatorFixedMaskConstraint
-from spynnaker.pyNN.models.abstract_models.abstract_data_specable_vertex \
-    import AbstractDataSpecableVertex
 from spynnaker.pyNN import exceptions
+
+from spinn_front_end_common.abstract_models.abstract_data_specable_vertex\
+    import AbstractDataSpecableVertex
+from spinn_front_end_common.abstract_models\
+    .abstract_provides_outgoing_edge_constraints\
+    import AbstractProvidesOutgoingEdgeConstraints
 
 from pacman.model.partitionable_graph.abstract_partitionable_vertex \
     import AbstractPartitionableVertex
@@ -75,7 +76,8 @@ class MunichMotorControl(AbstractDataSpecableVertex,
 
     def generate_data_spec(self, subvertex, placement, subgraph, graph,
                            routing_info, hostname, graph_subgraph_mapper,
-                           report_folder, ip_tags, reverse_ip_tags):
+                           report_folder, ip_tags, reverse_ip_tags,
+                           write_text_specs, application_run_time_folder):
         """
         Model-specific construction of the data blocks necessary to build a
         single external retina device.
@@ -83,7 +85,8 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         # Create new DataSpec for this processor:
         data_writer, report_writer = \
             self.get_data_spec_file_writers(
-                placement.x, placement.y, placement.p, hostname, report_folder)
+                placement.x, placement.y, placement.p, hostname, report_folder,
+                write_text_specs, application_run_time_folder)
 
         spec = DataSpecificationGenerator(data_writer, report_writer)
 
@@ -92,7 +95,8 @@ class MunichMotorControl(AbstractDataSpecableVertex,
 
         # Write the setup region
         spec.comment("\n*** Spec for robot motor control ***\n\n")
-        self._write_basic_setup_info(spec, self.CORE_APP_IDENTIFIER)
+        self._write_basic_setup_info(spec, self.CORE_APP_IDENTIFIER,
+                                     self.SYSTEM_REGION)
 
         # locate correct subedge for key
         edge_key = None
@@ -158,4 +162,7 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         return 0
 
     def has_dependent_vertices(self):
+        return True
+
+    def is_data_specable(self):
         return True

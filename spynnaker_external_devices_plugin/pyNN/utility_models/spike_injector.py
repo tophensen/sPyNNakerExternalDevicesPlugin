@@ -1,7 +1,12 @@
-from spynnaker_external_devices_plugin.pyNN import ReverseIpTagMultiCastSource
+from spinn_front_end_common.utility_models.reverse_ip_tag_multi_cast_source\
+    import ReverseIpTagMultiCastSource
+from spinn_front_end_common.abstract_models\
+    .abstract_outgoing_edge_same_contiguous_keys_restrictor\
+    import AbstractOutgoingEdgeSameContiguousKeysRestrictor
 
 
-class SpikeInjector(ReverseIpTagMultiCastSource):
+class SpikeInjector(ReverseIpTagMultiCastSource,
+                    AbstractOutgoingEdgeSameContiguousKeysRestrictor):
     """ An Injector of Spikes for PyNN populations.  This only allows the user\
         to specify the virtual_key of the population to identify the population
     """
@@ -12,6 +17,14 @@ class SpikeInjector(ReverseIpTagMultiCastSource):
         ReverseIpTagMultiCastSource.__init__(
             self, port=port, label=label,
             n_neurons=n_neurons, machine_time_step=machine_time_step,
-            ring_buffer_sigma=ring_buffer_sigma,
-            timescale_factor=timescale_factor,
-            spikes_per_second=spikes_per_second, virtual_key=virtual_key)
+            timescale_factor=timescale_factor, virtual_key=virtual_key)
+        AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
+
+    def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
+        constraints = (ReverseIpTagMultiCastSource
+                       .get_outgoing_edge_constraints(
+                           self, partitioned_edge, graph_mapper))
+        constraints.extend(AbstractOutgoingEdgeSameContiguousKeysRestrictor
+                           .get_outgoing_edge_constraints(
+                               self, partitioned_edge, graph_mapper))
+        return constraints
