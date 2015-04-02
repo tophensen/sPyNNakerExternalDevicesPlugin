@@ -9,8 +9,8 @@ from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
 from spynnaker.pyNN import exceptions
 
 from spinn_front_end_common.abstract_models\
-    .abstract_provides_outgoing_edge_constraints\
-    import AbstractProvidesOutgoingEdgeConstraints
+    .abstract_outgoing_edge_same_contiguous_keys_restrictor\
+    import AbstractOutgoingEdgeSameContiguousKeysRestrictor
 
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
@@ -31,7 +31,7 @@ def get_spike_value_from_robot_retina(key):
 
 class MunichRetinaDevice(AbstractVirtualVertex,
                          AbstractSendMeMulticastCommandsVertex,
-                         AbstractProvidesOutgoingEdgeConstraints):
+                         AbstractOutgoingEdgeSameContiguousKeysRestrictor):
 
     # key codes for the robot retina
     MANAGEMENT_BIT = 0x400
@@ -81,7 +81,7 @@ class MunichRetinaDevice(AbstractVirtualVertex,
             label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands(position))
-        AbstractProvidesOutgoingEdgeConstraints.__init__(self)
+        AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
 
         self._polarity = polarity
         self._position = position
@@ -96,8 +96,12 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        return list([KeyAllocatorFixedKeyAndMaskConstraint(
-            [KeyAndMask(self._fixed_key, self._fixed_mask)])])
+        constraints = (AbstractOutgoingEdgeSameContiguousKeysRestrictor
+                       .get_outgoing_edge_constraints(
+                           self, partitioned_edge, graph_mapper))
+        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
+            [KeyAndMask(self._fixed_key, self._fixed_mask)]))
+        return constraints
 
     def _get_commands(self, position):
         """

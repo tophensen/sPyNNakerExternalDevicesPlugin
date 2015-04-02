@@ -163,3 +163,6 @@ class MunichMotorControl(AbstractDataSpecableVertex,
 
     def has_dependent_vertices(self):
         return True
+
+    def is_data_specable(self):
+        return True

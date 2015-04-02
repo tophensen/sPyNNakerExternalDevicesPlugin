@@ -9,8 +9,8 @@ from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
     import AbstractVirtualVertex
 
 from spinn_front_end_common.abstract_models\
-    .abstract_provides_outgoing_edge_constraints\
-    import AbstractProvidesOutgoingEdgeConstraints
+    .abstract_outgoing_edge_same_contiguous_keys_restrictor\
+    import AbstractOutgoingEdgeSameContiguousKeysRestrictor
 
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
@@ -60,9 +60,9 @@ def get_spike_value_from_fpga_retina(key, mode):
         return None
 
 
-class ExternalFPGARetinaDevice(AbstractVirtualVertex,
-                               AbstractSendMeMulticastCommandsVertex,
-                               AbstractProvidesOutgoingEdgeConstraints):
+class ExternalFPGARetinaDevice(
+        AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
+        AbstractOutgoingEdgeSameContiguousKeysRestrictor):
 
     MODE_128 = "128"
     MODE_64 = "64"
@@ -123,18 +123,22 @@ class ExternalFPGARetinaDevice(AbstractVirtualVertex,
                         " device has been ignored {} will be used instead"
                         .format(fixed_n_neurons))
         AbstractVirtualVertex.__init__(
-            self, fixed_n_neurons, self._fixed_x, self._fixed_y,
+            self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
             connected_to_real_chip_x, connected_to_real_chip_y,
             connected_to_real_chip_link_id, max_atoms_per_core=fixed_n_neurons,
             label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(self, commands=[
             MultiCastCommand(0, 0x0000FFFF, 0xFFFF0000, 1, 5, 100),
             MultiCastCommand(-1, 0x0000FFFE, 0xFFFF0000, 0, 5, 100)])
+        AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-
-        return list([KeyAllocatorFixedKeyAndMaskConstraint(
-            [KeyAndMask(self._fixed_key, self._fixed_mask)])])
+        constraints = (AbstractOutgoingEdgeSameContiguousKeysRestrictor
+                       .get_outgoing_edge_constraints(
+                           self, partitioned_edge, graph_mapper))
+        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
+            [KeyAndMask(self._fixed_key, self._fixed_mask)]))
+        return constraints
 
     @property
     def model_name(self):
