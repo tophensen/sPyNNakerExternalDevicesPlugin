@@ -7,6 +7,8 @@ import spynnaker_external_devices_plugin.pyNN as q
 import retina_lib as retina_lib
 
 connected_chip_details = {
+    "virtual_chip_x": 0,
+    "virtual_chip_y": 6,
     "connected_to_real_chip_x": 0,
     "connected_to_real_chip_y": 0,
     "connected_to_real_chip_link_id": 4

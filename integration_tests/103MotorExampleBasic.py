@@ -7,7 +7,7 @@ import spynnaker.pyNN as p
 import spynnaker_external_devices_plugin.pyNN as q
 
 # set up the tools
-p.setup(timestep=1.0, min_delay=1.0, max_delay=32.0)
+p.setup(timestep=1.0)
 
 # set up the virtual chip coordinates for the motor
 connected_chip_coords = {'x': 0, 'y': 0}

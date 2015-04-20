@@ -1,6 +1,5 @@
 import spynnaker.pyNN as frontend
 import spynnaker_external_devices_plugin.pyNN as externaldevices
-from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
 import pylab
 
 from spynnaker.pyNN.utilities.database.socket_address import SocketAddress
@@ -37,7 +36,7 @@ weight_to_spike = 2.0
 populations.append(frontend.Population(nNeurons, frontend.IF_curr_exp,
                                        cell_params_lif, label='pop_1'))
 populations.append(
-    frontend.Population(nNeurons, externaldevices.ReverseIpTagMultiCastSource,
+    frontend.Population(nNeurons, externaldevices.SpikeInjector,
                         cell_params_spike_injector,
                         label='spike_injector_1'))
 
