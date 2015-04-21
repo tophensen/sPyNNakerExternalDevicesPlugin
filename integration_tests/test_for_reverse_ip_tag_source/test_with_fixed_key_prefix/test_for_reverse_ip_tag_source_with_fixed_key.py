@@ -59,8 +59,8 @@ if spikes is not None:
     print spikes
     pylab.figure()
     pylab.plot([i[1] for i in spikes], [i[0] for i in spikes], ".")
-    pylab.xlabel('neuron id')
-    pylab.ylabel('Time/ms')
+    pylab.ylabel('neuron id')
+    pylab.xlabel('Time/ms')
     pylab.title('spikes')
     pylab.show()
 else:
