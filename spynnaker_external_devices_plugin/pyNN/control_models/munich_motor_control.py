@@ -17,7 +17,7 @@ from spynnaker.pyNN import exceptions
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_mask_constraint \
     import KeyAllocatorFixedMaskConstraint
-from pacman.model.abstract_classes.abstract_partitionable_vertex \
+from pacman.model.partitionable_graph.abstract_partitionable_vertex \
     import AbstractPartitionableVertex
 
 # front end common imports
@@ -27,7 +27,6 @@ from spinn_front_end_common.abstract_models\
     .abstract_provides_outgoing_edge_constraints\
     import AbstractProvidesOutgoingEdgeConstraints
 
-# dsg improts
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 
