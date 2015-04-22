@@ -1,28 +1,37 @@
+"""
+MunichMotorControl
+"""
+
+# externald evice imports
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_motor_device import MunichMotorDevice
+
+# spynnaker improts
 from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.models.abstract_models\
     .abstract_vertex_with_dependent_vertices import \
     AbstractVertexWithEdgeToDependentVertices
+from spynnaker.pyNN import exceptions
+
+# pacman imports
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_mask_constraint \
     import KeyAllocatorFixedMaskConstraint
-from spynnaker.pyNN import exceptions
+from pacman.model.partitionable_graph.abstract_partitionable_vertex \
+    import AbstractPartitionableVertex
 
+# front end common imports
 from spinn_front_end_common.abstract_models.abstract_data_specable_vertex\
     import AbstractDataSpecableVertex
 from spinn_front_end_common.abstract_models\
     .abstract_provides_outgoing_edge_constraints\
     import AbstractProvidesOutgoingEdgeConstraints
 
-from pacman.model.partitionable_graph.abstract_partitionable_vertex \
-    import AbstractPartitionableVertex
-
 from data_specification.data_specification_generator import \
     DataSpecificationGenerator
 
+# general imports
 import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +40,9 @@ class MunichMotorControl(AbstractDataSpecableVertex,
                          AbstractPartitionableVertex,
                          AbstractVertexWithEdgeToDependentVertices,
                          AbstractProvidesOutgoingEdgeConstraints):
+    """
+    the control model for the moters of a ombibot
+    """
 
     SYSTEM_REGION = 0
     PARAMS_REGION = 1

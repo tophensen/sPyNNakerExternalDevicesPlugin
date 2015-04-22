@@ -72,23 +72,25 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
         :param label: The label of the population to be notified about. Must\
                     be one of the populations listed in the constructor
         :type label: str
-        :param spikes_callback_function: A function to be called when spikes\
+        :param live_spike_callback: A function to be called when spikes\
                     are received.  This should take as parameters the label\
                     of the population, the simulation timestep when the spike\
                     occured, and an array-like of neuron ids.
-        :type spikes_callback_function: function(str, int, [int]) -> None
+        :type live_spike_callback: function(str, int, [int]) -> None
         """
         self._live_spike_callbacks[label].append(live_spike_callback)
 
     def add_start_callback(self, label, start_callback):
         """ Add a callback for the start of the simulation
 
-        :param start_callback_function: A function to be called when the start\
+        :param start_callback: A function to be called when the start\
                     message has been received.  This function should take the\
                     label of the referenced population, and an instance of\
                     this class, which can be used to send spikes
-        :type start_callback_function: function(str, \
+        :type start_callback: function(str, \
                     :py:class:`SpynnakerLiveInputSpikesConnection`) -> None
+        :param label: the label of the function to be sent
+        :type label: str
         """
         self._start_callbacks[label].append(start_callback)
 
@@ -187,14 +189,13 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
         pos = 0
         while pos < len(neuron_ids):
 
-            message = None
             if send_full_keys:
                 message = EIEIO32BitDataMessage()
             else:
                 message = EIEIO16BitDataMessage()
 
             spikes_in_packet = 0
-            while (pos < len(neuron_ids) and spikes_in_packet < max_keys):
+            while pos < len(neuron_ids) and spikes_in_packet < max_keys:
                 key = neuron_ids[pos]
                 if send_full_keys:
                     key = self._neuron_id_to_key[label][key]
