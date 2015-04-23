@@ -3,16 +3,8 @@ import sqlite3 as sqlite
 from time import sleep
 import math
 
-from spinnman.data.little_endian_byte_array_byte_reader import \
-    LittleEndianByteArrayByteReader
-# from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
-# from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
-# from spinnman.messages.eieio.data_messages.eieio_data_header import EIEIOHeader
-# from spinnman.messages.eieio.data_messages.eieio_data_message import EIEIODataMessage
-# from spinnman.messages.eieio.eieio_type import EIEIOType
 from spinnman.connections.udp_packet_connections.reverse_iptag_connection \
     import ReverseIPTagConnection
-# from spinnman import constants
 from spinnman.messages.eieio.command_messages.database_confirmation import \
     DatabaseConfirmation
 from spinnman.messages.eieio.data_messages.eieio_32bit.\
@@ -29,15 +21,15 @@ class HostBasedInjector(object):
     """
 
     def _receive_hand_shake(self, packet):
-        """ method to process the eieio command message
+        """ method to process the DatabaseConfirmation command message
 
-        :param packet: the eieio command message
-        :type packet: spinnman.messages.eieio.eieio_command_message
+        :param packet: the DatabaseConfirmation message received
+        :type packet: spinnman.messages.eieio.command_messages.database_confirmation
         :return:
         """
         self._received_hand_shake_condition.acquire()
         if not isinstance(packet, DatabaseConfirmation):
-            raise Exception("not recieved correct type of command message")
+            raise Exception("not received correct type of command message")
 
         # store the database path
         self._database_path = packet.database_path
@@ -45,8 +37,6 @@ class HostBasedInjector(object):
         self._received_hand_shake = True
         # send handshake
         hand_shake_response = DatabaseConfirmation()
-        # hand_shake_response = EIEIOCommandMessage(EIEIOCommandHeader(
-        #     constants.EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value))
         self._database_connection.\
             send_eieio_command_message(hand_shake_response)
 
