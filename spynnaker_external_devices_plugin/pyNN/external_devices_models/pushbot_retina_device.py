@@ -47,12 +47,12 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
 
     def __init__(self, virtual_chip_x, virtual_chip_y,
                  connected_to_real_chip_x, connected_to_real_chip_y,
-                 connected_to_real_chip_link_id, position, machine_time_step,
+                 connected_to_real_chip_link_id, machine_time_step,
                  timescale_factor, spikes_per_second, ring_buffer_sigma,
                  label=None, n_neurons=None, polarity=None):
 
         if polarity is None:
-            polarity = PushBotRetinaDevice.MERGED_POLARITY
+            polarity = PushBotRetinaDevice.UP_POLARITY
 
         self._fixed_key = (virtual_chip_x << 24 | virtual_chip_y << 16)
         fixed_n_neurons = 128 * 128
@@ -60,7 +60,7 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
         self._fixed_mask = 0xFFFFF000
         
         if polarity == PushBotRetinaDevice.UP_POLARITY:
-            self._fixed_key |= POLARITY_BIT
+            self._fixed_key |= PushBotRetinaDevice.POLARITY_BIT
         elif polarity == PushBotRetinaDevice.DOWN_POLARITY:
            pass
         else:
@@ -72,7 +72,7 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
             connected_to_real_chip_link_id, max_atoms_per_core=fixed_n_neurons,
             label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
-            self, self._get_commands(position))
+            self, self._get_commands())
         AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
 
         self._polarity = polarity
