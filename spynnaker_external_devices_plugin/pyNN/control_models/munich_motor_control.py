@@ -50,8 +50,6 @@ class MunichMotorControl(AbstractDataSpecableVertex,
     SYSTEM_SIZE = 3 * 4
     PARAMS_SIZE = 7 * 4
 
-    CORE_APP_IDENTIFIER = constants.MUNICH_MOTOR_CONTROL_CORE_APPLICATION_ID
-
     def __init__(self, machine_timestep, timescale_factor,
                  virtual_chip_x, virtual_chip_y,
                  connected_to_real_chip_x, connected_to_real_chip_y,
@@ -107,8 +105,7 @@ class MunichMotorControl(AbstractDataSpecableVertex,
 
         # Write the setup region
         spec.comment("\n*** Spec for robot motor control ***\n\n")
-        self._write_basic_setup_info(spec, self.CORE_APP_IDENTIFIER,
-                                     self.SYSTEM_REGION)
+        self._write_basic_setup_info(spec, self.SYSTEM_REGION)
 
         # locate correct subedge for key
         edge_key = None
