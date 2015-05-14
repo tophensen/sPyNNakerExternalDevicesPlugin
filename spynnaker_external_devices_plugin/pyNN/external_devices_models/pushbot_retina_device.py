@@ -124,38 +124,38 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
         commands.append(MultiCastCommand(
             0, PushBotRetinaDevice.SENSOR | PushBotRetinaDevice.SENSOR_SET_KEY, 
             PushBotRetinaDevice.MANAGEMENT_MASK, self._retina_source_key,
-            0, 0))
+            1, 100))
         
         # Set sensor to pushbot
         commands.append(MultiCastCommand(
             0, PushBotRetinaDevice.SENSOR | PushBotRetinaDevice.SENSOR_SET_PUSHBOT, 
             PushBotRetinaDevice.MANAGEMENT_MASK, 1,
-            0, 0))
+            1, 100))
         
         # Ensure retina is disabled
         commands.append(MultiCastCommand(
             0, PushBotRetinaDevice.RETINA_DISABLE, 
             PushBotRetinaDevice.MANAGEMENT_MASK, 0, 
-            0, 0))
+            1, 100))
         
         # Set retina key
         commands.append(MultiCastCommand(
             0, PushBotRetinaDevice.RETINA_KEY_SET, 
             PushBotRetinaDevice.MANAGEMENT_MASK, self._retina_source_key,
-            0, 0))
+            1, 100))
         
         # Enable retina
         commands.append(MultiCastCommand(
             0, PushBotRetinaDevice.RETINA_ENABLE, 
             PushBotRetinaDevice.MANAGEMENT_MASK,
             PushBotRetinaDevice.RETINA_NO_TIMESTAMP + self._resolution.value.enable_command,
-            0, 0))
+            1, 100))
 
         # At end of simulation, disable retina
         commands.append(MultiCastCommand(
             -1, PushBotRetinaDevice.RETINA_DISABLE, 
             PushBotRetinaDevice.MANAGEMENT_MASK, 0, 
-            0, 0))
+            1, 100))
 
         return commands
 
