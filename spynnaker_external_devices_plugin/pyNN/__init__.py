@@ -13,7 +13,11 @@ from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_retina_device import MunichRetinaDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
-    pushbot_retina_device import PushBotRetinaDevice, PushBotRetinaResolution, PushBotRetinaPolarity
+    pushbot_retina_device import PushBotRetinaDevice
+from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
+    pushbot_retina_device import PushBotRetinaResolution
+from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
+    pushbot_retina_device import PushBotRetinaPolarity
 from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
     import SpikeInjector
 from spynnaker_external_devices_plugin.pyNN import model_binaries
