@@ -6,8 +6,6 @@
 #include <simulation.h>
 #include <string.h>
 
-#define APPLICATION_MAGIC_NUMBER 0xAC5
-
 // Counters
 #define N_COUNTERS       6
 #define	MOTION_FORWARD   0x01
@@ -187,7 +185,7 @@ static bool initialize(uint32_t *timer_period) {
     // Get the timing details
     if (!simulation_read_timing_details(
             data_specification_get_region(0, address),
-            APPLICATION_MAGIC_NUMBER, timer_period, &simulation_ticks)) {
+            APPLICATION_NAME_HASH, timer_period, &simulation_ticks)) {
         return false;
     }
 
