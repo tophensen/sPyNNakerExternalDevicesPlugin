@@ -7,7 +7,6 @@ from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_motor_device import MunichMotorDevice
 
 # spynnaker improts
-from spynnaker.pyNN.utilities import constants
 from spynnaker.pyNN.models.abstract_models\
     .abstract_vertex_with_dependent_vertices import \
     AbstractVertexWithEdgeToDependentVertices
