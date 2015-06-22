@@ -15,7 +15,7 @@ from spinn_front_end_common.abstract_models\
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
-from pacman.model.routing_info.key_and_mask import KeyAndMask
+from pacman.model.routing_info.base_key_and_mask import BaseKeyAndMask
 
 
 logger = logging.getLogger(__name__)
@@ -137,7 +137,7 @@ class ExternalFPGARetinaDevice(
                        .get_outgoing_edge_constraints(
                            self, partitioned_edge, graph_mapper))
         constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
-            [KeyAndMask(self._fixed_key, self._fixed_mask)]))
+            [BaseKeyAndMask(self._fixed_key, self._fixed_mask)]))
         return constraints
 
     @property
