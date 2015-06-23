@@ -80,7 +80,12 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         self._continue_if_not_different = continue_if_not_different
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
+        """
 
+        :param partitioned_edge:
+        :param graph_mapper:
+        :return:
+        """
         # Any key to the device will work, as long as it doesn't set the
         # management bit.  We also need enough for the configuration bits
         # and the management bit anyway
@@ -93,6 +98,19 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         """
         Model-specific construction of the data blocks necessary to build a
         single external retina device.
+        :param subvertex:
+        :param placement:
+        :param subgraph:
+        :param graph:
+        :param routing_info:
+        :param hostname:
+        :param graph_subgraph_mapper:
+        :param report_folder:
+        :param ip_tags:
+        :param reverse_ip_tags:
+        :param write_text_specs:
+        :param application_run_time_folder:
+        :return:
         """
         # Create new DataSpec for this processor:
         data_writer, report_writer = \
@@ -140,6 +158,10 @@ class MunichMotorControl(AbstractDataSpecableVertex,
 
     # inherited from data specable vertex
     def get_binary_file_name(self):
+        """
+        string containing name of this vertex c binary
+        :return:
+        """
         return "robot_motor_control.aplx"
 
     def reserve_memory_regions(self, spec):
@@ -148,6 +170,7 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         1) Area for information on what data to record
         2) area for start commands
         3) area for end commands
+        :param spec: the databspec object
         """
         spec.comment("\nReserving memory space for data regions:\n\n")
 
@@ -162,19 +185,66 @@ class MunichMotorControl(AbstractDataSpecableVertex,
 
     @property
     def model_name(self):
+        """
+        human readable name of this vertex
+        :return:
+        """
         return "Munich Motor Control"
 
     def get_sdram_usage_for_atoms(self, vertex_slice, graph):
+        """
+        returns the sdram usage of this vertex
+        :param vertex_slice:
+        :param graph:
+        :return:
+        """
         return self.SYSTEM_SIZE + self.PARAMS_SIZE
 
     def get_dtcm_usage_for_atoms(self, vertex_slice, graph):
+        """
+        returns the amount of dtcm used by this vertex
+        :param vertex_slice:
+        :param graph:
+        :return:
+        """
         return 0
 
     def get_cpu_usage_for_atoms(self, vertex_slice, graph):
+        """
+        helper method for parittioning.
+        :param vertex_slice:
+        :param graph:
+        :return:
+        """
         return 0
 
     def has_dependent_vertices(self):
+        """
+        helper method for is instance
+        :return:
+        """
         return True
 
     def is_data_specable(self):
+        """
+        helper method for is instance
+        :return:
+        """
         return True
+
+    def partition_identifer_for_dependent_edge(self, dependent_edge):
+        """ helper emthod for the vertex to give semantic data of the partition
+        uidentifer type for each depdent vertex.
+
+        :param dependent_edge: the edge which coems from this to one of its
+        dependent vertices.
+        :return: the outgoing spike parittion identifer for this depdentent edge
+        """
+        if isinstance(dependent_edge.post_vertex, MunichMotorDevice):
+            return "motor commands"
+        else:
+            raise exceptions.ConfigurationException(
+                "I have a edge whose destination i dont recongise {}->{} ( I "
+                "only reconginse edges to my dependent vertex of a "
+                "MunichMotorDevice. please fix and try again"
+                .format(self, dependent_edge.post_vertex))
