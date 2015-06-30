@@ -9,6 +9,7 @@ from spynnaker.pyNN.models.pynn_population import Population
 from spinn_front_end_common.utility_models.live_packet_gather \
     import LivePacketGather
 
+PARTITION_ID = "SPIKE"
 
 class SpynnakerExternalDevicePluginManager(object):
 
@@ -44,7 +45,7 @@ class SpynnakerExternalDevicePluginManager(object):
         # create the edge and add
         edge = MultiCastPartitionableEdge(
             vertex_to_record_from, live_spike_recorder, label="recorder_edge")
-        _spinnaker.add_edge(edge)
+        _spinnaker.add_edge(edge, PARTITION_ID)
 
     def create_munich_motor_population(
             self, virtual_chip_x, virtual_chip_y, connected_to_real_chip_x,

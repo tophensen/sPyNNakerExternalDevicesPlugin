@@ -14,7 +14,7 @@ from spinn_front_end_common.abstract_models\
 
 from collections import namedtuple
 from enum import Enum, IntEnum
-from pacman.model.routing_info.key_and_mask import KeyAndMask
+from pacman.model.routing_info.base_key_and_mask import BaseKeyAndMask
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
 
 # Named tuple bundling together configuration elements of a pushbot resolution
@@ -119,7 +119,7 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
                        .get_outgoing_edge_constraints(
                            self, partitioned_edge, graph_mapper))
         constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
-            [KeyAndMask(self._routing_key, self._routing_mask)]))
+            [BaseKeyAndMask(self._routing_key, self._routing_mask)]))
         return constraints
 
     def _get_commands(self):
