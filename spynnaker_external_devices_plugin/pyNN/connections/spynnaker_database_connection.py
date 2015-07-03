@@ -6,8 +6,8 @@ from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
 from spinnman.data.little_endian_byte_array_byte_writer \
     import LittleEndianByteArrayByteWriter
-from spinnman.connections.abstract_classes.abstract_udp_connection \
-    import AbstractUDPConnection
+from spinnman.connections.udp_packet_connections.udp_connection \
+    import UDPConnection
 
 
 from spynnaker_external_devices_plugin.pyNN.connections.database_reader \
@@ -22,7 +22,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SpynnakerDatabaseConnection(AbstractUDPConnection, Thread):
+class SpynnakerDatabaseConnection(UDPConnection, Thread):
     """ A connection from the sPyNNaker toolchain which will be notified\
         when the database has been written, and can then respond when the\
         database has been read, and further wait for notification that the\
@@ -55,7 +55,7 @@ class SpynnakerDatabaseConnection(AbstractUDPConnection, Thread):
                     notification on (19999 by default)
         :type local_port: int
         """
-        AbstractUDPConnection.__init__(
+        UDPConnection.__init__(
             self, local_host=local_host, local_port=local_port,
             remote_host=None, remote_port=None)
         Thread.__init__(self)
