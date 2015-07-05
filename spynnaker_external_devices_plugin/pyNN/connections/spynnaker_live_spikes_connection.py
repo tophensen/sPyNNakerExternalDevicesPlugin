@@ -8,11 +8,13 @@ from spinnman.messages.eieio.data_messages.eieio_16bit\
     .eieio_16bit_data_message import EIEIO16BitDataMessage
 from spinnman.messages.eieio.data_messages.eieio_32bit\
     .eieio_32bit_data_message import EIEIO32BitDataMessage
-from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
-    import StrippedIPTagConnection
-from spinnman.constants import TRAFFIC_TYPE
+from spinnman.connections.connection_listener import ConnectionListener
+from spinnman.connections.udp_packet_connections.udp_eieio_connection \
+    import UDPEIEIOConnection
 
 from threading import Thread
+
+import traceback
 
 # The maximum number of 32-bit keys that will fit in a packet
 _MAX_FULL_KEYS_PER_PACKET = 63
@@ -105,17 +107,19 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
                     database_reader.get_neuron_id_to_key_mapping(send_label)
         if self._receive_labels is not None:
             receivers = dict()
+            listeners = dict()
 
             for receive_label in self._receive_labels:
                 _, port, strip_sdp = database_reader.get_live_output_details(
                     receive_label)
                 if strip_sdp:
                     if port not in receivers:
-                        receivers[port] = StrippedIPTagConnection(
-                            local_port=port)
-                        receivers[port].register_callback(
-                            self._receive_packet_callback,
-                            TRAFFIC_TYPE.EIEIO_DATA)
+                        receiver = UDPEIEIOConnection(local_port=port)
+                        listener = ConnectionListener(receiver)
+                        listener.add_callback(self._receive_packet_callback)
+                        listener.start()
+                        receivers[port] = receiver
+                        listeners[port] = listener
                 else:
                     raise Exception("Currently, only ip tags which strip the"
                                     " SDP headers are supported")
@@ -134,25 +138,28 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
                 callback_thread.start()
 
     def _receive_packet_callback(self, packet):
-        header = packet.eieio_header
-        if not header.is_time:
-            raise Exception(
-                "Only packets with a timestamp are currently considered")
+        try:
+            header = packet.eieio_header
+            if not header.is_time:
+                raise Exception(
+                    "Only packets with a timestamp are currently considered")
 
-        key_times_labels = dict()
-        while packet.is_next_element:
-            element = packet.next_element
-            time = element.payload
-            key = element.key
-            if key in self._key_to_neuron_id_and_label:
-                (neuron_id, label) = self._key_to_neuron_id_and_label[key]
-                if (time, label) not in key_times_labels:
-                    key_times_labels[(time, label)] = list()
-                key_times_labels[(time, label)].append(neuron_id)
+            key_times_labels = dict()
+            while packet.is_next_element:
+                element = packet.next_element
+                time = element.payload
+                key = element.key
+                if key in self._key_to_neuron_id_and_label:
+                    (neuron_id, label) = self._key_to_neuron_id_and_label[key]
+                    if (time, label) not in key_times_labels:
+                        key_times_labels[(time, label)] = list()
+                    key_times_labels[(time, label)].append(neuron_id)
 
-        for (time, label) in sorted(key_times_labels.keys()):
-            for callback in self._live_spike_callbacks[label]:
-                callback(label, time, key_times_labels[(time, label)])
+            for (time, label) in sorted(key_times_labels.keys()):
+                for callback in self._live_spike_callbacks[label]:
+                    callback(label, time, key_times_labels[(time, label)])
+        except:
+            traceback.print_exc()
 
     def send_spike(self, label, neuron_id, send_full_keys=False):
         """ Send a spike from a single neuron
