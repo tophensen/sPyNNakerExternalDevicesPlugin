@@ -58,8 +58,7 @@ class SpynnakerExternalDevicePluginManager(object):
         _spinnaker.add_edge(edge)
 
     def create_munich_motor_population(
-            self, virtual_chip_x, virtual_chip_y, connected_to_real_chip_x,
-            connected_to_real_chip_y, connected_to_real_chip_link_id, speed=30,
+            self, virtual_chip_x, virtual_chip_y, spinnaker_link_id, speed=30,
             sample_time=4096, update_time=512, delay_time=5,
             delta_threshold=23, continue_if_not_different=True,
             model=IF_curr_exp, params=None):
@@ -84,15 +83,8 @@ class SpynnakerExternalDevicePluginManager(object):
         :type virtual_chip_x: int
         :param virtual_chip_y: The y coordinate of the virtual chip
         :type virtual_chip_y: int
-        :param connected_to_real_chip_x: The x coordinate of the real chip in\
-                    the machine where the spinn-link is connected
-        :type connected_to_real_chip_x: int
-        :param connected_to_real_chip_y: The y coordinate of the real chip in\
-                    the machine where the spinn-link is connected
-        :type connected_to_real_chip_x: int
-        :param connected_to_real_chip_link_id: The id of the link on the real\
-                    chip where the spinn-link is connected
-        :type connected_to_real_chip_link_id: int
+        :param spinnaker_link_id: the spinnaker link to tie into
+        :type spinnaker_link_id: int
         :param speed: The speed to be sent to the motor when a direction is\
                     activated
         :type speed: int
@@ -127,8 +119,7 @@ class SpynnakerExternalDevicePluginManager(object):
                                 "Robot Input Population")
         motor_control = MunichMotorControl(
             spynnaker.machine_time_step, spynnaker.timescale_factor,
-            virtual_chip_x, virtual_chip_y, connected_to_real_chip_x,
-            connected_to_real_chip_y, connected_to_real_chip_link_id, speed,
+            virtual_chip_x, virtual_chip_y, spinnaker_link_id, speed,
             sample_time, update_time, delay_time, delta_threshold,
             continue_if_not_different, "Robot Motor Control")
         spynnaker.add_vertex(motor_control)

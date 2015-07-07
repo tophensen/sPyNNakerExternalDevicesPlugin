@@ -51,8 +51,7 @@ class MunichRetinaDevice(AbstractVirtualVertex,
     RIGHT_RETINA = "RIGHT"
 
     def __init__(self, virtual_chip_x, virtual_chip_y,
-                 connected_to_real_chip_x, connected_to_real_chip_y,
-                 connected_to_real_chip_link_id, position, machine_time_step,
+                 spinnaker_link_id, position, machine_time_step,
                  timescale_factor, spikes_per_second, ring_buffer_sigma,
                  label=None, n_neurons=None, polarity=None):
 
@@ -76,8 +75,7 @@ class MunichRetinaDevice(AbstractVirtualVertex,
 
         AbstractVirtualVertex.__init__(
             self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
-            connected_to_real_chip_x, connected_to_real_chip_y,
-            connected_to_real_chip_link_id, max_atoms_per_core=fixed_n_neurons,
+            spinnaker_link_id, max_atoms_per_core=fixed_n_neurons,
             label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands(position))

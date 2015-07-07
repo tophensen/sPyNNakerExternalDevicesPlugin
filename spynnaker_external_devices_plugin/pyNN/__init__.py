@@ -126,8 +126,7 @@ def activate_live_output_for(
 
 
 def MunichMotorPopulation(
-        virtual_chip_x, virtual_chip_y, connected_to_real_chip_x,
-        connected_to_real_chip_y, connected_to_real_chip_link_id, speed=30,
+        virtual_chip_x, virtual_chip_y, spinnaker_link_id, speed=30,
         sample_time=4096, update_time=512, delay_time=5,
         delta_threshold=23, continue_if_not_different=True,
         model=IF_curr_exp, params=None):
@@ -152,15 +151,8 @@ def MunichMotorPopulation(
     :type virtual_chip_x: int
     :param virtual_chip_y: The y coordinate of the virtual chip
     :type virtual_chip_y: int
-    :param connected_to_real_chip_x: The x coordinate of the real chip in\
-                the machine where the spinn-link is connected
-    :type connected_to_real_chip_x: int
-    :param connected_to_real_chip_y: The y coordinate of the real chip in\
-                the machine where the spinn-link is connected
-    :type connected_to_real_chip_x: int
-    :param connected_to_real_chip_link_id: The id of the link on the real\
-                chip where the spinn-link is connected
-    :type connected_to_real_chip_link_id: int
+    :param spinnaker_link_id: the id for the spinnaker link
+    :type spinnaker_link_id: int
     :param speed: The speed to be sent to the motor when a direction is\
                 activated
     :type speed: int
@@ -195,8 +187,7 @@ def MunichMotorPopulation(
     if params is None:
         params = {}
     return spynnaker_external_devices.create_munich_motor_population(
-        virtual_chip_x, virtual_chip_y, connected_to_real_chip_x,
-        connected_to_real_chip_y, connected_to_real_chip_link_id, speed,
+        virtual_chip_x, virtual_chip_y, spinnaker_link_id, speed,
         sample_time, update_time, delay_time, delta_threshold,
         continue_if_not_different, model, params)
 
