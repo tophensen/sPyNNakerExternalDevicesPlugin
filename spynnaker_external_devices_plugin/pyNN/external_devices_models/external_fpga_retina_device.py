@@ -74,8 +74,7 @@ class ExternalFPGARetinaDevice(
 
     def __init__(
             self, mode, virtual_chip_x, virtual_chip_y,
-            connected_to_real_chip_x, connected_to_real_chip_y,
-            connected_to_real_chip_link_id, polarity, machine_time_step,
+            spinnaker_link_id, polarity, machine_time_step,
             timescale_factor, spikes_per_second, ring_buffer_sigma,
             label=None, n_neurons=None):
         self._polarity = polarity
@@ -124,8 +123,7 @@ class ExternalFPGARetinaDevice(
                         .format(fixed_n_neurons))
         AbstractVirtualVertex.__init__(
             self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
-            connected_to_real_chip_x, connected_to_real_chip_y,
-            connected_to_real_chip_link_id, max_atoms_per_core=fixed_n_neurons,
+            spinnaker_link_id, max_atoms_per_core=fixed_n_neurons,
             label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(self, commands=[
             MultiCastCommand(0, 0x0000FFFF, 0xFFFF0000, 1, 5, 100),
