@@ -102,7 +102,8 @@ def activate_live_output_for(
     # get default params for the database socket if required
 
     if database_notify_port_num is None:
-        database_notify_port_num = conf.config.getint("Database", "notify_port")
+        database_notify_port_num = conf.config.getint("Database",
+                                                      "notify_port")
     if database_notify_host is None:
         database_notify_host = conf.config.get("Database", "notify_hostname")
     if database_ack_port_num is None:
@@ -232,7 +233,8 @@ def SpikeInjector(
     :return:
     """
     if database_notify_port_num is None:
-        database_notify_port_num = conf.config.getint("Database", "notify_port")
+        database_notify_port_num = conf.config.getint("Database",
+                                                      "notify_port")
     if database_notify_host is None:
         database_notify_host = conf.config.get("Database", "notify_hostname")
     if database_ack_port_num is None:
@@ -252,4 +254,3 @@ def SpikeInjector(
         timescale_factor=timescale_factor, spikes_per_second=spikes_per_second,
         ring_buffer_sigma=ring_buffer_sigma, label=label, port=port,
         virtual_key=virtual_key)
-
