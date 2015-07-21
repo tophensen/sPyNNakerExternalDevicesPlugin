@@ -18,19 +18,17 @@ from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     pushbot_retina_device import PushBotRetinaResolution
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     pushbot_retina_device import PushBotRetinaPolarity
-from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
-    import SpikeInjector
 from spynnaker_external_devices_plugin.pyNN import model_binaries
 from spynnaker_external_devices_plugin.pyNN.\
     spynnaker_external_device_plugin_manager import \
     SpynnakerExternalDevicePluginManager
+from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
+    import SpikeInjector as SpynnakerExternalDeviceSpikeInjector
 
 from spynnaker.pyNN.utilities import conf
 from spynnaker.pyNN import IF_curr_exp
+from spynnaker.pyNN.utilities.database.socket_address import SocketAddress
 from spynnaker.pyNN.spinnaker import executable_finder
-
-from spinn_front_end_common.utility_models.live_packet_gather \
-    import LivePacketGather
 
 import os
 
@@ -39,8 +37,9 @@ spynnaker_external_devices = SpynnakerExternalDevicePluginManager()
 
 
 def activate_live_output_for(
-        population, board_address=None, port=None, host=None, tag=None,
-        strip_sdp=True, use_prefix=False, key_prefix=None,
+        population, database_notify_host=None, database_notify_port_num=None,
+        database_ack_port_num=None, board_address=None, port=None,
+        host=None, tag=None, strip_sdp=True, use_prefix=False, key_prefix=None,
         prefix_type=None, message_type=EIEIOType.KEY_32_BIT,
         right_shift=0, payload_as_time_stamps=True,
         use_payload_prefix=True, payload_prefix=None,
@@ -50,6 +49,31 @@ def activate_live_output_for(
 
     :param population: The population to activate the live output for
     :type population: Population
+    :param database_notify_host: the hostnmae for the device which is listening
+    to the database notifcation.
+    :type database_notify_host: str
+    :param database_ack_port_num: the port number to which a external device
+    will ack that they have finished reading the database and are ready for
+    it to start execution
+    :type database_ack_port_num: int
+    :param database_notify_port_num: The port number to which a external device
+    will recieve the database is ready command
+    :type database_notify_port_num: int
+    :param board_address: A fixed board address required for the tag, or\
+                    None if any address is OK
+    :type board_address: str
+    :param key_prefix: the prefix to be applied to the key
+    :type key_prefix: int or None
+    :param prefix_type: if the prefix type is 32 bit or 16 bit
+    :param message_type: if the message is a eieio_command mesage, or
+    eieio data message with 16 bit or 32 bit keys.
+    :param payload_as_time_stamps:
+    :param right_shift:
+    :param use_payload_prefix:
+    :param payload_prefix:
+    :param payload_right_shift:
+    :param number_of_packets_sent_per_time_step:
+
     :param port: The UDP port to which the live spikes will be sent.  If not\
                 specified, the port will be taken from the "live_spike_port"\
                 parameter in the "Recording" section of the spynnaker cfg file.
@@ -75,6 +99,17 @@ def activate_live_output_for(
         port = conf.config.getint("Recording", "live_spike_port")
     if host is None:
         host = conf.config.get("Recording", "live_spike_host")
+    # get default params for the database socket if required
+
+    if database_notify_port_num is None:
+        database_notify_port_num = conf.config.getint("Database",
+                                                      "notify_port")
+    if database_notify_host is None:
+        database_notify_host = conf.config.get("Database", "notify_hostname")
+    if database_ack_port_num is None:
+        database_ack_port_num = conf.config.get("Database", "listen_port")
+        if database_ack_port_num == "None":
+            database_ack_port_num = None
 
     # add new edge and vertex if required to spinnaker graph
     spynnaker_external_devices.add_edge_to_recorder_vertex(
@@ -82,14 +117,20 @@ def activate_live_output_for(
         use_prefix, key_prefix, prefix_type, message_type, right_shift,
         payload_as_time_stamps, use_payload_prefix, payload_prefix,
         payload_right_shift, number_of_packets_sent_per_time_step)
+    # build the database socket address used by the notifcation interface
+    database_socket = SocketAddress(
+        listen_port=database_ack_port_num,
+        notify_host_name=database_notify_host,
+        notify_port_no=database_notify_port_num)
+    # update socket interface with new demands.
+    spynnaker_external_devices.add_socket_address(database_socket)
 
 
 def MunichMotorPopulation(
-        virtual_chip_x, virtual_chip_y, connected_to_real_chip_x,
-        connected_to_real_chip_y, connected_to_real_chip_link_id, speed=30,
+        virtual_chip_x, virtual_chip_y, spinnaker_link_id, speed=30,
         sample_time=4096, update_time=512, delay_time=5,
         delta_threshold=23, continue_if_not_different=True,
-        model=IF_curr_exp, params={}):
+        model=IF_curr_exp, params=None):
     """ Create a population of 6 neurons which will drive the robot motor.
         Neuron id 0 drives the forwards direction
                   1 drives the backwards direction
@@ -111,15 +152,8 @@ def MunichMotorPopulation(
     :type virtual_chip_x: int
     :param virtual_chip_y: The y coordinate of the virtual chip
     :type virtual_chip_y: int
-    :param connected_to_real_chip_x: The x coordinate of the real chip in\
-                the machine where the spinn-link is connected
-    :type connected_to_real_chip_x: int
-    :param connected_to_real_chip_y: The y coordinate of the real chip in\
-                the machine where the spinn-link is connected
-    :type connected_to_real_chip_x: int
-    :param connected_to_real_chip_link_id: The id of the link on the real\
-                chip where the spinn-link is connected
-    :type connected_to_real_chip_link_id: int
+    :param spinnaker_link_id: the id for the spinnaker link
+    :type spinnaker_link_id: int
     :param speed: The speed to be sent to the motor when a direction is\
                 activated
     :type speed: int
@@ -145,12 +179,78 @@ def MunichMotorPopulation(
     :param model: The neuron model to use for the pre-motor population
     :type model: class
     :param params: Dictionary of parameters to give to the model
-    :type params: dict
+    :type params: dict or None
     :return: The newly created population
     :rtype: Population
     """
+    # checker for params and not having the setter for mutliple versions of
+    # munich motor control having cloned data
+    if params is None:
+        params = {}
     return spynnaker_external_devices.create_munich_motor_population(
-        virtual_chip_x, virtual_chip_y, connected_to_real_chip_x,
-        connected_to_real_chip_y, connected_to_real_chip_link_id, speed,
+        virtual_chip_x, virtual_chip_y, spinnaker_link_id, speed,
         sample_time, update_time, delay_time, delta_threshold,
         continue_if_not_different, model, params)
+
+
+def SpikeInjector(
+        n_neurons, machine_time_step, timescale_factor, spikes_per_second,
+        ring_buffer_sigma, label, port, virtual_key=None,
+        database_notify_host=None, database_notify_port_num=None,
+        database_ack_port_num=None):
+    """
+    supports adding a spike injector to the applciation graph.
+    :param n_neurons: the number of neurons the spike injector will emulate
+    :type n_neurons: int
+    :param machine_time_step: the time period in ms for each timer callback
+    :type machine_time_step: int
+    :param timescale_factor: the amount of scaling needed of the machine time
+    step (basically a slow down function)
+    :type timescale_factor: int
+    :param spikes_per_second: the expected number of spikes per second
+    :type spikes_per_second: int
+    :param ring_buffer_sigma: the number of standard divations from a
+    calcuation on how much safety in percision vs overflowing
+     (this is deduced from the front end)
+    :type ring_buffer_sigma: int
+    :param label: the label given to the population
+    :type label: str
+    :param port: the port number used to listen for injections of spikes
+    :type port: int
+    :param virtual_key: the virtual key used in the routing system
+    :type virtual_key: int
+    :param database_notify_host: the hostnmae for the device which is listening
+    to the database notifcation.
+    :type database_notify_host: str
+    :param database_ack_port_num: the port number to which a external device
+    will ack that they have finished reading the database and are ready for
+    it to start execution
+    :type database_ack_port_num: int
+    :param database_notify_port_num: The port number to which a external device
+    will recieve the database is ready command
+    :type database_notify_port_num: int
+
+    :return:
+    """
+    if database_notify_port_num is None:
+        database_notify_port_num = conf.config.getint("Database",
+                                                      "notify_port")
+    if database_notify_host is None:
+        database_notify_host = conf.config.get("Database", "notify_hostname")
+    if database_ack_port_num is None:
+        database_ack_port_num = conf.config.get("Database", "listen_port")
+        if database_ack_port_num == "None":
+            database_ack_port_num = None
+
+    # build the database socket address used by the notifcation interface
+    database_socket = SocketAddress(
+        listen_port=database_ack_port_num,
+        notify_host_name=database_notify_host,
+        notify_port_no=database_notify_port_num)
+    # update socket interface with new demands.
+    spynnaker_external_devices.add_socket_address(database_socket)
+    return SpynnakerExternalDeviceSpikeInjector(
+        n_neurons=n_neurons, machine_time_step=machine_time_step,
+        timescale_factor=timescale_factor, spikes_per_second=spikes_per_second,
+        ring_buffer_sigma=ring_buffer_sigma, label=label, port=port,
+        virtual_key=virtual_key)

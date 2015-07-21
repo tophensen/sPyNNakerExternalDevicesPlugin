@@ -54,8 +54,7 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
     SENSOR_SET_PUSHBOT = 0x1
 
     def __init__(self, virtual_chip_x, virtual_chip_y,
-                 connected_to_real_chip_x, connected_to_real_chip_y,
-                 connected_to_real_chip_link_id, machine_time_step,
+                 spinnaker_link_id, machine_time_step,
                  timescale_factor, spikes_per_second, ring_buffer_sigma,
                  label=None, n_neurons=None,
                  polarity=PushBotRetinaPolarity.Merged,
@@ -103,8 +102,7 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
 
         AbstractVirtualVertex.__init__(
             self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
-            connected_to_real_chip_x, connected_to_real_chip_y,
-            connected_to_real_chip_link_id, max_atoms_per_core=fixed_n_neurons,
+            spinnaker_link_id, max_atoms_per_core=fixed_n_neurons,
             label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands())
