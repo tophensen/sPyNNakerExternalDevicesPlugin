@@ -27,8 +27,10 @@ from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
 
 from spynnaker.pyNN.utilities import conf
 from spynnaker.pyNN import IF_curr_exp
-from spynnaker.pyNN.utilities.database.socket_address import SocketAddress
 from spynnaker.pyNN.spinnaker import executable_finder
+
+from spinn_front_end_common.utilities.notification_protocol.socket_address \
+    import SocketAddress
 
 import os
 
