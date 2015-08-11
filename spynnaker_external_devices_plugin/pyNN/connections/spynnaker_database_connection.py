@@ -1,28 +1,21 @@
 from spinnman.exceptions import SpinnmanIOException
-from spinnman.constants import CONNECTION_TYPE
 from spinnman.messages.eieio.command_messages.eieio_command_header \
     import EIEIOCommandHeader
-from spinnman.data.little_endian_byte_array_byte_reader \
-    import LittleEndianByteArrayByteReader
-from spinnman.data.little_endian_byte_array_byte_writer \
-    import LittleEndianByteArrayByteWriter
-from spinnman.connections.abstract_classes.abstract_udp_connection \
-    import AbstractUDPConnection
+from spinnman.connections.udp_packet_connections.udp_connection \
+    import UDPConnection
 
 
 from spynnaker_external_devices_plugin.pyNN.connections.database_reader \
     import DatabaseReader
 
 from threading import Thread
-import select
-import socket
 import traceback
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class SpynnakerDatabaseConnection(AbstractUDPConnection, Thread):
+class SpynnakerDatabaseConnection(UDPConnection, Thread):
     """ A connection from the sPyNNaker toolchain which will be notified\
         when the database has been written, and can then respond when the\
         database has been read, and further wait for notification that the\
@@ -55,7 +48,7 @@ class SpynnakerDatabaseConnection(AbstractUDPConnection, Thread):
                     notification on (19999 by default)
         :type local_port: int
         """
-        AbstractUDPConnection.__init__(
+        UDPConnection.__init__(
             self, local_host=local_host, local_port=local_port,
             remote_host=None, remote_port=None)
         Thread.__init__(self)
@@ -63,26 +56,15 @@ class SpynnakerDatabaseConnection(AbstractUDPConnection, Thread):
         self._start_callback_function = start_callback_function
         self.start()
 
-    def connection_type(self):
-        CONNECTION_TYPE.UDP_IPTAG
-
-    def supports_sends_message(self, message):
-        return False
-
     def run(self):
         try:
             logger.info(
                 "Waiting for message to indicate that the database is ready")
-            read_ready, _, _ = select.select([self._socket], [], [])
-            if not read_ready:
-                raise socket.timeout()
-            raw_data, address = self._socket.recvfrom(512)
+            data, address = self.receive_with_address()
 
             # Read the read packet confirmation
             logger.info("Reading database")
-            reader = LittleEndianByteArrayByteReader(bytearray(raw_data))
-            EIEIOCommandHeader.read_eieio_header(reader)
-            database_path = str(reader.read_bytes())
+            database_path = str(data[2:])
 
             # Call the callback
             self._database_callback_function(DatabaseReader(database_path))
@@ -90,19 +72,14 @@ class SpynnakerDatabaseConnection(AbstractUDPConnection, Thread):
             # Send the response
             logger.info(
                 "Notifying the toolchain that the database has been read")
-            writer = LittleEndianByteArrayByteWriter()
-            EIEIOCommandHeader(1).write_eieio_header(writer)
-            self._socket.sendto(writer.data, address)
+            self.send_to(EIEIOCommandHeader(1).bytestring, address)
 
             # Wait for the start of the simulation
             if self._start_callback_function is not None:
                 logger.info(
                     "Waiting for message to indicate that the simulation has"
                     " started")
-                read_ready, _, _ = select.select([self._socket], [], [])
-                if not read_ready:
-                    raise socket.timeout()
-                raw_data, address = self._socket.recvfrom(512)
+                self.receive()
 
                 # Call the callback
                 self._start_callback_function()
