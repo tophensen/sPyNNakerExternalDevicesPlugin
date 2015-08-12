@@ -133,8 +133,12 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
     def _start_callback(self):
         for (label, callbacks) in self._start_callbacks.iteritems():
             for callback in callbacks:
-                callback_thread = Thread(target=callback, args=(label, self),
-                                         verbose=True)
+                callback_thread = Thread(
+                    target=callback, args=(label, self),
+                    verbose=True,
+                    name="start callbac thread for spynnaker_live_spikes_"
+                         "connection {}:{}".format(
+                        self._local_port, self._local_ip_address))
                 callback_thread.start()
 
     def _receive_packet_callback(self, packet):
