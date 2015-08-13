@@ -49,11 +49,11 @@ class MunichMotorControl(AbstractDataSpecableVertex,
     SYSTEM_SIZE = 3 * 4
     PARAMS_SIZE = 7 * 4
 
-    def __init__(self, machine_timestep, timescale_factor,
-                 virtual_chip_x, virtual_chip_y, spinnaker_link_id,
-                 speed=30, sample_time=4096, update_time=512, delay_time=5,
-                 delta_threshold=23, continue_if_not_different=True,
-                 label="RobotMotorControl"):
+    def __init__(
+            self, machine_timestep, timescale_factor, spinnaker_link_id,
+            speed=30, sample_time=4096, update_time=512, delay_time=5,
+            delta_threshold=23, continue_if_not_different=True,
+            label="RobotMotorControl"):
         """
         """
 
@@ -61,8 +61,7 @@ class MunichMotorControl(AbstractDataSpecableVertex,
                                             timescale_factor)
         AbstractPartitionableVertex.__init__(self, 6, label, 6, None)
         AbstractVertexWithEdgeToDependentVertices.__init__(
-            self, [MunichMotorDevice(
-                virtual_chip_x, virtual_chip_y, spinnaker_link_id)])
+            self, [MunichMotorDevice(spinnaker_link_id)])
         AbstractProvidesOutgoingEdgeConstraints.__init__(self)
 
         self._speed = speed

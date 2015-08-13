@@ -5,7 +5,7 @@ from spynnaker.pyNN.models.abstract_models\
     import AbstractSendMeMulticastCommandsVertex
 from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
-from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
+from pacman.model.abstract_classes.abstract_virtual_vertex \
     import AbstractVirtualVertex
 
 from spinn_front_end_common.abstract_models\
@@ -73,12 +73,11 @@ class ExternalFPGARetinaDevice(
     MERGED_POLARITY = "MERGED"
 
     def __init__(
-            self, mode, virtual_chip_x, virtual_chip_y,
-            spinnaker_link_id, polarity, machine_time_step,
-            timescale_factor, spikes_per_second, ring_buffer_sigma,
-            label=None, n_neurons=None):
+            self, mode, fixed_key, spinnaker_link_id, polarity,
+            machine_time_step, timescale_factor, spikes_per_second,
+            ring_buffer_sigma, label=None, n_neurons=None):
         self._polarity = polarity
-        self._fixed_key = (virtual_chip_x << 24 | virtual_chip_y << 16)
+        self._fixed_key = fixed_key
         self._fixed_mask = 0xFFFF8000
         if polarity == ExternalFPGARetinaDevice.UP_POLARITY:
             self._fixed_key |= 0x4000
@@ -122,9 +121,8 @@ class ExternalFPGARetinaDevice(
                         " device has been ignored {} will be used instead"
                         .format(fixed_n_neurons))
         AbstractVirtualVertex.__init__(
-            self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
-            spinnaker_link_id, max_atoms_per_core=fixed_n_neurons,
-            label=label)
+            self, fixed_n_neurons, spinnaker_link_id,
+            max_atoms_per_core=fixed_n_neurons, label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(self, commands=[
             MultiCastCommand(0, 0x0000FFFF, 0xFFFF0000, 1, 5, 100),
             MultiCastCommand(-1, 0x0000FFFE, 0xFFFF0000, 0, 5, 100)])
