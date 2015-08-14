@@ -6,7 +6,8 @@ class ExternalCochleaDevice(AbstractVirtualVertex):
 
     def __init__(
             self, n_neurons, spinnaker_link, machine_time_step,
-            timescale_factor, spikes_per_second, ring_buffer_sigma, label=None):
+            timescale_factor, spikes_per_second, ring_buffer_sigma,
+            label=None):
         AbstractVirtualVertex.__init__(
             self, n_neurons, spinnaker_link, label=label,
             max_atoms_per_core=n_neurons)
