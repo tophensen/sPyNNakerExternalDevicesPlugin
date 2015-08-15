@@ -16,6 +16,7 @@ from spynnaker.pyNN import exceptions
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_mask_constraint \
     import KeyAllocatorFixedMaskConstraint
+from spinn_front_end_common.utilities import constants
 from pacman.model.partitionable_graph.abstract_partitionable_vertex \
     import AbstractPartitionableVertex
 
@@ -46,14 +47,14 @@ class MunichMotorControl(AbstractDataSpecableVertex,
     SYSTEM_REGION = 0
     PARAMS_REGION = 1
 
-    SYSTEM_SIZE = 3 * 4
+    SYSTEM_SIZE = 4 * 4
     PARAMS_SIZE = 7 * 4
 
-    def __init__(self, machine_timestep, timescale_factor,
-                 virtual_chip_x, virtual_chip_y, spinnaker_link_id,
-                 speed=30, sample_time=4096, update_time=512, delay_time=5,
-                 delta_threshold=23, continue_if_not_different=True,
-                 label="RobotMotorControl"):
+    def __init__(
+            self, machine_timestep, timescale_factor, spinnaker_link_id,
+            speed=30, sample_time=4096, update_time=512, delay_time=5,
+            delta_threshold=23, continue_if_not_different=True,
+            label="RobotMotorControl"):
         """
         """
 
@@ -61,8 +62,7 @@ class MunichMotorControl(AbstractDataSpecableVertex,
                                             timescale_factor)
         AbstractPartitionableVertex.__init__(self, 6, label, 6, None)
         AbstractVertexWithEdgeToDependentVertices.__init__(
-            self, [MunichMotorDevice(
-                virtual_chip_x, virtual_chip_y, spinnaker_link_id)])
+            self, [MunichMotorDevice(spinnaker_link_id)])
         AbstractProvidesOutgoingEdgeConstraints.__init__(self)
 
         self._speed = speed
@@ -144,9 +144,10 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         spec.comment("\nReserving memory space for data regions:\n\n")
 
         # Reserve memory:
-        spec.reserve_memory_region(region=self.SYSTEM_REGION,
-                                   size=self.SYSTEM_SIZE,
-                                   label='setup')
+        spec.reserve_memory_region(
+            region=self.SYSTEM_REGION,
+            size=constants.DATA_SPECABLE_BASIC_SETUP_INFO_N_WORDS * 4,
+            label='setup')
 
         spec.reserve_memory_region(region=self.PARAMS_REGION,
                                    size=self.PARAMS_SIZE,

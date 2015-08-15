@@ -4,7 +4,7 @@ from spynnaker.pyNN.models.abstract_models\
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
-from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
+from pacman.model.abstract_classes.abstract_virtual_vertex \
     import AbstractVirtualVertex
 from spynnaker.pyNN import exceptions
 
@@ -50,15 +50,15 @@ class MunichRetinaDevice(AbstractVirtualVertex,
     LEFT_RETINA = "LEFT"
     RIGHT_RETINA = "RIGHT"
 
-    def __init__(self, virtual_chip_x, virtual_chip_y,
-                 spinnaker_link_id, position, machine_time_step,
-                 timescale_factor, spikes_per_second, ring_buffer_sigma,
-                 label=None, n_neurons=None, polarity=None):
+    def __init__(
+            self, retina_key, spinnaker_link_id, position, machine_time_step,
+            timescale_factor, spikes_per_second, ring_buffer_sigma,
+            label=None, n_neurons=None, polarity=None):
 
         if polarity is None:
             polarity = MunichRetinaDevice.MERGED_POLARITY
 
-        self._fixed_key = (virtual_chip_x << 24 | virtual_chip_y << 16)
+        self._fixed_key = (retina_key & 0xFFFF) << 16
         self._fixed_mask = 0xFFFF8000
         if polarity == MunichRetinaDevice.UP_POLARITY:
             self._fixed_key |= 0x4000
@@ -74,9 +74,8 @@ class MunichRetinaDevice(AbstractVirtualVertex,
             self._fixed_mask = 0xFFFFC000
 
         AbstractVirtualVertex.__init__(
-            self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
-            spinnaker_link_id, max_atoms_per_core=fixed_n_neurons,
-            label=label)
+            self, fixed_n_neurons, spinnaker_link_id,
+            max_atoms_per_core=fixed_n_neurons, label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands(position))
         AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)

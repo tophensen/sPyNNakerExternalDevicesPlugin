@@ -58,10 +58,9 @@ class SpynnakerExternalDevicePluginManager(object):
         _spinnaker.add_edge(edge)
 
     def create_munich_motor_population(
-            self, virtual_chip_x, virtual_chip_y, spinnaker_link_id, speed=30,
-            sample_time=4096, update_time=512, delay_time=5,
-            delta_threshold=23, continue_if_not_different=True,
-            model=IF_curr_exp, params=None):
+            self, spinnaker_link_id, speed=30, sample_time=4096,
+            update_time=512, delay_time=5, delta_threshold=23,
+            continue_if_not_different=True, model=IF_curr_exp, params=None):
         """ Create a population of 6 neurons which will drive the robot motor.
         Neuron id 0 drives the forwards direction
                   1 drives the backwards direction
@@ -79,10 +78,6 @@ class SpynnakerExternalDevicePluginManager(object):
         the motor control.  This chip must be one which does not exist\
         within the current physical machine.
 
-        :param virtual_chip_x: The x coordinate of the virtual chip
-        :type virtual_chip_x: int
-        :param virtual_chip_y: The y coordinate of the virtual chip
-        :type virtual_chip_y: int
         :param spinnaker_link_id: the spinnaker link to tie into
         :type spinnaker_link_id: int
         :param speed: The speed to be sent to the motor when a direction is\
@@ -119,9 +114,8 @@ class SpynnakerExternalDevicePluginManager(object):
                                 "Robot Input Population")
         motor_control = MunichMotorControl(
             spynnaker.machine_time_step, spynnaker.timescale_factor,
-            virtual_chip_x, virtual_chip_y, spinnaker_link_id, speed,
-            sample_time, update_time, delay_time, delta_threshold,
-            continue_if_not_different, "Robot Motor Control")
+            spinnaker_link_id, speed, sample_time, update_time, delay_time,
+            delta_threshold, continue_if_not_different, "Robot Motor Control")
         spynnaker.add_vertex(motor_control)
         edge = MultiCastPartitionableEdge(
             population._get_vertex, motor_control, label="Robot input edge")
