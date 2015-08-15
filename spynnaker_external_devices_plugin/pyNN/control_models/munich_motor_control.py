@@ -16,6 +16,7 @@ from spynnaker.pyNN import exceptions
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_mask_constraint \
     import KeyAllocatorFixedMaskConstraint
+from spinn_front_end_common.utilities import constants
 from pacman.model.partitionable_graph.abstract_partitionable_vertex \
     import AbstractPartitionableVertex
 
@@ -46,7 +47,7 @@ class MunichMotorControl(AbstractDataSpecableVertex,
     SYSTEM_REGION = 0
     PARAMS_REGION = 1
 
-    SYSTEM_SIZE = 3 * 4
+    SYSTEM_SIZE = 4 * 4
     PARAMS_SIZE = 7 * 4
 
     def __init__(
@@ -143,9 +144,10 @@ class MunichMotorControl(AbstractDataSpecableVertex,
         spec.comment("\nReserving memory space for data regions:\n\n")
 
         # Reserve memory:
-        spec.reserve_memory_region(region=self.SYSTEM_REGION,
-                                   size=self.SYSTEM_SIZE,
-                                   label='setup')
+        spec.reserve_memory_region(
+            region=self.SYSTEM_REGION,
+            size=constants.DATA_SPECABLE_BASIC_SETUP_INFO_N_WORDS * 4,
+            label='setup')
 
         spec.reserve_memory_region(region=self.PARAMS_REGION,
                                    size=self.PARAMS_SIZE,
