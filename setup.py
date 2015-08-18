@@ -13,5 +13,5 @@ setup(
               'spynnaker_external_devices_plugin.pyNN.model_binaries',
               'spynnaker_external_devices_plugin.pyNN.utility_models'],
     package_data={'spynnaker_external_devices_plugin.pyNN.model_binaries': ['*.aplx']},
-    install_requires=['sPyNNaker >= 2015.005']
+    install_requires=['sPyNNaker >= 2015.004']
 )
