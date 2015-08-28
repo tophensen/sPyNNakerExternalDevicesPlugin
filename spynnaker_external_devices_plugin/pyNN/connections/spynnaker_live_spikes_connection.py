@@ -13,7 +13,7 @@ from spinnman.connections.udp_packet_connections.udp_eieio_connection \
     import UDPEIEIOConnection
 
 from threading import Thread
-
+from collections import OrderedDict
 import traceback
 
 # The maximum number of 32-bit keys that will fit in a packet
@@ -109,6 +109,7 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
             receivers = dict()
             listeners = dict()
 
+            receive_label_id = 0
             for receive_label in self._receive_labels:
                 _, port, strip_sdp = database_reader.get_live_output_details(
                     receive_label)
@@ -128,7 +129,8 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
                     database_reader.get_key_to_neuron_id_mapping(receive_label)
                 for (key, neuron_id) in key_to_neuron_id.iteritems():
                     self._key_to_neuron_id_and_label[key] = (neuron_id,
-                                                             receive_label)
+                                                             receive_label_id)
+                receive_label_id += 1
 
     def _start_callback(self):
         for (label, callbacks) in self._start_callbacks.iteritems():
@@ -148,20 +150,25 @@ class SpynnakerLiveSpikesConnection(SpynnakerDatabaseConnection):
                 raise Exception(
                     "Only packets with a timestamp are currently considered")
 
-            key_times_labels = dict()
+            key_times_labels = OrderedDict()
             while packet.is_next_element:
                 element = packet.next_element
                 time = element.payload
                 key = element.key
                 if key in self._key_to_neuron_id_and_label:
-                    (neuron_id, label) = self._key_to_neuron_id_and_label[key]
-                    if (time, label) not in key_times_labels:
-                        key_times_labels[(time, label)] = list()
-                    key_times_labels[(time, label)].append(neuron_id)
+                    (neuron_id, label_id) = \
+                        self._key_to_neuron_id_and_label[key]
+                    if time not in key_times_labels:
+                        key_times_labels[time] = dict()
+                    if label_id not in key_times_labels[time]:
+                        key_times_labels[time][label_id] = list()
+                    key_times_labels[time][label_id].append(neuron_id)
 
-            for (time, label) in sorted(key_times_labels.keys()):
-                for callback in self._live_spike_callbacks[label]:
-                    callback(label, time, key_times_labels[(time, label)])
+            for time in key_times_labels.iterkeys():
+                for label_id in key_times_labels[time].iterkeys():
+                    label = self._receive_labels[label_id]
+                    for callback in self._live_spike_callbacks[label]:
+                        callback(label, time, key_times_labels[time][label_id])
         except:
             traceback.print_exc()
 
