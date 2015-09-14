@@ -57,6 +57,11 @@ class SpynnakerExternalDevicePluginManager(object):
             vertex_to_record_from, live_spike_recorder, label="recorder_edge")
         _spinnaker.add_edge(edge)
 
+    def add_edge(self, vertex, device_vertex):
+        _spinnaker = get_spynnaker()
+        edge = MultiCastPartitionableEdge(vertex, device_vertex)
+        _spinnaker.add_edge(edge)
+
     def create_munich_motor_population(
             self, spinnaker_link_id, speed=30, sample_time=4096,
             update_time=512, delay_time=5, delta_threshold=23,
