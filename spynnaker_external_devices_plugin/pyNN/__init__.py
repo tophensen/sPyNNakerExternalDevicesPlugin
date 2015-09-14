@@ -128,6 +128,19 @@ def activate_live_output_for(
     spynnaker_external_devices.add_socket_address(database_socket)
 
 
+def activate_live_output_to(population, device):
+    """ Activate the output of spikes from a population to an external device.\
+        Note that all spikes will be sent to the device.
+
+    :param population: The pyNN population object from which spikes will be\
+                sent.
+    :param device: The pyNN population external device to which the spikes\
+                will be sent.
+    """
+    spynnaker_external_devices.add_edge(population._get_vertex,
+                                        device._get_vertex)
+
+
 def MunichMotorPopulation(
         spinnaker_link_id, speed=30, sample_time=4096, update_time=512,
         delay_time=5, delta_threshold=23, continue_if_not_different=True,
