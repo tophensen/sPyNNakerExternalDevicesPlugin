@@ -139,8 +139,8 @@ def activate_live_output_to(population, device):
     :param device: The pyNN population external device to which the spikes\
                 will be sent.
     """
-    spynnaker_external_devices.add_edge(population._get_vertex,
-                                        device._get_vertex)
+    spynnaker_external_devices.add_edge(
+        population._get_vertex, device._get_vertex)
 
 
 def MunichMotorPopulation(
