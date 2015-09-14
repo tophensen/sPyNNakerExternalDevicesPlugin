@@ -24,6 +24,8 @@ from spynnaker_external_devices_plugin.pyNN.\
     SpynnakerExternalDevicePluginManager
 from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
     import SpikeInjector as SpynnakerExternalDeviceSpikeInjector
+from spynnaker_external_devices_plugin.pyNN.connections\
+    .spynnaker_live_spikes_connection import SpynnakerLiveSpikesConnection
 
 from spynnaker.pyNN.utilities import conf
 from spynnaker.pyNN import IF_curr_exp
