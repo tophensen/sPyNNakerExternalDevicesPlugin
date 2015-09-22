@@ -126,8 +126,8 @@ class ExternalFPGARetinaDevice(
             else:
                 fixed_n_neurons = 16 * 16 * 2
         else:
-            raise exceptions.ConfigurationException("the FPGA retina does not "
-                                                    "recongise this mode")
+            raise exceptions.SpynnakerException("the FPGA retina does not "
+                                                "recongise this mode")
 
         if fixed_n_neurons != n_neurons and n_neurons is not None:
             logger.warn("The specified number of neurons for the FPGA retina"

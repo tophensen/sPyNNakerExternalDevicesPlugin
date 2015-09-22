@@ -52,8 +52,7 @@ class MunichRetinaDevice(AbstractVirtualVertex,
 
     def __init__(
             self, retina_key, spinnaker_link_id, position, machine_time_step,
-            timescale_factor, spikes_per_second, ring_buffer_sigma,
-            label=None, n_neurons=None, polarity=None):
+            timescale_factor, label=None, n_neurons=None, polarity=None):
 
         if polarity is None:
             polarity = MunichRetinaDevice.MERGED_POLARITY
@@ -85,7 +84,7 @@ class MunichRetinaDevice(AbstractVirtualVertex,
 
         if (self._position != self.RIGHT_RETINA and
            self._position != self.LEFT_RETINA):
-            raise exceptions.ConfigurationException(
+            raise exceptions.SpynnakerException(
                 "The external Retina does not recognise this _position")
 
         if n_neurons != fixed_n_neurons and n_neurons is not None:

@@ -55,18 +55,17 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
     SENSOR_SET_PUSHBOT = 0x1
 
     def __init__(self, fixed_key, spinnaker_link_id, machine_time_step,
-                 timescale_factor, spikes_per_second, ring_buffer_sigma,
-                 label=None, n_neurons=None,
+                 timescale_factor, label=None, n_neurons=None,
                  polarity=PushBotRetinaPolarity.Merged,
                  resolution=PushBotRetinaResolution.Downsample64):
 
         # Validate number of timestamp bytes
         if not isinstance(polarity, PushBotRetinaPolarity):
-            raise exceptions.ConfigurationException(
+            raise exceptions.SpynnakerException(
                 "Pushbot retina polarity should be one of those defined in"
                 " Polarity enumeration")
         if not isinstance(resolution, PushBotRetinaResolution):
-            raise exceptions.ConfigurationException(
+            raise exceptions.SpynnakerException(
                 "Pushbot retina resolution should be one of those defined in"
                 " Resolution enumeration")
 
