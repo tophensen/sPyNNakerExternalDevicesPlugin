@@ -74,8 +74,7 @@ class ExternalFPGARetinaDevice(
 
     def __init__(
             self, mode, retina_key, spinnaker_link_id, polarity,
-            machine_time_step, timescale_factor, spikes_per_second,
-            ring_buffer_sigma, label=None, n_neurons=None):
+            machine_time_step, timescale_factor, label=None, n_neurons=None):
         """
         :param mode: The retina "mode"
         :param retina_key: The value of the top 16-bits of the key
@@ -84,8 +83,6 @@ class ExternalFPGARetinaDevice(
         :param polarity: The "polarity" of the retina data
         :param machine_time_step: The time step of the simulation
         :param timescale_factor: The timescale factor of the simulation
-        :param spikes_per_second: The maximum spikes-per-second of any input
-        :param ring_buffer_sigma: The ring buffer sigma value
         :param label: The label for the population
         :param n_neurons: The number of neurons in the population
         """
