@@ -28,6 +28,7 @@ static uint32_t delay_time;
 static int delta_threshold;
 static uint32_t continue_if_not_different;
 static uint32_t simulation_ticks;
+static uint32_t infinite_run;
 
 static inline void send(uint32_t direction, uint32_t speed) {
     uint32_t direction_key = direction | key;
@@ -94,7 +95,7 @@ void timer_callback(uint unused0, uint unused1) {
 
     log_debug("Timer tick %d", time);
 
-    if ((simulation_ticks != UINT32_MAX) && (time == simulation_ticks)) {
+    if ((infinite_run != TRUE) && (time == simulation_ticks)) {
         log_info("Simulation complete.\n");
         spin1_exit(0);
         return;
@@ -185,7 +186,8 @@ static bool initialize(uint32_t *timer_period) {
     // Get the timing details
     if (!simulation_read_timing_details(
             data_specification_get_region(0, address),
-            APPLICATION_NAME_HASH, timer_period, &simulation_ticks)) {
+            APPLICATION_NAME_HASH, timer_period, &simulation_ticks,
+            &infinite_run)) {
         return false;
     }
 

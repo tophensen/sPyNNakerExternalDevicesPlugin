@@ -4,13 +4,14 @@ from spynnaker.pyNN.models.abstract_models\
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
-from spynnaker.pyNN.models.abstract_models.abstract_virtual_vertex \
-    import AbstractVirtualVertex
 from spynnaker.pyNN import exceptions
 
 from spinn_front_end_common.abstract_models\
     .abstract_outgoing_edge_same_contiguous_keys_restrictor\
     import AbstractOutgoingEdgeSameContiguousKeysRestrictor
+
+from pacman.model.abstract_classes.abstract_virtual_vertex import \
+    AbstractVirtualVertex
 
 from collections import namedtuple
 from enum import Enum, IntEnum
@@ -53,9 +54,7 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
     SENSOR_SET_KEY = 0x0
     SENSOR_SET_PUSHBOT = 0x1
 
-    def __init__(self, virtual_chip_x, virtual_chip_y,
-                 connected_to_real_chip_x, connected_to_real_chip_y,
-                 connected_to_real_chip_link_id, machine_time_step,
+    def __init__(self, fixed_key, spinnaker_link_id, machine_time_step,
                  timescale_factor, spikes_per_second, ring_buffer_sigma,
                  label=None, n_neurons=None,
                  polarity=PushBotRetinaPolarity.Merged,
@@ -75,7 +74,7 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
         self._resolution = resolution
 
         # Build standard routing key from virtual chip coordinates
-        self._routing_key = virtual_chip_x << 24 | virtual_chip_y << 16
+        self._routing_key = fixed_key
         self._retina_source_key = self._routing_key
 
         # Calculate number of neurons
@@ -102,10 +101,8 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
         self._routing_mask = ~((1 << mask_bits) - 1) & 0xFFFFFFFF
 
         AbstractVirtualVertex.__init__(
-            self, fixed_n_neurons, virtual_chip_x, virtual_chip_y,
-            connected_to_real_chip_x, connected_to_real_chip_y,
-            connected_to_real_chip_link_id, max_atoms_per_core=fixed_n_neurons,
-            label=label)
+            self, fixed_n_neurons, spinnaker_link_id,
+            max_atoms_per_core=fixed_n_neurons, label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands())
         AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
