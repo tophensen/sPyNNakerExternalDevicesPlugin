@@ -4,8 +4,9 @@ and implementation for the PyNN High-level API
 (http://neuralensemble.org/trac/PyNN)
 """
 
-from spinnman.messages.eieio.eieio_type import EIEIOType
+import os
 
+from spinnman.messages.eieio.eieio_type import EIEIOType
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     external_cochlea_device import ExternalCochleaDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
@@ -26,15 +27,11 @@ from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
     import SpikeInjector as SpynnakerExternalDeviceSpikeInjector
 from spynnaker_external_devices_plugin.pyNN.connections\
     .spynnaker_live_spikes_connection import SpynnakerLiveSpikesConnection
-
 from spynnaker.pyNN.utilities import conf
 from spynnaker.pyNN import IF_curr_exp
 from spynnaker.pyNN.spinnaker import executable_finder
-
 from spinn_front_end_common.utilities.notification_protocol.socket_address \
     import SocketAddress
-
-import os
 
 executable_finder.add_path(os.path.dirname(model_binaries.__file__))
 spynnaker_external_devices = SpynnakerExternalDevicePluginManager()
