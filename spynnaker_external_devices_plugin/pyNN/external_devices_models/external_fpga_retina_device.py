@@ -1,4 +1,10 @@
 import logging
+from spinn_front_end_common.abstract_models.\
+    abstract_outgoing_edge_same_contiguous_keys_restrictor import \
+    OutgoingEdgeSameContiguousKeysRestrictor
+from spinn_front_end_common.abstract_models.\
+    abstract_provides_outgoing_edge_constraints import \
+    AbstractProvidesOutgoingEdgeConstraints
 
 from spynnaker.pyNN.models.abstract_models\
     .abstract_send_me_multicast_commands_vertex \
@@ -7,10 +13,6 @@ from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
 from pacman.model.abstract_classes.abstract_virtual_vertex \
     import AbstractVirtualVertex
-
-from spinn_front_end_common.abstract_models\
-    .abstract_outgoing_edge_same_contiguous_keys_restrictor\
-    import AbstractOutgoingEdgeSameContiguousKeysRestrictor
 
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
@@ -62,7 +64,9 @@ def get_spike_value_from_fpga_retina(key, mode):
 
 class ExternalFPGARetinaDevice(
         AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
-        AbstractOutgoingEdgeSameContiguousKeysRestrictor):
+        AbstractProvidesOutgoingEdgeConstraints
+
+):
 
     MODE_128 = "128"
     MODE_64 = "64"
@@ -74,8 +78,7 @@ class ExternalFPGARetinaDevice(
 
     def __init__(
             self, mode, retina_key, spinnaker_link_id, polarity,
-            machine_time_step, timescale_factor, spikes_per_second,
-            ring_buffer_sigma, label=None, n_neurons=None):
+            machine_time_step, timescale_factor, label=None, n_neurons=None):
         """
         :param mode: The retina "mode"
         :param retina_key: The value of the top 16-bits of the key
@@ -84,8 +87,6 @@ class ExternalFPGARetinaDevice(
         :param polarity: The "polarity" of the retina data
         :param machine_time_step: The time step of the simulation
         :param timescale_factor: The timescale factor of the simulation
-        :param spikes_per_second: The maximum spikes-per-second of any input
-        :param ring_buffer_sigma: The ring buffer sigma value
         :param label: The label for the population
         :param n_neurons: The number of neurons in the population
         """
@@ -126,8 +127,8 @@ class ExternalFPGARetinaDevice(
             else:
                 fixed_n_neurons = 16 * 16 * 2
         else:
-            raise exceptions.ConfigurationException("the FPGA retina does not "
-                                                    "recongise this mode")
+            raise exceptions.SpynnakerException("the FPGA retina does not "
+                                                "recongise this mode")
 
         if fixed_n_neurons != n_neurons and n_neurons is not None:
             logger.warn("The specified number of neurons for the FPGA retina"
@@ -139,12 +140,14 @@ class ExternalFPGARetinaDevice(
         AbstractSendMeMulticastCommandsVertex.__init__(self, commands=[
             MultiCastCommand(0, 0x0000FFFF, 0xFFFF0000, 1, 5, 100),
             MultiCastCommand(-1, 0x0000FFFE, 0xFFFF0000, 0, 5, 100)])
-        AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
+
+        self._outgoing_edge_key_restrictor = \
+            OutgoingEdgeSameContiguousKeysRestrictor()
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = (AbstractOutgoingEdgeSameContiguousKeysRestrictor
-                       .get_outgoing_edge_constraints(
-                           self, partitioned_edge, graph_mapper))
+        constraints = (
+            self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints(
+                partitioned_edge, graph_mapper))
         constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
             [KeyAndMask(self._fixed_key, self._fixed_mask)]))
         return constraints

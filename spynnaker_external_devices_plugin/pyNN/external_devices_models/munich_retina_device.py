@@ -1,3 +1,9 @@
+from spinn_front_end_common.abstract_models.\
+    abstract_outgoing_edge_same_contiguous_keys_restrictor import \
+    OutgoingEdgeSameContiguousKeysRestrictor
+from spinn_front_end_common.abstract_models.\
+    abstract_provides_outgoing_edge_constraints import \
+    AbstractProvidesOutgoingEdgeConstraints
 from spynnaker.pyNN.models.abstract_models\
     .abstract_send_me_multicast_commands_vertex \
     import AbstractSendMeMulticastCommandsVertex
@@ -7,10 +13,6 @@ from pacman.model.constraints.key_allocator_constraints\
 from pacman.model.abstract_classes.abstract_virtual_vertex \
     import AbstractVirtualVertex
 from spynnaker.pyNN import exceptions
-
-from spinn_front_end_common.abstract_models\
-    .abstract_outgoing_edge_same_contiguous_keys_restrictor\
-    import AbstractOutgoingEdgeSameContiguousKeysRestrictor
 
 from pacman.model.routing_info.key_and_mask import KeyAndMask
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
@@ -29,9 +31,9 @@ def get_spike_value_from_robot_retina(key):
     return (key >> 14) & 0x1
 
 
-class MunichRetinaDevice(AbstractVirtualVertex,
-                         AbstractSendMeMulticastCommandsVertex,
-                         AbstractOutgoingEdgeSameContiguousKeysRestrictor):
+class MunichRetinaDevice(
+    AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
+    AbstractProvidesOutgoingEdgeConstraints):
 
     # key codes for the robot retina
     MANAGEMENT_BIT = 0x400
@@ -52,8 +54,7 @@ class MunichRetinaDevice(AbstractVirtualVertex,
 
     def __init__(
             self, retina_key, spinnaker_link_id, position, machine_time_step,
-            timescale_factor, spikes_per_second, ring_buffer_sigma,
-            label=None, n_neurons=None, polarity=None):
+            timescale_factor, label=None, n_neurons=None, polarity=None):
 
         if polarity is None:
             polarity = MunichRetinaDevice.MERGED_POLARITY
@@ -78,14 +79,15 @@ class MunichRetinaDevice(AbstractVirtualVertex,
             max_atoms_per_core=fixed_n_neurons, label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands(position))
-        AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
 
+        self._outgoing_edge_key_restrictor = \
+            OutgoingEdgeSameContiguousKeysRestrictor()
         self._polarity = polarity
         self._position = position
 
         if (self._position != self.RIGHT_RETINA and
            self._position != self.LEFT_RETINA):
-            raise exceptions.ConfigurationException(
+            raise exceptions.SpynnakerException(
                 "The external Retina does not recognise this _position")
 
         if n_neurons != fixed_n_neurons and n_neurons is not None:
@@ -93,9 +95,9 @@ class MunichRetinaDevice(AbstractVirtualVertex,
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = (AbstractOutgoingEdgeSameContiguousKeysRestrictor
-                       .get_outgoing_edge_constraints(
-                           self, partitioned_edge, graph_mapper))
+        constraints = \
+            (self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints(
+                partitioned_edge, graph_mapper))
         constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
             [KeyAndMask(self._fixed_key, self._fixed_mask)]))
         return constraints
