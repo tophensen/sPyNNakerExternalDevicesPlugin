@@ -1,5 +1,4 @@
-from spinn_front_end_common.abstract_models.\
-    abstract_outgoing_edge_same_contiguous_keys_restrictor import \
+from spinn_front_end_common.utility_models.outgoing_edge_same_contiguous_keys_restrictor import \
     OutgoingEdgeSameContiguousKeysRestrictor
 from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
@@ -96,8 +95,7 @@ class MunichRetinaDevice(
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
         constraints = \
-            (self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints(
-                partitioned_edge, graph_mapper))
+            self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints()
         constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
             [BaseKeyAndMask(self._fixed_key, self._fixed_mask)]))
         return constraints
