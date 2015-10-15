@@ -1,3 +1,8 @@
+from spinn_front_end_common.abstract_models.abstract_outgoing_edge_same_contiguous_keys_restrictor import \
+    OutgoingEdgeSameContiguousKeysRestrictor
+from spinn_front_end_common.abstract_models.\
+    abstract_provides_outgoing_edge_constraints import \
+    AbstractProvidesOutgoingEdgeConstraints
 from spynnaker.pyNN.models.abstract_models\
     .abstract_send_me_multicast_commands_vertex \
     import AbstractSendMeMulticastCommandsVertex
@@ -5,10 +10,6 @@ from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
 from spynnaker.pyNN import exceptions
-
-from spinn_front_end_common.abstract_models\
-    .abstract_outgoing_edge_same_contiguous_keys_restrictor\
-    import AbstractOutgoingEdgeSameContiguousKeysRestrictor
 
 from pacman.model.abstract_classes.abstract_virtual_vertex import \
     AbstractVirtualVertex
@@ -38,7 +39,7 @@ PushBotRetinaPolarity = IntEnum(
 
 class PushBotRetinaDevice(AbstractVirtualVertex,
                           AbstractSendMeMulticastCommandsVertex,
-                          AbstractOutgoingEdgeSameContiguousKeysRestrictor):
+                          AbstractProvidesOutgoingEdgeConstraints):
 
     # Mask for all SpiNNaker->Pushbot commands
     MANAGEMENT_MASK = 0xFFFFF800
@@ -55,18 +56,17 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
     SENSOR_SET_PUSHBOT = 0x1
 
     def __init__(self, fixed_key, spinnaker_link_id, machine_time_step,
-                 timescale_factor, spikes_per_second, ring_buffer_sigma,
-                 label=None, n_neurons=None,
+                 timescale_factor, label=None, n_neurons=None,
                  polarity=PushBotRetinaPolarity.Merged,
                  resolution=PushBotRetinaResolution.Downsample64):
 
         # Validate number of timestamp bytes
         if not isinstance(polarity, PushBotRetinaPolarity):
-            raise exceptions.ConfigurationException(
+            raise exceptions.SpynnakerException(
                 "Pushbot retina polarity should be one of those defined in"
                 " Polarity enumeration")
         if not isinstance(resolution, PushBotRetinaResolution):
-            raise exceptions.ConfigurationException(
+            raise exceptions.SpynnakerException(
                 "Pushbot retina resolution should be one of those defined in"
                 " Resolution enumeration")
 
@@ -105,16 +105,17 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
             max_atoms_per_core=fixed_n_neurons, label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands())
-        AbstractOutgoingEdgeSameContiguousKeysRestrictor.__init__(self)
+        self._outgoing_edge_key_restrictor = \
+            OutgoingEdgeSameContiguousKeysRestrictor()
 
         if n_neurons != fixed_n_neurons and n_neurons is not None:
             print "Warning, the retina will have {} neurons".format(
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = (AbstractOutgoingEdgeSameContiguousKeysRestrictor
-                       .get_outgoing_edge_constraints(
-                           self, partitioned_edge, graph_mapper))
+        constraints = \
+            (self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints(
+                partitioned_edge, graph_mapper))
         constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
             [BaseKeyAndMask(self._routing_key, self._routing_mask)]))
         return constraints
