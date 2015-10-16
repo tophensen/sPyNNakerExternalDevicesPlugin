@@ -148,6 +148,8 @@ class MunichMotorDevice(AbstractDataSpecableVertex,
         spec.end_specification()
         data_writer.close()
 
+        return [data_writer.filename]
+
     # inherited from data specable vertex
     def get_binary_file_name(self):
         return "robot_motor_control.aplx"
