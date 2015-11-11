@@ -8,7 +8,6 @@ setup(
     packages=['spynnaker_external_devices_plugin',
               'spynnaker_external_devices_plugin.pyNN',
               'spynnaker_external_devices_plugin.pyNN.connections',
-              'spynnaker_external_devices_plugin.pyNN.control_models',
               'spynnaker_external_devices_plugin.pyNN.external_devices_models',
               'spynnaker_external_devices_plugin.pyNN.model_binaries',
               'spynnaker_external_devices_plugin.pyNN.utility_models'],
