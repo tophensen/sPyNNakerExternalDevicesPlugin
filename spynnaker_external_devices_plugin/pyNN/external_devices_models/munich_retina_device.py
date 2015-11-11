@@ -1,6 +1,3 @@
-from spinn_front_end_common.utility_models\
-    .outgoing_edge_same_contiguous_keys_restrictor import \
-    OutgoingEdgeSameContiguousKeysRestrictor
 from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
     AbstractProvidesOutgoingEdgeConstraints
@@ -80,8 +77,6 @@ class MunichRetinaDevice(
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands(position))
 
-        self._outgoing_edge_key_restrictor = \
-            OutgoingEdgeSameContiguousKeysRestrictor()
         self._polarity = polarity
         self._position = position
 
@@ -95,11 +90,8 @@ class MunichRetinaDevice(
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = \
-            self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints()
-        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
-            [BaseKeyAndMask(self._fixed_key, self._fixed_mask)]))
-        return constraints
+        return [KeyAllocatorFixedKeyAndMaskConstraint(
+            [BaseKeyAndMask(self._fixed_key, self._fixed_mask)])]
 
     def _get_commands(self, position):
         """ Return the commands for the retina external device

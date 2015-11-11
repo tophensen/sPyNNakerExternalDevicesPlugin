@@ -1,9 +1,6 @@
 from collections import namedtuple
 from enum import Enum, IntEnum
 
-from spinn_front_end_common.utility_models\
-    .outgoing_edge_same_contiguous_keys_restrictor import \
-    OutgoingEdgeSameContiguousKeysRestrictor
 from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
     AbstractProvidesOutgoingEdgeConstraints
@@ -106,19 +103,14 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
             max_atoms_per_core=fixed_n_neurons, label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands())
-        self._outgoing_edge_key_restrictor = \
-            OutgoingEdgeSameContiguousKeysRestrictor()
 
         if n_neurons != fixed_n_neurons and n_neurons is not None:
             print "Warning, the retina will have {} neurons".format(
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = \
-            self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints()
-        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
-            [BaseKeyAndMask(self._routing_key, self._routing_mask)]))
-        return constraints
+        return [KeyAllocatorFixedKeyAndMaskConstraint(
+            [BaseKeyAndMask(self._routing_key, self._routing_mask)])]
 
     def _get_commands(self):
         """

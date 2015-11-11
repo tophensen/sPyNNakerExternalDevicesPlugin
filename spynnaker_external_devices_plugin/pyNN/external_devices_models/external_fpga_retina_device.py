@@ -1,8 +1,5 @@
 import logging
 
-from spinn_front_end_common.utility_models\
-    .outgoing_edge_same_contiguous_keys_restrictor import \
-    OutgoingEdgeSameContiguousKeysRestrictor
 from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
     AbstractProvidesOutgoingEdgeConstraints
@@ -137,15 +134,9 @@ class ExternalFPGARetinaDevice(
             MultiCastCommand(0, 0x0000FFFF, 0xFFFF0000, 1, 5, 100),
             MultiCastCommand(-1, 0x0000FFFE, 0xFFFF0000, 0, 5, 100)])
 
-        self._outgoing_edge_key_restrictor = \
-            OutgoingEdgeSameContiguousKeysRestrictor()
-
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = (
-            self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints())
-        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
-            [BaseKeyAndMask(self._fixed_key, self._fixed_mask)]))
-        return constraints
+        return [KeyAllocatorFixedKeyAndMaskConstraint(
+            [BaseKeyAndMask(self._fixed_key, self._fixed_mask)])]
 
     @property
     def model_name(self):
