@@ -1,7 +1,3 @@
-"""
-MunichMotorControl
-"""
-
 # spynnaker improts
 from spynnaker.pyNN.models.abstract_models\
     .abstract_vertex_with_dependent_vertices import \

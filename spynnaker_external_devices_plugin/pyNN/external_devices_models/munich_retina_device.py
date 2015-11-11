@@ -1,4 +1,5 @@
-from spinn_front_end_common.utility_models.outgoing_edge_same_contiguous_keys_restrictor import \
+from spinn_front_end_common.utility_models\
+    .outgoing_edge_same_contiguous_keys_restrictor import \
     OutgoingEdgeSameContiguousKeysRestrictor
 from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
@@ -31,8 +32,8 @@ def get_spike_value_from_robot_retina(key):
 
 
 class MunichRetinaDevice(
-    AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
-    AbstractProvidesOutgoingEdgeConstraints):
+        AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
+        AbstractProvidesOutgoingEdgeConstraints):
 
     # key codes for the robot retina
     MANAGEMENT_BIT = 0x400
@@ -101,8 +102,7 @@ class MunichRetinaDevice(
         return constraints
 
     def _get_commands(self, position):
-        """
-        method that returns the commands for the retina external device
+        """ Return the commands for the retina external device
         """
         commands = list()
 

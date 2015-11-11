@@ -2,12 +2,11 @@ from pacman.model.partitionable_graph.multi_cast_partitionable_edge\
     import MultiCastPartitionableEdge
 from spinnman.messages.eieio.eieio_type import EIEIOType
 from spynnaker.pyNN import get_spynnaker
-from spynnaker.pyNN import IF_curr_exp
-from spynnaker.pyNN.models.pynn_population import Population
 from spinn_front_end_common.utility_models.live_packet_gather \
     import LivePacketGather
 
 PARTITION_ID = "SPIKE"
+
 
 class SpynnakerExternalDevicePluginManager(object):
 
@@ -15,9 +14,9 @@ class SpynnakerExternalDevicePluginManager(object):
         self._live_spike_recorders = dict()
 
     def add_socket_address(self, socket_address):
-        """
-        helper method for adding a socket address to the list needed to be
-        checked by the notifcation protocol
+        """ Add a socket address to the list to be checked by the\
+            notification protocol
+
         :param socket_address: the socket address
         :type socket_address:
         :return:

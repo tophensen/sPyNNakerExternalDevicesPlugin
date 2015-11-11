@@ -1,6 +1,7 @@
 import logging
 
-from spinn_front_end_common.utility_models.outgoing_edge_same_contiguous_keys_restrictor import \
+from spinn_front_end_common.utility_models\
+    .outgoing_edge_same_contiguous_keys_restrictor import \
     OutgoingEdgeSameContiguousKeysRestrictor
 from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
@@ -61,9 +62,7 @@ def get_spike_value_from_fpga_retina(key, mode):
 
 class ExternalFPGARetinaDevice(
         AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
-        AbstractProvidesOutgoingEdgeConstraints
-
-):
+        AbstractProvidesOutgoingEdgeConstraints):
 
     MODE_128 = "128"
     MODE_64 = "64"
@@ -150,9 +149,6 @@ class ExternalFPGARetinaDevice(
 
     @property
     def model_name(self):
-        """
-        name for debugs
-        """
         return "external FPGA retina device"
 
     def is_virtual_vertex(self):
