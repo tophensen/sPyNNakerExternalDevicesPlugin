@@ -76,7 +76,7 @@ class MunichMotorDevice(AbstractDataSpecableVertex,
                                             timescale_factor)
         AbstractPartitionableVertex.__init__(self, 6, label, 6, None)
         AbstractVertexWithEdgeToDependentVertices.__init__(
-            self, [_MunichMotorDevice(spinnaker_link_id)])
+            self, [_MunichMotorDevice(spinnaker_link_id)], None)
         AbstractProvidesOutgoingEdgeConstraints.__init__(self)
 
         self._speed = speed
@@ -187,3 +187,6 @@ class MunichMotorDevice(AbstractDataSpecableVertex,
 
     def is_data_specable(self):
         return True
+
+    def partition_identifier_for_dependent_edge(self, dependent_edge):
+        return None
