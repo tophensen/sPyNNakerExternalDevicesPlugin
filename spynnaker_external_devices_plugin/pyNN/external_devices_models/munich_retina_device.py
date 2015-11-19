@@ -1,7 +1,4 @@
 from spinn_front_end_common.abstract_models.\
-    abstract_outgoing_edge_same_contiguous_keys_restrictor import \
-    OutgoingEdgeSameContiguousKeysRestrictor
-from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
     AbstractProvidesOutgoingEdgeConstraints
 from spynnaker.pyNN.models.abstract_models\
@@ -14,7 +11,7 @@ from pacman.model.abstract_classes.abstract_virtual_vertex \
     import AbstractVirtualVertex
 from spynnaker.pyNN import exceptions
 
-from pacman.model.routing_info.key_and_mask import KeyAndMask
+from pacman.model.routing_info.base_key_and_mask import BaseKeyAndMask
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
 
 
@@ -32,8 +29,8 @@ def get_spike_value_from_robot_retina(key):
 
 
 class MunichRetinaDevice(
-    AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
-    AbstractProvidesOutgoingEdgeConstraints):
+        AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
+        AbstractProvidesOutgoingEdgeConstraints):
 
     # key codes for the robot retina
     MANAGEMENT_BIT = 0x400
@@ -80,8 +77,6 @@ class MunichRetinaDevice(
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands(position))
 
-        self._outgoing_edge_key_restrictor = \
-            OutgoingEdgeSameContiguousKeysRestrictor()
         self._polarity = polarity
         self._position = position
 
@@ -95,16 +90,11 @@ class MunichRetinaDevice(
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = \
-            (self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints(
-                partitioned_edge, graph_mapper))
-        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
-            [KeyAndMask(self._fixed_key, self._fixed_mask)]))
-        return constraints
+        return [KeyAllocatorFixedKeyAndMaskConstraint(
+            [BaseKeyAndMask(self._fixed_key, self._fixed_mask)])]
 
     def _get_commands(self, position):
-        """
-        method that returns the commands for the retina external device
+        """ Return the commands for the retina external device
         """
         commands = list()
 

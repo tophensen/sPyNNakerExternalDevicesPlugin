@@ -4,8 +4,9 @@ and implementation for the PyNN High-level API
 (http://neuralensemble.org/trac/PyNN)
 """
 
-from spinnman.messages.eieio.eieio_type import EIEIOType
+import os
 
+from spinnman.messages.eieio.eieio_type import EIEIOType
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     external_cochlea_device import ExternalCochleaDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
@@ -28,15 +29,11 @@ from spynnaker_external_devices_plugin.pyNN.utility_models.spike_injector \
     import SpikeInjector as SpynnakerExternalDeviceSpikeInjector
 from spynnaker_external_devices_plugin.pyNN.connections\
     .spynnaker_live_spikes_connection import SpynnakerLiveSpikesConnection
-
 from spynnaker.pyNN.utilities import conf
 from spynnaker.pyNN import IF_curr_exp
 from spynnaker.pyNN.spinnaker import executable_finder
-
 from spinn_front_end_common.utilities.notification_protocol.socket_address \
     import SocketAddress
-
-import os
 
 executable_finder.add_path(os.path.dirname(model_binaries.__file__))
 spynnaker_external_devices = SpynnakerExternalDevicePluginManager()
@@ -55,24 +52,24 @@ def activate_live_output_for(
 
     :param population: The population to activate the live output for
     :type population: Population
-    :param database_notify_host: the hostnmae for the device which is listening
-    to the database notifcation.
+    :param database_notify_host: the hostname for the device which is\
+            listening to the database notification.
     :type database_notify_host: str
-    :param database_ack_port_num: the port number to which a external device
-    will ack that they have finished reading the database and are ready for
-    it to start execution
+    :param database_ack_port_num: the port number to which a external device\
+            will ack that they have finished reading the database and are\
+            ready for it to start execution
     :type database_ack_port_num: int
-    :param database_notify_port_num: The port number to which a external device
-    will recieve the database is ready command
+    :param database_notify_port_num: The port number to which a external\
+            device will receive the database is ready command
     :type database_notify_port_num: int
     :param board_address: A fixed board address required for the tag, or\
-                    None if any address is OK
+            None if any address is OK
     :type board_address: str
     :param key_prefix: the prefix to be applied to the key
     :type key_prefix: int or None
     :param prefix_type: if the prefix type is 32 bit or 16 bit
-    :param message_type: if the message is a eieio_command mesage, or
-    eieio data message with 16 bit or 32 bit keys.
+    :param message_type: if the message is a eieio_command message, or\
+            eieio data message with 16 bit or 32 bit keys.
     :param payload_as_time_stamps:
     :param right_shift:
     :param use_payload_prefix:
@@ -149,14 +146,14 @@ def SpikeInjector(
         n_neurons, machine_time_step, timescale_factor, label, port,
         virtual_key=None, database_notify_host=None,
         database_notify_port_num=None, database_ack_port_num=None):
-    """
-    supports adding a spike injector to the applciation graph.
+    """ Supports adding a spike injector to the application graph.
+
     :param n_neurons: the number of neurons the spike injector will emulate
     :type n_neurons: int
     :param machine_time_step: the time period in ms for each timer callback
     :type machine_time_step: int
-    :param timescale_factor: the amount of scaling needed of the machine time
-    step (basically a slow down function)
+    :param timescale_factor: the amount of scaling needed of the machine time\
+            step (basically a slow down function)
     :type timescale_factor: int
     :param label: the label given to the population
     :type label: str
@@ -164,15 +161,15 @@ def SpikeInjector(
     :type port: int
     :param virtual_key: the virtual key used in the routing system
     :type virtual_key: int
-    :param database_notify_host: the hostnmae for the device which is listening
-    to the database notifcation.
+    :param database_notify_host: the hostname for the device which is\
+            listening to the database notification.
     :type database_notify_host: str
-    :param database_ack_port_num: the port number to which a external device
-    will ack that they have finished reading the database and are ready for
-    it to start execution
+    :param database_ack_port_num: the port number to which a external device\
+            will ack that they have finished reading the database and are\
+            ready for it to start execution
     :type database_ack_port_num: int
-    :param database_notify_port_num: The port number to which a external device
-    will recieve the database is ready command
+    :param database_notify_port_num: The port number to which a external\
+            device will receive the database is ready command
     :type database_notify_port_num: int
 
     :return:
@@ -187,11 +184,12 @@ def SpikeInjector(
         if database_ack_port_num == "None":
             database_ack_port_num = None
 
-    # build the database socket address used by the notifcation interface
+    # build the database socket address used by the notification interface
     database_socket = SocketAddress(
         listen_port=database_ack_port_num,
         notify_host_name=database_notify_host,
         notify_port_no=database_notify_port_num)
+
     # update socket interface with new demands.
     spynnaker_external_devices.add_socket_address(database_socket)
     return SpynnakerExternalDeviceSpikeInjector(

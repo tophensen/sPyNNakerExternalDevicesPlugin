@@ -1,11 +1,8 @@
 import logging
-from spinn_front_end_common.abstract_models.\
-    abstract_outgoing_edge_same_contiguous_keys_restrictor import \
-    OutgoingEdgeSameContiguousKeysRestrictor
+
 from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
     AbstractProvidesOutgoingEdgeConstraints
-
 from spynnaker.pyNN.models.abstract_models\
     .abstract_send_me_multicast_commands_vertex \
     import AbstractSendMeMulticastCommandsVertex
@@ -13,12 +10,10 @@ from spynnaker.pyNN import exceptions
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
 from pacman.model.abstract_classes.abstract_virtual_vertex \
     import AbstractVirtualVertex
-
 from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
-from pacman.model.routing_info.key_and_mask import KeyAndMask
-
+from pacman.model.routing_info.base_key_and_mask import BaseKeyAndMask
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +59,7 @@ def get_spike_value_from_fpga_retina(key, mode):
 
 class ExternalFPGARetinaDevice(
         AbstractVirtualVertex, AbstractSendMeMulticastCommandsVertex,
-        AbstractProvidesOutgoingEdgeConstraints
-
-):
+        AbstractProvidesOutgoingEdgeConstraints):
 
     MODE_128 = "128"
     MODE_64 = "64"
@@ -141,22 +134,12 @@ class ExternalFPGARetinaDevice(
             MultiCastCommand(0, 0x0000FFFF, 0xFFFF0000, 1, 5, 100),
             MultiCastCommand(-1, 0x0000FFFE, 0xFFFF0000, 0, 5, 100)])
 
-        self._outgoing_edge_key_restrictor = \
-            OutgoingEdgeSameContiguousKeysRestrictor()
-
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = (
-            self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints(
-                partitioned_edge, graph_mapper))
-        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
-            [KeyAndMask(self._fixed_key, self._fixed_mask)]))
-        return constraints
+        return [KeyAllocatorFixedKeyAndMaskConstraint(
+            [BaseKeyAndMask(self._fixed_key, self._fixed_mask)])]
 
     @property
     def model_name(self):
-        """
-        name for debugs
-        """
         return "external FPGA retina device"
 
     def is_virtual_vertex(self):

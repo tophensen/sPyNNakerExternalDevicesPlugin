@@ -1,5 +1,6 @@
-from spinn_front_end_common.abstract_models.abstract_outgoing_edge_same_contiguous_keys_restrictor import \
-    OutgoingEdgeSameContiguousKeysRestrictor
+from collections import namedtuple
+from enum import Enum, IntEnum
+
 from spinn_front_end_common.abstract_models.\
     abstract_provides_outgoing_edge_constraints import \
     AbstractProvidesOutgoingEdgeConstraints
@@ -10,14 +11,11 @@ from pacman.model.constraints.key_allocator_constraints\
     .key_allocator_fixed_key_and_mask_constraint \
     import KeyAllocatorFixedKeyAndMaskConstraint
 from spynnaker.pyNN import exceptions
-
 from pacman.model.abstract_classes.abstract_virtual_vertex import \
     AbstractVirtualVertex
-
-from collections import namedtuple
-from enum import Enum, IntEnum
-from pacman.model.routing_info.key_and_mask import KeyAndMask
+from pacman.model.routing_info.base_key_and_mask import BaseKeyAndMask
 from spynnaker.pyNN.utilities.multi_cast_command import MultiCastCommand
+
 
 # Named tuple bundling together configuration elements of a pushbot resolution
 # config
@@ -105,20 +103,14 @@ class PushBotRetinaDevice(AbstractVirtualVertex,
             max_atoms_per_core=fixed_n_neurons, label=label)
         AbstractSendMeMulticastCommandsVertex.__init__(
             self, self._get_commands())
-        self._outgoing_edge_key_restrictor = \
-            OutgoingEdgeSameContiguousKeysRestrictor()
 
         if n_neurons != fixed_n_neurons and n_neurons is not None:
             print "Warning, the retina will have {} neurons".format(
                 fixed_n_neurons)
 
     def get_outgoing_edge_constraints(self, partitioned_edge, graph_mapper):
-        constraints = \
-            (self._outgoing_edge_key_restrictor.get_outgoing_edge_constraints(
-                partitioned_edge, graph_mapper))
-        constraints.append(KeyAllocatorFixedKeyAndMaskConstraint(
-            [KeyAndMask(self._routing_key, self._routing_mask)]))
-        return constraints
+        return [KeyAllocatorFixedKeyAndMaskConstraint(
+            [BaseKeyAndMask(self._routing_key, self._routing_mask)])]
 
     def _get_commands(self):
         """
