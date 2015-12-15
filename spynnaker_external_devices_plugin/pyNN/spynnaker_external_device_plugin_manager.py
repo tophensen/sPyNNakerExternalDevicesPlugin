@@ -4,6 +4,8 @@ from spinnman.messages.eieio.eieio_type import EIEIOType
 from spynnaker.pyNN import get_spynnaker
 from spinn_front_end_common.utility_models.live_packet_gather \
     import LivePacketGather
+from spynnaker_external_devices_plugin.pyNN\
+    .external_devices_models.munich_io_device import MunichIODeviceSource
 
 PARTITION_ID = "SPIKE"
 
@@ -12,6 +14,7 @@ class SpynnakerExternalDevicePluginManager(object):
 
     def __init__(self):
         self._live_spike_recorders = dict()
+        self._munich_io_devs = []
 
     def add_socket_address(self, socket_address):
         """ Add a socket address to the list to be checked by the\
@@ -59,3 +62,12 @@ class SpynnakerExternalDevicePluginManager(object):
         _spinnaker = get_spynnaker()
         edge = MultiCastPartitionableEdge(vertex, device_vertex)
         _spinnaker.add_edge(edge)
+
+    def link_to_io_device_source(
+            self, munich_io_device, controlled_population):
+        spynnaker = get_spynnaker()
+        if munich_io_device not in self._munich_io_devs:
+            spynnaker.add_vertex(munich_io_device)
+        edge = MultiCastPartitionableEdge(
+             munich_io_device, controlled_population._get_vertex, label="io edge")
+        spynnaker.add_edge(edge)

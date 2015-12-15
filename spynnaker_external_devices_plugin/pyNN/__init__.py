@@ -14,6 +14,8 @@ from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     munich_retina_device import MunichRetinaDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
+    munich_io_device import MunichIODeviceSource
+from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     pushbot_retina_device import PushBotRetinaDevice
 from spynnaker_external_devices_plugin.pyNN.external_devices_models.\
     pushbot_retina_device import PushBotRetinaResolution
