@@ -74,7 +74,7 @@ sensor_min,sensor_max = 0, 20000
 rate_min,rate_max = 0.1, 100.
 # half width of RBF-neuron receiptive fields in neuron units 
 # i.e. 1 is the distance between consecutive preferred values
-gauss_width = 2.5 
+gauss_width = 1.5 
 
 input_pops=[]
 remote_pops=[]
@@ -132,6 +132,7 @@ for t in arange(offset, offset + duration/1000.,period):
        # iostr is the string we send to the debug port of our IO board
        iostr = iostr + "@" + key + '.' + payload + '\n'
     # our commands are stored in actual_sendvalues
+    print t,x
     actual_sendvalues.append(x)
     # append a threading.Timer to list of threads
     mythreads.append(Timer(t,send_str_to_io,args=[iostr]))
@@ -176,7 +177,7 @@ for i,p in enumerate(input_pops):
     s=sorted(zip(s[1],s[0]))
     s=transpose(s)
     spikesplot, = plot(array(s[0])/1000.,s[1],'s',alpha=0.1,ms=2.4)
-    valuesplot, = plot(array(actual_sendtimes),p.size*(array(actual_sendvalues)-p._vertex.sensor_min)/p._vertex.sensor_max,drawstyle='steps-post',lw=1.6)
+    valuesplot, = plot(array(actual_sendtimes),1.*p.size*(array(actual_sendvalues)-p._vertex.sensor_min)/p._vertex.sensor_max,drawstyle='steps-post',lw=1.6)
     xlabel("time (s)")
     ylabel("#neuron, average rate (a.u.)")
     xlim(0,duration/1e3)
@@ -192,8 +193,8 @@ for i,p in enumerate(input_pops):
     ivon,ibis = 0,0
     tstart = 0.0
     while tstart < duration - windowsize:
-        ivon = searchsorted(s[0],tstart,side='right')
-        ibis = searchsorted(s[0],tstart+windowsize,side='left')
+        ivon = searchsorted(s[0],tstart,side='left')
+        ibis = searchsorted(s[0],tstart+windowsize,side='right')
         roughtime.append((tstart+windowsize/2.)/1000.)
         density.append((ibis-ivon)/(windowsize/1e3)/nn)
         tstart += resolution
